@@ -1,0 +1,72 @@
+#
+# This source file is part of the Stanford Biodesign Digital Health RadGPT open-source project
+#
+# SPDX-FileCopyrightText: 2024 Stanford University and the project authors (see CONTRIBUTORS.md)
+#
+# SPDX-License-Identifier: MIT
+#
+
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+        - web/**
+  workflow_dispatch:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: ./web
+
+jobs:
+  reuseaction:
+    name: REUSE Compliance Check
+    uses: StanfordBDHG/.github/.github/workflows/reuse.yml@v2
+  markdownlinkcheck:
+    name: Markdown Link Check
+    uses: StanfordBDHG/.github/.github/workflows/markdown-link-check.yml@v2
+  eslint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: web/package-lock.json
+      - name: Install Node Dependencies
+        run: npm ci
+      - name: Save Code Linting Report JSON
+        run: npm run lint:ci
+        continue-on-error: true
+      - name: Check if PR is from a fork
+        id: fork-check
+        run: |
+          if [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.head.repo.fork }}" == 'true' ]]; then
+            echo "is_fork=true" >> $GITHUB_ENV
+          else
+            echo "is_fork=false" >> $GITHUB_ENV
+          fi
+      - name: Run ESLint if PR is from a fork
+        if: env.is_fork == 'true'
+        run: npm run lint:ci
+      - name: Annotate Code Linting Results
+        if: env.is_fork == 'false'
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          only-pr-files: false
+          fail-on-warning: true
+          fail-on-error: true
+          markdown-report-on-step-summary: true
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint_report.json
+          path: eslint_report.json
