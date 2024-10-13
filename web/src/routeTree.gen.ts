@@ -19,13 +19,13 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
-import { Route as SecondImport } from './routes/second'
+import { Route as ProtectedpageImport } from './routes/protected_page'
 import { Route as IndexImport } from './routes/index'
 
 // Create/Update Routes
 
-const SecondRoute = SecondImport.update({
-  path: '/second',
+const ProtectedpageRoute = ProtectedpageImport.update({
+  path: '/protected_page',
   getParentRoute: () => rootRoute,
 } as any)
 
@@ -45,11 +45,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexImport
       parentRoute: typeof rootRoute
     }
-    '/second': {
-      id: '/second'
-      path: '/second'
-      fullPath: '/second'
-      preLoaderRoute: typeof SecondImport
+    '/protected_page': {
+      id: '/protected_page'
+      path: '/protected_page'
+      fullPath: '/protected_page'
+      preLoaderRoute: typeof ProtectedpageImport
       parentRoute: typeof rootRoute
     }
   }
@@ -59,37 +59,37 @@ declare module '@tanstack/react-router' {
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/protected_page': typeof ProtectedpageRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/protected_page': typeof ProtectedpageRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
   '/': typeof IndexRoute
-  '/second': typeof SecondRoute
+  '/protected_page': typeof ProtectedpageRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/second'
+  fullPaths: '/' | '/protected_page'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/second'
-  id: '__root__' | '/' | '/second'
+  to: '/' | '/protected_page'
+  id: '__root__' | '/' | '/protected_page'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  SecondRoute: typeof SecondRoute
+  ProtectedpageRoute: typeof ProtectedpageRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  SecondRoute: SecondRoute,
+  ProtectedpageRoute: ProtectedpageRoute,
 }
 
 export const routeTree = rootRoute
@@ -105,14 +105,14 @@ export const routeTree = rootRoute
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/second"
+        "/protected_page"
       ]
     },
     "/": {
       "filePath": "index.tsx"
     },
-    "/second": {
-      "filePath": "second.tsx"
+    "/protected_page": {
+      "filePath": "protected_page.tsx"
     }
   }
 }

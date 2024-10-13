@@ -9,14 +9,14 @@ import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 
 export const Route = createRootRoute({
   component: () => (
-    <div className="h-screen">
+    <div className="min-h-screen">
       <div className="p-2 flex gap-2">
         <Link to="/" className="[&.active]:font-bold">
-          Home
+          Login
         </Link>{" "}
         <span>|</span>
-        <Link to="/second" className="[&.active]:font-bold">
-          Second
+        <Link to="/protected_page" className="[&.active]:font-bold">
+          Protected Page
         </Link>
       </div>
       <hr />
