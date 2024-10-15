@@ -1,0 +1,50 @@
+#
+# This source file is part of the Stanford Biodesign Digital Health RadGPT open-source project
+#
+# SPDX-FileCopyrightText: 2024 Stanford University and the project authors (see CONTRIBUTORS.md)
+#
+# SPDX-License-Identifier: MIT
+#
+
+name: Build and Test
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+        - firebase/**
+  workflow_dispatch:
+  workflow_call:
+
+defaults:
+  run:
+    working-directory: ./firebase
+
+jobs:
+  reuseaction:
+    name: REUSE Compliance Check
+    uses: StanfordBDHG/.github/.github/workflows/reuse.yml@v2
+  markdownlinkcheck:
+    name: Markdown Link Check
+    uses: StanfordBDHG/.github/.github/workflows/markdown-link-check.yml@v2
+
+  # Taken from the Github Docs
+  # Url: https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-python
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+      - name: Install the code linting and formatting tool Ruff
+        run: pipx install ruff
+      - name: Lint code with Ruff
+        run: ruff check --output-format=github --target-version=py39
+      - name: Check code formatting with Ruff
+        run: ruff format --diff --target-version=py39
