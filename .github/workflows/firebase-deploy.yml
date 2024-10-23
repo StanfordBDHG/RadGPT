@@ -1,0 +1,113 @@
+#
+# This source file is part of the Stanford Biodesign Digital Health Group open-source organization
+#
+# SPDX-FileCopyrightText: 2022 Stanford University and the project authors (see CONTRIBUTORS.md)
+#
+# SPDX-License-Identifier: MIT
+#
+
+# This is a copy of https://github.com/StanfordBDHG/.github/blob/main/.github/workflows/firebase-deploy.yml
+# which is currently not working with this repository because the working directory is not the
+# root directory. This is due to the fact that this repository is following a monorepo approach which
+# is more suitable for this project
+# This file will be further tested when a firebase backend is added and more side effects might be
+# uncovered from the changes. After it is working well for this repository a PR will be created in
+# https://github.com/StanfordBDHG/.github/tree/main/.github
+
+name: Test using xcodebuild or run fastlane
+
+on:
+  workflow_call:
+    inputs:
+      nodeVersion:
+        description: |
+          Node version spec of the version to use in SemVer notation.
+        required: false
+        type: string
+        default: '20'
+      path:
+        description: |
+          The path where the project is located. Defaults to $GITHUB_WORKSPACE.
+        required: false
+        type: string
+        default: '.'
+      customcommand:
+        description: |
+          Custom command to be executed before the deployment. Can be used to, e.g., install dependencies for cloud functions.
+        required: false
+        type: string
+        default: ''
+      arguments:
+        description: |
+          Arguments passed to the firebase deploy command.
+        required: false
+        type: string
+        default: ''
+      environment:
+        description: |
+          GitHub deployment environment to optionally adjust access to variables and secrets with additional protection rules.
+          https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment'
+        required: false
+        type: string
+        default: ''
+      workingDirectory:
+        description: 'The workingDirectory of the GitHub Action. Defaults to $GITHUB_WORKSPACE'
+        required: false
+        type: string
+        default: '.'
+    secrets:
+      GOOGLE_APPLICATION_CREDENTIALS_BASE64:
+        description: |
+          The Base64 version of the private key JSON file for the service account.
+          You can lean more about how to generate the JSON at https://cloud.google.com/iam/docs/service-accounts-create.
+          The service account must have the minimally required permissions documented at https://firebase.google.com/docs/projects/iam/permissions.
+        required: true
+      ENV_FILE:
+        description: |
+          .env file that is injected in the build context before doing the firebase deployment.
+        required: false
+
+jobs:
+  deployfirebase:
+    name: Deploy Firebase Project
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.path }}
+    environment: ${{ inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check environment
+        run: |
+            echo "env.selfhosted: ${{ env.selfhosted }}"
+            echo "environment: ${{ inputs.environment }}"
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodeVersion }}
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+      - name: Install Firebase CLI Tools
+        run: npm install -g firebase-tools
+      - name: Create .env file
+        env:
+            env-file: ${{ secrets.ENV_FILE }}
+        if: ${{ env.env-file != '' }}
+        run: |
+            echo "${{ env.env-file }}" > ${{ inputs.workingDirectory }}/.env
+      - name: Run custom command
+        if: ${{ inputs.customcommand != '' }}
+        run: ${{ inputs.customcommand }}
+      - name: Deploy to Firebase
+        run: |
+            echo -n "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}" | base64 -d > "$RUNNER_TEMP/google-application-credentials.json"
+            export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/google-application-credentials.json"
+            echo "Stored the Google application credentials at $GOOGLE_APPLICATION_CREDENTIALS"
+            firebase deploy ${{ inputs.arguments }}
+      - name: Clean up Google application credentials
+        if: always()
+        run: |
+            rm -rf $RUNNER_TEMP/google-application-credentials.json || true
