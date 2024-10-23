@@ -7,12 +7,8 @@ SPDX-FileCopyrightText: 2024 Stanford University and the project authors (see CO
 SPDX-License-Identifier: MIT
 
 -->
-# RadGPT Web Interace
 
-Using Vite + React
+# Stanford Biodesign RadGPT Contributors
 
-## Getting Started
-```
-npm install
-npm run dev
-```
+* [Paul Schmiedmayer](https://github.com/PSchmiedmayer)
+* [Thomas Kaar](https://github.com/ThomasKaar)
