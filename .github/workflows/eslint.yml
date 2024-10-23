@@ -1,0 +1,80 @@
+#
+# This source file is part of the Stanford Biodesign Digital Health Group open-source organization
+#
+# SPDX-FileCopyrightText: 2023 Stanford University and the project authors (see CONTRIBUTORS.md)
+#
+# SPDX-License-Identifier: MIT
+#
+
+# This is a copy of https://github.com/StanfordBDHG/.github/blob/main/.github/workflows/eslint.yml
+# which is currently not working with this repository because the working directory is not the
+# root directory. This is due to the fact that this repository is following a monorepo approach which
+# is more suitable for this project
+# This file will be further tested when a firebase backend is added and more side effects might be
+# uncovered from the changes. After it is working well for this repository a PR will be created in
+# https://github.com/StanfordBDHG/.github/tree/main/.github
+
+name: ESLint
+
+on:
+  workflow_call:
+    inputs:
+      nodeVersion:
+        description: 'Node version spec of the version to use in SemVer notation.'
+        required: false
+        type: string
+        default: '18'
+      working-directory:
+        description: 'Working directory eslint should be executed in'
+        required: false
+        type: string
+        default: '.'
+
+permissions:
+  checks: write
+  contents: read
+
+jobs:
+  eslint:
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ inputs.nodeVersion }}
+          cache: 'npm'
+          cache-dependency-path: ${{ inputs.working-directory }}/package-lock.json
+      - name: Install Node Dependencies
+        run: npm ci
+      - name: Save Code Linting Report JSON
+        run: npm run lint:ci
+        continue-on-error: true
+      - name: Check if PR is from a fork
+        id: fork-check
+        run: |
+          if [[ "${{ github.event_name }}" == 'pull_request' && "${{ github.event.pull_request.head.repo.fork }}" == 'true' ]]; then
+            echo "is_fork=true" >> $GITHUB_ENV
+          else
+            echo "is_fork=false" >> $GITHUB_ENV
+          fi
+      - name: Run ESLint if PR is from a fork
+        if: env.is_fork == 'true'
+        run: npm run lint:ci
+      - name: Annotate Code Linting Results
+        if: env.is_fork == 'false'
+        uses: ataylorme/eslint-annotate-action@v3
+        with:
+          only-pr-files: false
+          fail-on-warning: true
+          fail-on-error: true
+          markdown-report-on-step-summary: true
+      - name: Upload ESLint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint_report.json
+          path: ${{ inputs.working-directory }}/eslint_report.json
