@@ -5,11 +5,9 @@
 //
 // SPDX-License-Identifier: MIT
 //
+
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{ts,tsx}"],
-  theme: {
-    extend: {},
-  },
+  content: ["./src/**/*.{ts,tsx}", "./node_modules/@stanfordspezi/spezi-web-design-system/dist/**/*.js"],
   plugins: [],
 };
