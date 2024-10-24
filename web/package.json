@@ -11,6 +11,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stanfordbdhg/spezi-web-design-system": "file:../../spezi-web-design-system",
     "@t3-oss/env-core": "^0.11.1",
     "@tanstack/react-router": "^1.62.1",
     "firebase": "^10.14.1",

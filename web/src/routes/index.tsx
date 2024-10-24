@@ -9,6 +9,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@utils/firebase.ts";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import useAuthenticatedUser from "../hooks/useAuthenticatedUser";
+import { Button } from "@stanfordbdhg/spezi-web-design-system";
 
 const IndexComponent = () => {
   const currentUser = useAuthenticatedUser();
@@ -21,24 +22,16 @@ const IndexComponent = () => {
     <>
       <h1 className="text-3xl">Login Screen</h1>
       {!currentUser ? (
-        <button
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 my-2 px-4 rounded"
-          onClick={signInWithGoogle}
-        >
+        <Button className="my-2" onClick={signInWithGoogle}>
           SignIn With Google
-        </button>
+        </Button>
       ) : (
         <>
           <p className="text-s py-2">
             Current logged in user:
             {currentUser.email}
           </p>
-          <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-            onClick={signOut}
-          >
-            Sign Out
-          </button>
+          <Button onClick={signOut}>Sign Out</Button>
         </>
       )}
     </>
