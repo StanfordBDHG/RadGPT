@@ -5,6 +5,7 @@
 //
 // SPDX-License-Identifier: MIT
 //
+
 import { createFileRoute } from "@tanstack/react-router";
 import { auth } from "@utils/firebase.ts";
 import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
