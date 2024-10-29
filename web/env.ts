@@ -17,7 +17,11 @@ export const env = createEnv({
     VITE_PUBLIC_FIREBASE_STORAGE_BUCKET: z.string().min(1),
     VITE_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: z.string().min(1),
     VITE_PUBLIC_FIREBASE_APP_ID: z.string().min(1),
-    VITE_PUBLIC_FIREBASE_EMULATED: z.string().transform((s) => s === "true"),
+    VITE_PUBLIC_FIREBASE_EMULATED: z
+      .string()
+      .transform((s) => s === "true")
+      .optional()
+      .default("false"),
   },
   clientPrefix: "VITE_PUBLIC",
   runtimeEnv: {
