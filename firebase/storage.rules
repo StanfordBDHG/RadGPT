@@ -10,15 +10,14 @@ rules_version = '2';
 
 service firebase.storage {
   match /b/{bucket}/o {
-    match /users/{userId}/reports/{allPaths=**} {
-      allow read: if request.auth != null && request.auth.uid == userId;
-      allow create: if request.auth != null && request.auth.uid == userId
+    function isAuthenticatedUserID(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    match /users/{userId}/reports/{reportHash} {
+      allow read: if isAuthenticatedUserID(userId);
+      allow create: if isAuthenticatedUserID(userId)
                     && request.resource.contentType.matches("text/plain");
     } 
-
-    // restrict all others
-    match /{allPaths=**} {
-      allow read, write: if false;
-    }
   }
 }

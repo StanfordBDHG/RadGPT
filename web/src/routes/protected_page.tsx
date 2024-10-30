@@ -17,7 +17,9 @@ import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Text
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 
 const formSchema = z.object({
-  medicalReportContent: z.string().min(1, "Content of medical report is required"),
+  medicalReportContent: z
+    .string()
+    .min(1, "Content of medical report is required"),
   medicalReportName: z.string().min(1, "Name of medical report is required"),
 });
 
@@ -30,7 +32,7 @@ const calculateSHA256Hash = async (data: string) => {
     .map((b) => b.toString(16).padStart(2, "0"))
     .join("");
   return hashHex;
-}
+};
 
 const ProtectedComponent = () => {
   const currentUser = useAuthenticatedUser();
@@ -38,15 +40,21 @@ const ProtectedComponent = () => {
     formSchema,
   });
 
-  const handleSubmit = form.handleSubmit(async ({ medicalReportContent, medicalReportName }) => {
-    const medicalReportContentHash = await calculateSHA256Hash(medicalReportContent)
-    const storageReference = ref(
-      storage,
-      `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
-    );
-    const custmoMetadata = { medicalReportName: medicalReportName }
-    await uploadString(storageReference, medicalReportContent, "raw", { contentType: 'text/plain', customMetadata: custmoMetadata })
-  });
+  const handleSubmit = form.handleSubmit(
+    async ({ medicalReportContent, medicalReportName }) => {
+      const medicalReportContentHash =
+        await calculateSHA256Hash(medicalReportContent);
+      const storageReference = ref(
+        storage,
+        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
+      );
+      const custmoMetadata = { medicalReportName: medicalReportName };
+      await uploadString(storageReference, medicalReportContent, "raw", {
+        contentType: "text/plain",
+        customMetadata: custmoMetadata,
+      });
+    },
+  );
 
   return (
     <>
