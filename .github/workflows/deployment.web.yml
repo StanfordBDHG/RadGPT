@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-name: Deployment
+name: Deployment Web
 
 on:
   push:
