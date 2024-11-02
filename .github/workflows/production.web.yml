@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT
 #
 
-name: Production Deployment
+name: Production Deployment Web
 
 on:
   workflow_dispatch:
