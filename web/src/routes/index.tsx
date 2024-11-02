@@ -6,39 +6,68 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@utils/firebase.ts";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import useAuthenticatedUser from "../hooks/useAuthenticatedUser";
-import { Button } from "@stanfordspezi/spezi-web-design-system";
+import {
+  signInWithPopup,
+  GoogleAuthProvider,
+  signInWithEmailAndPassword,
+  OAuthProvider,
+} from "firebase/auth";
+import { AsideBrandLayout } from "@stanfordspezi/spezi-web-design-system/molecules/AsideBrandLayout";
+import { SignInForm } from "@stanfordspezi/spezi-web-design-system/modules/auth";
+import { Helmet } from "react-helmet";
 
 const IndexComponent = () => {
-  const currentUser = useAuthenticatedUser();
+  const appleProvider = new OAuthProvider("apple.com");
+  const googleProvider = new GoogleAuthProvider();
+  const providers = [
+    {
+      name: "Google",
+      provider: googleProvider,
+    },
+    { name: "Apple", provider: appleProvider },
+  ];
 
-  const signInWithGoogle = async () =>
-    await signInWithPopup(auth, new GoogleAuthProvider());
-  const signOut = async () => await auth.signOut();
+  const asidePictureComponent = (
+    <div className="min-h-full flex flex-column flex-center">
+      <img
+        src="/biodesign-footer-light.png"
+        alt="Stanford Biodesign Logo"
+        className="w-[317px]"
+      />
+    </div>
+  )
 
   return (
     <>
-      <h1 className="text-3xl">Login Screen</h1>
-      {!currentUser ? (
-        <Button className="my-2" onClick={signInWithGoogle}>
-          SignIn With Google
-        </Button>
-      ) : (
-        <>
-          <p className="text-s py-2">
-            Current logged in user:
-            {currentUser.email}
-          </p>
-          <Button onClick={signOut}>Sign Out</Button>
-        </>
-      )}
+      <Helmet>
+        <title>Sign In - RadGPT</title>
+      </Helmet>
+      <AsideBrandLayout aside={asidePictureComponent}>
+        <SignInForm
+          auth={auth}
+          providers={providers}
+          signInWithPopup={signInWithPopup}
+          enableEmailPassword={false}
+          signInWithEmailAndPassword={signInWithEmailAndPassword}
+        />
+      </AsideBrandLayout>
     </>
   );
 };
 
 export const Route = createFileRoute("/")({
   component: IndexComponent,
+  beforeLoad: async ({ location }) => {
+    // loading screen?
+    await auth.authStateReady();
+    if (auth.currentUser)
+      throw redirect({
+        to: "/protected_page",
+        search: {
+          redirect: location.href,
+        },
+      });
+  },
 });
