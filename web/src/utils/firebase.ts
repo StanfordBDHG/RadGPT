@@ -10,6 +10,7 @@
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { env } from "@/env.ts";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -30,4 +31,9 @@ if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
   connectAuthEmulator(auth, "http://localhost:9099");
 }
 
-export { auth };
+const storage = getStorage(app);
+if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
+  connectStorageEmulator(storage, "localhost", 9199);
+}
+
+export { auth, storage };
