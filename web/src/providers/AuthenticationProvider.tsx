@@ -23,10 +23,10 @@ export const AuthenticationProvider = ({
   const navigate = useNavigate();
 
   auth.onAuthStateChanged((newUser) => {
-    if (newUser && window.location.pathname === "/") {
-      navigate({ to: "/protected_page" });
-    } else if (!newUser) {
+    if (newUser && window.location.pathname === "/signin") {
       navigate({ to: "/" });
+    } else if (!newUser) {
+      navigate({ to: "/signin" });
     }
     setCurrentUser(newUser);
   });

@@ -20,6 +20,7 @@ export default defineConfig({
   },
   plugins: [
     TanStackRouterVite({
+      routeFilePrefix: "~",
       routeTreeFileHeader: [
         `//
 // This source file is part of the Stanford Biodesign Digital Health RadGPT open-source project
