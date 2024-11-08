@@ -8,6 +8,9 @@
 
 /** @type {import('tailwindcss').Config} */
 export default {
-  content: ["./src/**/*.{ts,tsx}", "./node_modules/@stanfordspezi/spezi-web-design-system/dist/**/*.js"],
+  content: [
+    "./src/**/*.{ts,tsx}",
+    "./node_modules/@stanfordspezi/spezi-web-design-system/dist/**/*.js",
+  ],
   plugins: [],
 };
