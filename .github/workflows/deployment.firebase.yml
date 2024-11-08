@@ -87,7 +87,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: 3.12
+          python-version: 3.10
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -97,9 +97,9 @@ jobs:
       - name: Setup Python Virutal Environment
         working-directory: firebase
         run: |
-          python3.12 -m venv functions/venv
+          python3.10 -m venv functions/venv
           . functions/venv/bin/activate
-          python3.12 -m pip install -r functions/requirements.txt
+          python3.10 -m pip install -r functions/requirements.txt
       - name: Deploy to Firebase
         working-directory: firebase
         run: |
