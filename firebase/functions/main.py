@@ -14,6 +14,11 @@ from firebase_functions import https_fn, options, storage_fn
 from firebase_admin import initialize_app, storage, firestore
 from radgraph import RadGraph, get_radgraph_processed_annotations
 
+from text_mapping.radgraph_text_mapper import (
+    add_end_ix_to_processed_annotations,
+    get_entity_mapping_in_user_entered_text,
+)
+
 initialize_app()
 
 
@@ -29,7 +34,7 @@ def on_medical_report_upload(
     file_path = pathlib.PurePath(event.data.name)
 
     # Forcing the pattern "users/{userid}/reports/{filename}" and also extracting userid and filename
-    # Hence, it is ensured that this function gets executerd only on files in "users/{userid}/reports"
+    # Hence, it is ensured that this function gets executed only on files in "users/{userid}/reports"
     match = re.match(
         r"^users/(?P<uid>[^/]*)/reports/(?P<file_name>[^/]*)$", str(file_path)
     )
@@ -38,7 +43,7 @@ def on_medical_report_upload(
     uid = match.group("uid")
     file_name = match.group("file_name")
 
-    # based on https://firebase.google.com/docs/storage/extend-with-functions?gen=2nd
+    # Based on https://firebase.google.com/docs/storage/extend-with-functions?gen=2nd
     bucket_name = event.data.bucket
     bucket = storage.bucket(bucket_name)
     file_blob = bucket.blob(str(file_path))
@@ -47,14 +52,21 @@ def on_medical_report_upload(
     radgraph = RadGraph(model_type="radgraph-xl")
     annotations = radgraph([file_str])
     processed_annotations = get_radgraph_processed_annotations(annotations)
+    text_mapping = get_entity_mapping_in_user_entered_text(
+        file_str, processed_annotations
+    )
 
     db = firestore.client()
     ref = db.collection(f"users/{uid}/annotations").document(file_name)
     ref.set(
         {
-            "radgraph_text": processed_annotations["radgraph_text"],
             "processed_annotations": json.dumps(
-                processed_annotations["processed_annotations"]
+                add_end_ix_to_processed_annotations(
+                    processed_annotations["processed_annotations"],
+                    processed_annotations,
+                )
             ),
+            "text_mapping": json.loads(json.dumps(text_mapping)),
+            "user_provided_text": file_str,
         }
     )
