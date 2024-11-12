@@ -16,12 +16,16 @@ import { getMetadata, listAll, ref, StorageReference } from "firebase/storage";
 import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
 import { z } from "zod";
 import AddFileButton from "./AddFileButton";
+import ReportText from "./ReportText";
 
 const schema = z.object({
   processed_annotations: z
     .string()
     .min(1, "Content of medical report is required"),
-  radgraph_text: z.string().min(1, "Content of medical report is required"),
+  user_provided_text: z.string().min(1, "User-provided text is required"),
+  // text_mapping: z
+  //   .string()
+  //   .min(1, "Text mapping is required")
 });
 
 function Dashboard() {
@@ -64,6 +68,8 @@ function Dashboard() {
   }, [fetchFiles]);
 
   const [reportText, setReportText] = useState<string>("");
+  const [textMapping, setTextMapping] = useState<any>();
+  const [processed_annotations, setProcessedAnnotations] = useState<string>("");
   const [selectedFile, setSelectedFile] = useState<StorageReference | null>(
     null,
   );
@@ -78,8 +84,12 @@ function Dashboard() {
       `users/${currentUser?.uid}/annotations/${selectedFile.name}`,
     );
     onSnapshot(annotationReference, (d) => {
-      const data = schema.parse(d.data());
-      setReportText(data["radgraph_text"]);
+      // const data = schema.parse(d.data());
+      console.log(d.data()["user_provided_text"]);
+      setReportText(d.data()["user_provided_text"]);
+      console.log(d.data()["text_mapping"]);
+      setTextMapping(d.data()["text_mapping"]);
+      setProcessedAnnotations(d.data()["processed_annotations"]);
     });
   }, [selectedFile, currentUser]);
 
@@ -113,11 +123,16 @@ function Dashboard() {
         </div>
       }
     >
-      {/* <FileCreationForm afterUpload={fetchFiles} /> */}
       {reportText ? (
-        <div className="flex flex-row flex-wrap">{reportText}</div>
-      ) : <p>Please add a file</p>
-      }
+        <ReportText
+          userProvidedText={reportText}
+          selectedFileName={selectedFile?.name ?? ""}
+          textMapping={textMapping}
+          processed_annotations={processed_annotations}
+        />
+      ) : (
+        <p>Please add a file</p>
+      )}
     </DashboardLayout>
   );
 }

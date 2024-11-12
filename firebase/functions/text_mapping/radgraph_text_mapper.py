@@ -1,5 +1,29 @@
+def add_end_ix_to_processed_annotations(processed_annotations, radgraph_output):
+    def get_end_ix_for_start_ix(start_idx):
+        ents = radgraph_output["radgraph_annotations"]["0"]["entities"]
+        for e in ents:
+            if ents[e]["start_ix"] == start_idx:
+                return ents[e]["end_ix"]
+        return None
+
+    for processed_annotation in processed_annotations:
+        located_at_start_observations = processed_annotation["located_at_start_ix"]
+        located_at_end_observations = []
+        for located_at_start_observation in located_at_start_observations:
+            end_indices = []
+            for start_idx in located_at_start_observation:
+                end_indices.append(get_end_ix_for_start_ix(start_idx))
+            located_at_end_observations.append(end_indices)
+        processed_annotation["located_at_end_ix"] = located_at_end_observations
+        print(processed_annotation)
+
+    return processed_annotations
+
+
 def determine_entities_in_user_entered_text(user_entered_text, radgraph_output):
-    processed_annotations = radgraph_output["processed_annotations"]
+    processed_annotations = add_end_ix_to_processed_annotations(
+        radgraph_output["processed_annotations"], radgraph_output
+    )
 
     radgraph_text = radgraph_output["radgraph_text"]
     tokens = radgraph_text.split(" ")
@@ -16,18 +40,13 @@ def determine_entities_in_user_entered_text(user_entered_text, radgraph_output):
         )
     ]
 
-    # workaround
-    def get_end_ix_for_start_ix(start_idx):
-        ents = radgraph_output["radgraph_annotations"]["0"]["entities"]
-        for e in ents:
-            if ents[e]["start_ix"] == start_idx:
-                return ents[e]["end_ix"]
-        return None
-
     relations = [
-        (start_idx, get_end_ix_for_start_ix(start_idx))
+        (start_idx, end_idx)
         for processed_annotation in processed_annotations
-        for start_idx in flat(processed_annotation["located_at_start_ix"])
+        for start_idx, end_idx in zip(
+            flat(processed_annotation["located_at_start_ix"]),
+            flat(processed_annotation["located_at_end_ix"]),
+        )
     ]
 
     def find_range_in_real_text():
