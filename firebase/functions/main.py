@@ -14,6 +14,11 @@ from firebase_functions import https_fn, options, storage_fn
 from firebase_admin import initialize_app, storage, firestore
 from radgraph import RadGraph, get_radgraph_processed_annotations
 
+from text_mapping.radgraph_text_mapper import (
+    add_end_ix_to_processed_annotations,
+    determine_entities_in_user_entered_text,
+)
+
 initialize_app()
 
 
@@ -47,14 +52,21 @@ def on_medical_report_upload(
     radgraph = RadGraph(model_type="radgraph-xl")
     annotations = radgraph([file_str])
     processed_annotations = get_radgraph_processed_annotations(annotations)
+    text_mapping = determine_entities_in_user_entered_text(
+        file_str, processed_annotations
+    )
 
     db = firestore.client()
     ref = db.collection(f"users/{uid}/annotations").document(file_name)
     ref.set(
         {
-            "radgraph_text": processed_annotations["radgraph_text"],
             "processed_annotations": json.dumps(
-                processed_annotations["processed_annotations"]
+                add_end_ix_to_processed_annotations(
+                    processed_annotations["processed_annotations"],
+                    processed_annotations,
+                )
             ),
+            "text_mapping": json.loads(json.dumps(text_mapping)),
+            "user_provided_text": file_str,
         }
     )

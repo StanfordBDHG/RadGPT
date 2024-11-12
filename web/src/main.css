@@ -10,3 +10,9 @@ SPDX-License-Identifier: MIT
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.keyword-highlight {
+  margin: 0 -0.1rem;
+  padding: 0 0.1rem;
+  border-radius: 0.25rem;
+}
