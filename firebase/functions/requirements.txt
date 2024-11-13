@@ -5,4 +5,6 @@
 #
 # SPDX-License-Identifier: MIT
 #
+
 firebase_functions~=0.1.0
+radgraph==0.1.11

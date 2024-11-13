@@ -10,20 +10,19 @@ import json
 import pathlib
 import re
 
-from firebase_functions import https_fn, storage_fn
+from firebase_functions import https_fn, options, storage_fn
 from firebase_admin import initialize_app, storage, firestore
 from radgraph import RadGraph, get_radgraph_processed_annotations
 
 initialize_app()
-db = firestore.client()
 
 
-@https_fn.on_request()
+@https_fn.on_request(memory=options.MemoryOption.GB_4)
 def on_request_example(_req: https_fn.Request) -> https_fn.Response:
     return https_fn.Response("Hello world!")
 
 
-@storage_fn.on_object_finalized()
+@storage_fn.on_object_finalized(memory=options.MemoryOption.GB_4)
 def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
@@ -49,6 +48,7 @@ def on_medical_report_upload(
     annotations = radgraph([file_str])
     processed_annotations = get_radgraph_processed_annotations(annotations)
 
+    db = firestore.client()
     ref = db.collection(f"users/{uid}/annotations").document(file_name)
     ref.set(
         {
