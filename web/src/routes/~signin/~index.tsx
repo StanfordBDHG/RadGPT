@@ -37,7 +37,7 @@ const IndexComponent = () => {
         className="w-[317px]"
       />
     </div>
-  )
+  );
 
   return (
     <>
@@ -57,14 +57,14 @@ const IndexComponent = () => {
   );
 };
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/signin/")({
   component: IndexComponent,
   beforeLoad: async ({ location }) => {
     // loading screen?
     await auth.authStateReady();
     if (auth.currentUser)
       throw redirect({
-        to: "/protected_page",
+        to: "/",
         search: {
           redirect: location.href,
         },
