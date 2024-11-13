@@ -7,28 +7,19 @@
 //
 
 import { SpeziProvider } from "@stanfordspezi/spezi-web-design-system";
-import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { AuthenticationProvider } from "../providers/AuthenticationProvider";
 
 import "@stanfordspezi/spezi-web-design-system/style.css";
 import "@/src/main.css";
 
 const RootComponent = () => {
   return (
-    <SpeziProvider>
-      <div className="min-h-screen">
-        <div className="p-2 flex gap-2">
-          <Link to="/" className="[&.active]:font-bold">
-            Login
-          </Link>{" "}
-          <span>|</span>
-          <Link to="/protected_page" className="[&.active]:font-bold">
-            Protected Page
-          </Link>
-        </div>
-        <hr />
+    <AuthenticationProvider>
+      <SpeziProvider>
         <Outlet />
-      </div>
-    </SpeziProvider>
+      </SpeziProvider>
+    </AuthenticationProvider>
   );
 };
 

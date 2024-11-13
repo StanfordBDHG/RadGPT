@@ -8,13 +8,13 @@
 
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth, storage } from "@utils/firebase.ts";
-import useAuthenticatedUser from "../hooks/useAuthenticatedUser";
 import { ref, uploadString } from "firebase/storage";
 import { z } from "zod";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
+import { useAuthenticatedUser } from "../hooks/useAuthenticatedUser";
 
 const formSchema = z.object({
   medicalReportContent: z
@@ -58,6 +58,7 @@ const ProtectedComponent = () => {
 
   return (
     <>
+      <Button onClick={() => auth.signOut()}>Signout</Button>
       <h1 className="text-3xl">Protected Screen</h1>
       <p className="text-s py-2">
         {currentUser?.email ?? "no user authenticated"}
