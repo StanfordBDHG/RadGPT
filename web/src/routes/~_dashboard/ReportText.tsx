@@ -6,6 +6,10 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { functions } from "@/src/utils/firebase";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
+import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { httpsCallable, HttpsCallable } from "firebase/functions";
 import { useState } from "react";
 
 interface AnnotatedTextProps {
@@ -111,8 +115,20 @@ export default function ReportText({
     }
   });
 
+  const openState = useOpenState(false)
+  const [reponse, setResponse] = useState<null | string>(null);
+
   return (
     <>
+      {currentHoveredWordIndex ?? "null"}
+      <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
+        <DialogContent className="max-h-screen overflow-y-auto min-w-[50%]">
+          <DialogHeader>
+            <DialogTitle>Add New Medical Report</DialogTitle>
+            <p>{reponse}</p>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
       <div className="whitespace-pre-wrap tracking-wide leading-5">
         {textArray.map(([k, s, id]) => (
           <span
@@ -129,9 +145,18 @@ export default function ReportText({
             }
             onMouseEnter={() => { setCurrentHoveredWordIndex(k); console.log(groupMap.get(k)) }}
             onMouseLeave={() => setCurrentHoveredWordIndex(null)}
-            onClick={() => {
+            onClick={async () => {
               if (k === null) return;
               console.log(groupMap.get(k));
+              setResponse(null)
+              openState.open()
+              const httpsGPTPrompt: HttpsCallable<
+                { file_name: string, token_ids: number[] },
+                { gpt_response: string }
+              > = httpsCallable(functions, "on_detail_request");
+              const r = await httpsGPTPrompt({ file_name: selectedFileName, token_ids: groupMap.get(+(k ?? "-1")) ?? [] });
+              setResponse(r.data.gpt_response)
+              // console.log(response)
             }}
           >
             {s}
