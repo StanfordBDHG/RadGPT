@@ -11,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { httpsCallable, HttpsCallable } from "firebase/functions";
 import { useState } from "react";
+import QuestionAnswer from "./QuestionAnswer";
 
 interface AnnotatedTextProps {
   userProvidedText: string;
@@ -31,6 +32,19 @@ interface AnnotatedTextProps {
   //   "suggestive_of": string | null,
   //   "observation_end_ix": number[]
   // }[];
+}
+
+type DetailedResponse = {
+  main_answer: string
+
+  question1: string | null
+  answer1: string | null
+
+  question2: string | null
+  answer2: string | null
+
+  question3: string | null
+  answer3: string | null
 }
 
 export default function ReportText({
@@ -116,19 +130,33 @@ export default function ReportText({
   });
 
   const openState = useOpenState(false)
-  const [reponse, setResponse] = useState<null | string>(null);
+  const [answer, setAnswer] = useState<null | string>(null);
+  const [question1, setQuestion1] = useState<null | string>(null)
+  const [answer1, setAnswer1] = useState<null | string>(null)
+  const [question2, setQuestion2] = useState<null | string>(null)
+  const [answer2, setAnswer2] = useState<null | string>(null)
+  const [question3, setQuestion3] = useState<null | string>(null)
+  const [answer3, setAnswer3] = useState<null | string>(null)
+
+  const [selectedNumber, setSelectedNumber] = useState<null | number>(null)
+
+
+  if (textArray.length === 0)
+    textArray.push([null, "loading...", 0])
 
   return (
     <>
-      {currentHoveredWordIndex ?? "null"}
       <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
         <DialogContent className="max-h-screen overflow-y-auto min-w-[50%]">
           <DialogHeader>
-            <DialogTitle>Add New Medical Report</DialogTitle>
-            <p>{reponse}</p>
-          </DialogHeader>
-        </DialogContent>
-      </Dialog>
+            <DialogTitle>Detailed Explanation</DialogTitle>
+            <p>{answer}</p>
+            {question1 && answer1 && <QuestionAnswer onClick={() => selectedNumber === 1 ? setSelectedNumber(null) : setSelectedNumber(1)} isSelected={selectedNumber === 1} question={question1} answer={answer1} />}
+            {question2 && answer2 && <QuestionAnswer onClick={() => selectedNumber === 2 ? setSelectedNumber(null) : setSelectedNumber(2)} isSelected={selectedNumber === 2} question={question2} answer={answer2} />}
+            {question3 && answer3 && <QuestionAnswer onClick={() => selectedNumber === 3 ? setSelectedNumber(null) : setSelectedNumber(3)} isSelected={selectedNumber === 3} question={question3} answer={answer3} />}
+          </DialogHeader >
+        </DialogContent >
+      </Dialog >
       <div className="whitespace-pre-wrap tracking-wide leading-5">
         {textArray.map(([k, s, id]) => (
           <span
@@ -147,16 +175,24 @@ export default function ReportText({
             onMouseLeave={() => setCurrentHoveredWordIndex(null)}
             onClick={async () => {
               if (k === null) return;
-              console.log(groupMap.get(k));
-              setResponse(null)
+              setAnswer("loading...")
+              setQuestion1(null)
+              setQuestion2(null)
+              setQuestion3(null)
+              setSelectedNumber(null)
               openState.open()
-              const httpsGPTPrompt: HttpsCallable<
+              const gptAnswer: HttpsCallable<
                 { file_name: string, token_ids: number[] },
-                { gpt_response: string }
+                DetailedResponse
               > = httpsCallable(functions, "on_detail_request");
-              const r = await httpsGPTPrompt({ file_name: selectedFileName, token_ids: groupMap.get(+(k ?? "-1")) ?? [] });
-              setResponse(r.data.gpt_response)
-              // console.log(response)
+              const r = await gptAnswer({ file_name: selectedFileName, token_ids: groupMap.get(+(k ?? "-1")) ?? [] });
+              setAnswer(r.data.main_answer)
+              setQuestion1(r.data.question1)
+              setQuestion2(r.data.question2)
+              setQuestion3(r.data.question3)
+              setAnswer1(r.data.answer1)
+              setAnswer2(r.data.answer2)
+              setAnswer3(r.data.answer3)
             }}
           >
             {s}
