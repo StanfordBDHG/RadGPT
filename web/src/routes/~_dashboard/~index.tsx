@@ -51,30 +51,33 @@ function Dashboard() {
 
   useEffect(() => {
     if (!selectedFile) return;
-    setReportText("shimmering...");
 
     const annotationReference = doc(
       firestore,
       `users/${currentUser?.uid}/annotations/${selectedFile.name}`,
     );
-    const unsubscribe = onSnapshot(annotationReference, (d) => {
-      const data = getProcessedAnnotationsFromJSONString(d.data());
+    const unsubscribe = onSnapshot(annotationReference, (documentSnapshot) => {
+      const data = getProcessedAnnotationsFromJSONString(
+        documentSnapshot.data(),
+      );
       if (!data) {
-        setReportText("");
         setTextMapping(null);
         setProcessedAnnotations([]);
         return;
       }
       setReportText(data.user_provided_text);
-      setTextMapping(data.text_mapping);
-      setProcessedAnnotations(data.processed_annotations);
+      setTextMapping(data.text_mapping ?? null);
+      setProcessedAnnotations(data.processed_annotations ?? []);
     });
     return unsubscribe;
   }, [selectedFile, currentUser]);
 
-  const onUploadSuccess = (ref: StorageReference) => {
+  const onUploadSuccess = (ref: StorageReference, medicalReport: string) => {
     fetchFiles();
     setSelectedFile(ref);
+    setReportText(medicalReport);
+    setTextMapping(null);
+    setProcessedAnnotations([]);
   };
 
   return (
@@ -106,7 +109,7 @@ function Dashboard() {
           </div>
         }
       >
-        {reportText && textMapping && processedAnnotations ? (
+        {reportText ? (
           <ReportText
             userProvidedText={reportText}
             selectedFileName={selectedFile?.name ?? ""}
@@ -114,7 +117,7 @@ function Dashboard() {
             processedAnnotations={processedAnnotations}
           />
         ) : (
-          <p>Please add a file</p>
+          <p>Please add or select a file</p>
         )}
       </DashboardLayout>
     </>

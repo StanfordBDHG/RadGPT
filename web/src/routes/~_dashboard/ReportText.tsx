@@ -10,14 +10,18 @@ import {
   getGroupMap,
   ProcessedAnnotations,
 } from "@/src/utils/processedAnnotations";
-import { getTextBlocks, TextMapping } from "@/src/utils/textMapping";
+import {
+  getTextBlocks,
+  TextBlockPosition,
+  TextMapping,
+} from "@/src/utils/textMapping";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useState } from "react";
 
 interface ReportTextProp {
   userProvidedText: string;
   selectedFileName: string;
-  textMapping: TextMapping;
+  textMapping: TextMapping | null;
   processedAnnotations: ProcessedAnnotations[];
 }
 
@@ -31,8 +35,21 @@ export default function ReportText({
     number | null
   >(null);
 
+  if (!textMapping) {
+    return (
+      <div className="shimmer whitespace-pre-wrap tracking-wide leading-5">
+        {userProvidedText}
+      </div>
+    );
+  }
+
   const textBlocks = getTextBlocks(textMapping, userProvidedText);
   const groupMap = getGroupMap(processedAnnotations);
+
+  if (textBlocks.length === 0) {
+    textBlocks.push([null, "Loading...", 0, TextBlockPosition.STAND_ALONE]);
+  }
+
   return (
     <>
       <div className="whitespace-pre-wrap tracking-wide leading-5">

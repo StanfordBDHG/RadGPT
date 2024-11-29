@@ -20,7 +20,7 @@ import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOp
 import { StorageReference } from "firebase/storage";
 
 interface AddFileModalProps {
-  onUploadSuccess?: (ref: StorageReference) => void;
+  onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
 export default function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
@@ -38,8 +38,8 @@ export default function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
           <DialogTitle>Add New Medical Report</DialogTitle>
         </DialogHeader>
         <FileCreationForm
-          onUploadSuccess={(ref) => {
-            if (onUploadSuccess) onUploadSuccess(ref);
+          onUploadSuccess={(ref, medicalReport) => {
+            if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
             openState.close();
           }}
         ></FileCreationForm>

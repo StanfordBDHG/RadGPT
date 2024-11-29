@@ -43,11 +43,20 @@ def on_medical_report_upload(
     uid = match.group("uid")
     file_name = match.group("file_name")
 
+    db = firestore.client()
+    ref = db.collection(f"users/{uid}/annotations").document(file_name)
+
     # Based on https://firebase.google.com/docs/storage/extend-with-functions?gen=2nd
     bucket_name = event.data.bucket
     bucket = storage.bucket(bucket_name)
     file_blob = bucket.blob(str(file_path))
     file_str = file_blob.download_as_text()
+
+    ref.set(
+        {
+            "user_provided_text": file_str,
+        }
+    )
 
     radgraph = RadGraph(model_type="radgraph-xl")
     annotations = radgraph([file_str])
@@ -56,9 +65,7 @@ def on_medical_report_upload(
         file_str, processed_annotations
     )
 
-    db = firestore.client()
-    ref = db.collection(f"users/{uid}/annotations").document(file_name)
-    ref.set(
+    ref.update(
         {
             "processed_annotations": json.dumps(
                 add_end_ix_to_processed_annotations(
@@ -67,6 +74,5 @@ def on_medical_report_upload(
                 )
             ),
             "text_mapping": json.loads(json.dumps(text_mapping)),
-            "user_provided_text": file_str,
         }
     )
