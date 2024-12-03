@@ -53,7 +53,7 @@ def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
     # TODO: Security check to avoid non radiology reports and GPT injections
 
     db = firestore.client()
-    annotations_folder_ref = db.collection(f"users/{uid}/annotations")
+    annotations_folder_ref = db.collection(f"users/{uid}/{file_name}")
 
     # Check if already exists
     observation_ref = annotations_folder_ref.document(f"cached_answer_{observation_id}")
@@ -61,7 +61,7 @@ def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
     if cached_gpt_answer.exists:
         return cached_gpt_answer.to_dict()
 
-    processed_annotation_ref = annotations_folder_ref.document(file_name)
+    processed_annotation_ref = annotations_folder_ref.document("report_meta_data")
     content = processed_annotation_ref.get()
 
     if not content.exists:
@@ -113,7 +113,7 @@ def on_medical_report_upload(
     file_name = match.group("file_name")
 
     db = firestore.client()
-    ref = db.collection(f"users/{uid}/annotations").document(file_name)
+    ref = db.collection(f"users/{uid}/{file_name}").document("report_meta_data")
 
     # Based on https://firebase.google.com/docs/storage/extend-with-functions?gen=2nd
     bucket_name = event.data.bucket

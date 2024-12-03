@@ -5,6 +5,7 @@
 //
 // SPDX-License-Identifier: MIT
 //
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -12,9 +13,71 @@ service cloud.firestore {
     function isAuthenticatedUserID(userId) {
       return request.auth != null && request.auth.uid == userId;
     }
+
+    function notChangingCachingFields(previousData, data) {
+      return previousData["main_explanation"] == data["main_explanation"]
+             && previousData["concept_based_question"] == data["concept_based_question"]
+             && previousData["concept_based_question_answer"] == data["concept_based_question_answer"]
+             && previousData["concept_based_template_question"] == data["concept_based_template_question"]
+             && previousData["concept_based_template_question_answer"] == data["concept_based_template_question_answer"];
+    } 
+
+    function containsOnlyAllowedCachedFields(data) {
+      return data.keys().hasOnly([
+          "main_explanation",
+          "concept_based_question",
+          "concept_based_question_answer",
+          "concept_based_template_question",
+          "concept_based_template_question_answer",
+          "feedback"
+        ]) && data.keys().hasAll([
+          "main_explanation",
+          "concept_based_question",
+          "concept_based_question_answer",
+          "concept_based_template_question",
+          "concept_based_template_question_answer",
+          "feedback"
+        ]);
+    }
     
-    match /users/{userId}/annotations/{documentName} {
+    function notChangingAnnotationFields(previousData, data) {
+      return previousData["processed_annotations"] == data["processed_annotations"]
+              && previousData["text_mapping"] == data["text_mapping"]
+              && previousData["user_provided_text"] == data["user_provided_text"];
+    } 
+
+    function containsOnlyAllowedAnnotationFields(data) {
+      return data.keys().hasOnly([ 
+          "processed_annotations", 
+          "text_mapping", 
+          "user_feedback", 
+          "user_provided_text" 
+        ]) && data.keys().hasAll([
+          "processed_annotations",
+          "text_mapping",
+          "user_feedback",
+          "user_provided_text"
+        ]);
+    }
+
+    function isValidAnnotationUpdate(previousData, data) {
+      return notChangingAnnotationFields(previousData, data) 
+              && containsOnlyAllowedAnnotationFields(data);
+    }
+
+    function isValidCachedAnswerUpdate(previousData, data, documentName) {
+      return notChangingCachingFields(previousData, data) 
+              && containsOnlyAllowedCachedFields(data) 
+              && documentName.matches('^cached_answer_(([1-9]\\d)|(\\d))$');
+    } 
+
+    match /users/{userId}/{documentHash}/{documentName} {
       allow read: if isAuthenticatedUserID(userId);
+      allow update: if isAuthenticatedUserID(userId)
+                    && (
+                      isValidAnnotationUpdate(resource.data, request.resource.data) ||
+                      isValidCachedAnswerUpdate(resource.data, request.resource.data, documentName)
+                    );
     }
   }
 }

@@ -26,9 +26,13 @@ const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
 };
 
 export async function getFileList(currentUser: User | null) {
+  if (currentUser === null) {
+    return null;
+  }
+
   const storageReportsReference = ref(
     storage,
-    `users/${currentUser?.uid}/reports`,
+    `users/${currentUser.uid}/reports`,
   );
   const listResult = await listAll(storageReportsReference);
   const fileMetadata = await Promise.all(

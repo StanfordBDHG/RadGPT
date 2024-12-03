@@ -63,6 +63,7 @@ const schema = z.object({
       }),
     )
     .optional(),
+  user_feedback: z.string().min(1).optional(),
 });
 
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {

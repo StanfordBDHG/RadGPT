@@ -14,6 +14,10 @@ import {
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import QuestionAnswer from "./QuestionAnswer";
 import { Loader2 } from "lucide-react";
+import { doc, onSnapshot, updateDoc } from "firebase/firestore";
+import { firestore } from "@/src/utils/firebase";
+import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
+import { useEffect, useState } from "react";
 
 export default function DetailDialog({
   answer,
@@ -24,6 +28,7 @@ export default function DetailDialog({
   conceptBasedTemplateQuestionAnswer: concept_based_template_question_answer,
   selectedNumber,
   setSelectedNumber,
+  selectedFileName,
 }: {
   answer: string | null;
   openState: {
@@ -39,7 +44,78 @@ export default function DetailDialog({
   conceptBasedTemplateQuestionAnswer: string | null;
   selectedNumber: number | null;
   setSelectedNumber: React.Dispatch<React.SetStateAction<number | null>>;
+  selectedFileName: string;
 }) {
+  const currentUser = useAuthenticatedUser();
+
+  const [like1, setLike1] = useState(false);
+  const [dislike1, setDislike1] = useState(false);
+  const [textFeedback1, setTextFeedback1] = useState("");
+  const [like2, setLike2] = useState(false);
+  const [dislike2, setDislike2] = useState(false);
+  const [textFeedback2, setTextFeedback2] = useState("");
+
+  const feedbackRef = doc(
+    firestore,
+    `users/${currentUser?.uid}/${selectedFileName}`,
+  );
+  useEffect(() => {
+    if (currentUser === null) {
+      return;
+    }
+    let ignore = false;
+    const unsubscribe = onSnapshot(feedbackRef, (documentSnapshot) => {
+      if (ignore) {
+        return;
+      }
+      const data = documentSnapshot.data()?.["feedback"];
+      setLike1(data?.["like1"] ?? false);
+      setLike2(data?.["like2"] ?? false);
+      setDislike1(data?.["dislike1"] ?? false);
+      setDislike2(data?.["dislike2"] ?? false);
+      setTextFeedback1(data?.["textFeedback1"] ?? "");
+      setTextFeedback2(data?.["textFeedback2"] ?? "");
+    });
+    return () => {
+      ignore = true;
+      unsubscribe();
+    };
+  }, [currentUser, feedbackRef]);
+
+  const onLikeFunctor = (id: number) => () =>
+    updateDoc(feedbackRef, {
+      feedback: {
+        like1: (like1 && id !== 1) || (!like1 && id === 1),
+        dislike1: !((like1 && id !== 1) || (!like1 && id === 1)) && dislike1,
+        textFeedback1: textFeedback1,
+        like2: (like2 && id !== 2) || (!like2 && id === 2),
+        dislike2: !((like2 && id !== 2) || (!like2 && id === 2)) && dislike2,
+        textFeedback2: textFeedback2,
+      },
+    });
+  const onDislikeFunctor = (id: number) => () =>
+    updateDoc(feedbackRef, {
+      feedback: {
+        dislike1: (dislike1 && id !== 1) || (!dislike1 && id === 1),
+        like1: !((dislike1 && id !== 1) || (!dislike1 && id === 1)) && like1,
+        textFeedback1: textFeedback1,
+        dislike2: (dislike2 && id !== 2) || (!dislike2 && id === 2),
+        like2: !((dislike2 && id !== 2) || (!dislike2 && id === 2)) && like2,
+        textFeedback2: textFeedback2,
+      },
+    });
+  const onFeedbackFunctor = (id: number) => async (feedback: string) => {
+    updateDoc(feedbackRef, {
+      feedback: {
+        dislike1: dislike1,
+        like1: like1,
+        textFeedback1: id === 1 ? feedback : textFeedback1,
+        dislike2: dislike2,
+        like2: like2,
+        textFeedback2: id === 2 ? feedback : textFeedback2,
+      },
+    });
+  };
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
       <DialogContent className="max-h-screen overflow-y-auto min-w-[50%]">
@@ -65,6 +141,12 @@ export default function DetailDialog({
               isSelected={selectedNumber === 1}
               question={concept_based_question}
               answer={concept_based_question_answer}
+              onLike={onLikeFunctor(1)}
+              onDislike={onDislikeFunctor(1)}
+              like={like1}
+              dislike={dislike1}
+              textFeedback={textFeedback1}
+              onFeedbackSubmit={onFeedbackFunctor(1)}
             />
           )}
           {concept_based_template_question &&
@@ -78,6 +160,12 @@ export default function DetailDialog({
                 isSelected={selectedNumber === 2}
                 question={concept_based_template_question}
                 answer={concept_based_template_question_answer}
+                onLike={onLikeFunctor(2)}
+                onDislike={onDislikeFunctor(2)}
+                like={like2}
+                dislike={dislike2}
+                textFeedback={textFeedback2}
+                onFeedbackSubmit={onFeedbackFunctor(2)}
               />
             )}
         </DialogHeader>

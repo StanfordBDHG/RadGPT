@@ -23,6 +23,7 @@ import {
 import { TextMapping } from "@/src/utils/textMapping";
 import { getFileList } from "@/src/utils/queries";
 import { Helmet } from "react-helmet";
+import FeedbackForm from "./FeedbackForm";
 
 function Dashboard() {
   const currentUser = useAuthenticatedUser();
@@ -32,7 +33,7 @@ function Dashboard() {
   >([]);
 
   const fetchFiles = useCallback(async () => {
-    const fileList = await getFileList(currentUser);
+    const fileList = (await getFileList(currentUser)) ?? [];
     setFiles(fileList);
   }, [currentUser]);
 
@@ -48,28 +49,38 @@ function Dashboard() {
   const [selectedFile, setSelectedFile] = useState<StorageReference | null>(
     null,
   );
+  const [userFeedback, setUserFeedback] = useState<string | null>(null);
 
   useEffect(() => {
     if (!selectedFile) return;
 
+    let ignore = false;
     const annotationReference = doc(
       firestore,
-      `users/${currentUser?.uid}/annotations/${selectedFile.name}`,
+      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`,
     );
     const unsubscribe = onSnapshot(annotationReference, (documentSnapshot) => {
+      if (ignore) {
+        return;
+      }
       const data = getProcessedAnnotationsFromJSONString(
         documentSnapshot.data(),
       );
       if (!data) {
         setTextMapping(null);
         setProcessedAnnotations([]);
+        setUserFeedback(null);
         return;
       }
       setReportText(data.user_provided_text);
       setTextMapping(data.text_mapping ?? null);
       setProcessedAnnotations(data.processed_annotations ?? []);
+      setUserFeedback(data.user_feedback ?? null);
     });
-    return unsubscribe;
+    return () => {
+      ignore = true;
+      unsubscribe();
+    };
   }, [selectedFile, currentUser]);
 
   const onUploadSuccess = (ref: StorageReference, medicalReport: string) => {
@@ -78,6 +89,7 @@ function Dashboard() {
     setReportText(medicalReport);
     setTextMapping(null);
     setProcessedAnnotations([]);
+    setUserFeedback(null);
   };
 
   return (
@@ -110,12 +122,21 @@ function Dashboard() {
         }
       >
         {reportText ? (
-          <ReportText
-            userProvidedText={reportText}
-            selectedFileName={selectedFile?.name ?? ""}
-            textMapping={textMapping}
-            processedAnnotations={processedAnnotations}
-          />
+          <div className="flex flex-col justify-between">
+            <ReportText
+              userProvidedText={reportText}
+              selectedFileName={selectedFile?.name ?? ""}
+              textMapping={textMapping}
+              processedAnnotations={processedAnnotations}
+            />
+            {processedAnnotations.length > 0 && (
+              <FeedbackForm
+                className="mt-4"
+                selectedFileName={selectedFile?.name ?? ""}
+                feedback={userFeedback}
+              />
+            )}
+          </div>
         ) : (
           <p>Please add or select a file</p>
         )}
