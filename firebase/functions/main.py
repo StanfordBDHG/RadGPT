@@ -36,15 +36,15 @@ def get_concept(processed_annotation) -> str:
 @https_fn.on_call(memory=options.MemoryOption.GB_4, secrets=["OPENAI_API_KEY"])
 def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
     uid = req.auth.uid
-    if not uid:
+    if uid is None:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.UNAUTHENTICATED,
             message="The function must be called while authenticated.",
         )
 
     file_name = req.data.get("file_name")
-    observation_id = int(req.data.get("observation_id"))
-    if not file_name or not observation_id:
+    observation_id = req.data.get("observation_id")
+    if file_name is None or observation_id is None:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             message='The function must be called with an object containing "user_prompt".',
@@ -53,8 +53,16 @@ def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
     # TODO: Security check to avoid non radiology reports and GPT injections
 
     db = firestore.client()
-    ref = db.collection(f"users/{uid}/annotations").document(file_name)
-    content = ref.get()
+    annotations_folder_ref = db.collection(f"users/{uid}/annotations")
+
+    # Check if already exists
+    observation_ref = annotations_folder_ref.document(f"cached_answer_{observation_id}")
+    cached_gpt_answer = observation_ref.get()
+    if cached_gpt_answer.exists:
+        return cached_gpt_answer.to_dict()
+
+    processed_annotation_ref = annotations_folder_ref.document(file_name)
+    content = processed_annotation_ref.get()
 
     if not content.exists:
         raise https_fn.HttpsError(
@@ -83,8 +91,9 @@ def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
 
     concept = get_concept(processed_annotation)
 
-    detailed_reponse = request_gpt(user_provided_text, concept)
-    return dataclasses.asdict(detailed_reponse)
+    detailed_reponse = dataclasses.asdict(request_gpt(user_provided_text, concept))
+    observation_ref.set(detailed_reponse)
+    return detailed_reponse
 
 
 @storage_fn.on_object_finalized(memory=options.MemoryOption.GB_4)
