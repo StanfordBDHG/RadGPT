@@ -23,8 +23,10 @@ export type ProcessedAnnotations = {
 // Source: https://github.com/JacobWeisenburger/zod_utilz/blob/4093595e5a6d95770872598ba3bc405d4e9c963b/src/stringToJSON.ts#LL4-L12C8
 const jsonStringToProcessedAnnotations = z
   .string()
+  .optional()
   .transform((str, ctx): ProcessedAnnotations[] => {
     try {
+      if (!str) return [];
       return JSON.parse(str);
     } catch (e) {
       ctx.addIssue({ code: "custom", message: "Invalid JSON" });
@@ -49,16 +51,18 @@ const schema = z.object({
           .nonempty("non empty obs end idx"),
       })
       .array()
-      .min(1, "has to have at least one element"),
+      .optional(),
   ),
   user_provided_text: z.string().min(1, "User-provided text is required"),
-  text_mapping: z.record(
-    z.string(),
-    z.object({
-      user_provided_text_start: z.number(),
-      user_provided_text_end: z.number(),
-    }),
-  ),
+  text_mapping: z
+    .record(
+      z.string(),
+      z.object({
+        user_provided_text_start: z.number(),
+        user_provided_text_end: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {

@@ -34,7 +34,7 @@ const calculateSHA256Hash = async (data: string) => {
 };
 
 interface FileCreationFormProps {
-  onUploadSuccess?: (ref: StorageReference) => void;
+  onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
 export default function FileCreationForm({
@@ -57,17 +57,17 @@ export default function FileCreationForm({
         storage,
         `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
       );
-      const custmoMetadata = { medicalReportName: medicalReportName };
+      const customMetadata = { medicalReportName: medicalReportName };
       const result = await uploadString(
         storageReference,
         medicalReportContent,
         "raw",
         {
           contentType: "text/plain",
-          customMetadata: custmoMetadata,
+          customMetadata: customMetadata,
         },
       );
-      if (onUploadSuccess) onUploadSuccess(result.ref);
+      if (onUploadSuccess) onUploadSuccess(result.ref, medicalReportContent);
     },
   );
 
