@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { StorageReference } from "firebase/storage";
 
 export default function FileList({
@@ -25,7 +26,10 @@ export default function FileList({
         <a
           key={item.ref.name}
           onClick={() => setSelectedFile(item.ref)}
-          className={item.ref.name === selectedFile?.name ? "font-bold" : ""}
+          className={cn(
+            item.ref.name === selectedFile?.name ? "font-bold" : "",
+            "cursor-pointer",
+          )}
         >
           {item.customName}
         </a>

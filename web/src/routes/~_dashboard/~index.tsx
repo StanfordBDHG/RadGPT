@@ -6,23 +6,23 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { auth, firestore, storage } from "@/src/utils/firebase";
+import { auth, firestore } from "@/src/utils/firebase";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { DashboardLayout } from "./DashboardLayout";
 import SideMenu from "./SideMenu";
 import { doc, onSnapshot } from "firebase/firestore";
 import { useCallback, useEffect, useState } from "react";
-import { getMetadata, listAll, ref, StorageReference } from "firebase/storage";
+import { StorageReference } from "firebase/storage";
 import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
-import { z } from "zod";
 import AddFileButton from "./AddFileButton";
-
-const schema = z.object({
-  processed_annotations: z
-    .string()
-    .min(1, "Content of medical report is required"),
-  radgraph_text: z.string().min(1, "Content of medical report is required"),
-});
+import ReportText from "./ReportText";
+import {
+  getProcessedAnnotationsFromJSONString,
+  ProcessedAnnotations,
+} from "@/src/utils/processedAnnotations";
+import { TextMapping } from "@/src/utils/textMapping";
+import { getFileList } from "@/src/utils/queries";
+import { Helmet } from "react-helmet";
 
 function Dashboard() {
   const currentUser = useAuthenticatedUser();
@@ -32,30 +32,7 @@ function Dashboard() {
   >([]);
 
   const fetchFiles = useCallback(async () => {
-    const storageReportsReference = ref(
-      storage,
-      `users/${currentUser?.uid}/reports`,
-    );
-    const listResult = await listAll(storageReportsReference);
-    const fileMetadata = await Promise.all(
-      listResult.items.map((i) => getMetadata(i)),
-    );
-    const fileList = fileMetadata
-      .sort((metaData1, metaData2) => {
-        const dateFile1 = new Date(metaData1.updated);
-        const dateFile2 = new Date(metaData2.updated);
-
-        if (dateFile1 === dateFile2) return 0;
-        if (dateFile1 < dateFile2) return 1;
-        return -1;
-      })
-      .map((fullMetaData) => {
-        return {
-          ref: fullMetaData.ref as StorageReference,
-          customName:
-            fullMetaData.customMetadata?.["medicalReportName"] ?? "undefined",
-        };
-      });
+    const fileList = await getFileList(currentUser);
     setFiles(fileList);
   }, [currentUser]);
 
@@ -64,6 +41,10 @@ function Dashboard() {
   }, [fetchFiles]);
 
   const [reportText, setReportText] = useState<string>("");
+  const [textMapping, setTextMapping] = useState<TextMapping | null>(null);
+  const [processedAnnotations, setProcessedAnnotations] = useState<
+    ProcessedAnnotations[]
+  >([]);
   const [selectedFile, setSelectedFile] = useState<StorageReference | null>(
     null,
   );
@@ -72,15 +53,23 @@ function Dashboard() {
     if (!selectedFile) return;
     setReportText("shimmering...");
 
-    // TODO tanstack query
     const annotationReference = doc(
       firestore,
       `users/${currentUser?.uid}/annotations/${selectedFile.name}`,
     );
-    onSnapshot(annotationReference, (d) => {
-      const data = schema.parse(d.data());
-      setReportText(data["radgraph_text"]);
+    const unsubscribe = onSnapshot(annotationReference, (d) => {
+      const data = getProcessedAnnotationsFromJSONString(d.data());
+      if (!data) {
+        setReportText("");
+        setTextMapping(null);
+        setProcessedAnnotations([]);
+        return;
+      }
+      setReportText(data.user_provided_text);
+      setTextMapping(data.text_mapping);
+      setProcessedAnnotations(data.processed_annotations);
     });
+    return unsubscribe;
   }, [selectedFile, currentUser]);
 
   const onUploadSuccess = (ref: StorageReference) => {
@@ -89,36 +78,46 @@ function Dashboard() {
   };
 
   return (
-    <DashboardLayout
-      title={<AddFileButton onUploadSuccess={onUploadSuccess} />}
-      mobile={
-        <SideMenu
-          className="px-2 pt-4"
-          auth={auth}
-          files={files}
-          selectedFile={selectedFile}
-          setSelectedFile={setSelectedFile}
-        />
-      }
-      aside={
-        <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0">
-          <AddFileButton onUploadSuccess={onUploadSuccess} />
+    <>
+      <Helmet>
+        <title>RadGPT</title>
+      </Helmet>
+      <DashboardLayout
+        title={<AddFileButton onUploadSuccess={onUploadSuccess} />}
+        mobile={
           <SideMenu
-            className="mt-4"
+            className="px-2 pt-4"
             auth={auth}
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
           />
-        </div>
-      }
-    >
-      {/* <FileCreationForm afterUpload={fetchFiles} /> */}
-      {reportText ? (
-        <div className="flex flex-row flex-wrap">{reportText}</div>
-      ) : <p>Please add a file</p>
-      }
-    </DashboardLayout>
+        }
+        aside={
+          <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0">
+            <AddFileButton onUploadSuccess={onUploadSuccess} />
+            <SideMenu
+              className="mt-4"
+              auth={auth}
+              files={files}
+              selectedFile={selectedFile}
+              setSelectedFile={setSelectedFile}
+            />
+          </div>
+        }
+      >
+        {reportText && textMapping && processedAnnotations ? (
+          <ReportText
+            userProvidedText={reportText}
+            selectedFileName={selectedFile?.name ?? ""}
+            textMapping={textMapping}
+            processedAnnotations={processedAnnotations}
+          />
+        ) : (
+          <p>Please add a file</p>
+        )}
+      </DashboardLayout>
+    </>
   );
 }
 
