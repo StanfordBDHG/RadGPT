@@ -66,8 +66,8 @@ const schema = z.object({
 });
 
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
-  const groupMapping = new Map<number, number[]>();
-  processedAnnotations.forEach((observation) => {
+  const groupMapping = new Map<number, {observationId: number, observationGroup: number[]}>();
+  processedAnnotations.forEach((observation, index) => {
     const observationGroup = [];
 
     // observations
@@ -101,8 +101,8 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
 
     // Attach to element group
     for (const element of observationGroup) {
-      const previousValue = groupMapping.get(element) ?? [];
-      groupMapping.set(element, observationGroup.concat(previousValue));
+      const previousValue = groupMapping.get(element);
+      groupMapping.set(element, {observationId: previousValue?.["observationId"] ?? index,observationGroup: (previousValue?.["observationGroup"] ?? []).concat(observationGroup)});
     }
   });
 
