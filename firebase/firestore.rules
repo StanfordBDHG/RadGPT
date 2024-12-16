@@ -13,7 +13,7 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
     
-    match /users/{userId}/annotations/{reportHash} {
+    match /users/{userId}/annotations/{documentName} {
       allow read: if isAuthenticatedUserID(userId);
     }
   }
