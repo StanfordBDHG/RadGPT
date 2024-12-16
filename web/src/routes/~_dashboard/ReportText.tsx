@@ -10,11 +10,7 @@ import {
   getGroupMap,
   ProcessedAnnotations,
 } from "@/src/utils/processedAnnotations";
-import {
-  getTextBlocks,
-  TextBlockPosition,
-  TextMapping,
-} from "@/src/utils/textMapping";
+import { getTextBlocks, TextMapping } from "@/src/utils/textMapping";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { functions } from "@/src/utils/firebase";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
@@ -29,6 +25,16 @@ interface ReportTextProp {
   processedAnnotations: ProcessedAnnotations[];
 }
 
+type DetailedResponse = {
+  main_explanation: string;
+
+  concept_based_question: string | null;
+  concept_based_question_answer: string | null;
+
+  concept_based_template_question: string | null;
+  concept_based_template_question_answer: string | null;
+};
+
 export default function ReportText({
   userProvidedText,
   selectedFileName,
@@ -39,7 +45,20 @@ export default function ReportText({
     number | null
   >(null);
   const openState = useOpenState(false);
-  const [answer, setAnswer] = useState<null | string>(null);
+  const [mainExplanation, setMainExplanation] = useState<null | string>(null);
+  const [conceptBasedQuestion, setConceptBasedQuestion] = useState<
+    null | string
+  >(null);
+  const [conceptBasedQuestionAnswer, setConceptBasedQuestionAnswer] = useState<
+    null | string
+  >(null);
+  const [conceptBasedTemplateQuestion, setConceptBasedTemplateQuestion] =
+    useState<null | string>(null);
+  const [
+    conceptBasedTemplateQuestionAnswer,
+    setConceptBasedTemplateQuestionAnswer,
+  ] = useState<null | string>(null);
+  const [selectedNumber, setSelectedNumber] = useState<null | number>(null);
 
   if (!textMapping) {
     return (
@@ -52,13 +71,18 @@ export default function ReportText({
   const textBlocks = getTextBlocks(textMapping, userProvidedText);
   const groupMap = getGroupMap(processedAnnotations);
 
-  if (textBlocks.length === 0) {
-    textBlocks.push([null, "Loading...", 0, TextBlockPosition.STAND_ALONE]);
-  }
-
   return (
     <>
-      <DetailDialog answer={answer} openState={openState} />
+      <DetailDialog
+        answer={mainExplanation}
+        openState={openState}
+        conceptBasedQuestion={conceptBasedQuestion}
+        conceptBasedQuestionAnswer={conceptBasedQuestionAnswer}
+        conceptBasedTemplateQuestion={conceptBasedTemplateQuestion}
+        conceptBasedTemplateQuestionAnswer={conceptBasedTemplateQuestionAnswer}
+        selectedNumber={selectedNumber}
+        setSelectedNumber={setSelectedNumber}
+      />
       <div className="whitespace-pre-wrap tracking-wide leading-5">
         {textBlocks.map(([key, textSnippet, id, position]) => (
           <span
@@ -66,7 +90,9 @@ export default function ReportText({
             className={cn(
               currentHoveredWordIndex &&
                 key &&
-                (groupMap.get(key)?.["observationGroup"] ?? []).includes(currentHoveredWordIndex)
+                (groupMap.get(key)?.["observationGroup"] ?? []).includes(
+                  currentHoveredWordIndex,
+                )
                 ? `bg-green-300 transition-color cursor-pointer keyword-highlight${position}`
                 : "",
               key &&
@@ -80,18 +106,33 @@ export default function ReportText({
             onMouseLeave={() => setCurrentHoveredWordIndex(null)}
             onClick={async () => {
               if (key === null) return;
-              setAnswer(null);
+              setMainExplanation(null);
+              setConceptBasedQuestion(null);
+              setConceptBasedTemplateQuestion(null);
+              setConceptBasedQuestionAnswer(null);
+              setConceptBasedTemplateQuestionAnswer(null);
+              setSelectedNumber(null);
               openState.open();
               const gptAnswer: HttpsCallable<
                 { file_name: string; observation_id: number },
-                string
+                DetailedResponse
               > = httpsCallable(functions, "on_detailed_explanation_request");
               const r = await gptAnswer({
                 file_name: selectedFileName,
-                observation_id: groupMap.get(+(key ?? -1))?.["observationId"] ?? -1
-                // token_ids: groupMap.get(+(key ?? "-1")) ?? [],
+                observation_id:
+                  groupMap.get(+(key ?? -1))?.["observationId"] ?? -1,
               });
-              setAnswer(r.data);
+              setMainExplanation(r.data.main_explanation);
+              setConceptBasedQuestion(r.data.concept_based_question);
+              setConceptBasedTemplateQuestion(
+                r.data.concept_based_template_question,
+              );
+              setConceptBasedQuestionAnswer(
+                r.data.concept_based_question_answer,
+              );
+              setConceptBasedTemplateQuestionAnswer(
+                r.data.concept_based_template_question_answer,
+              );
             }}
           >
             {textSnippet}

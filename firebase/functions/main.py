@@ -6,51 +6,22 @@
 # SPDX-License-Identifier: MIT
 #
 
+import dataclasses
 import json
 import pathlib
 import re
 
-import backoff
 from firebase_functions import https_fn, options, storage_fn
 from firebase_admin import initialize_app, storage, firestore
-from openai import APIError, OpenAI, RateLimitError
 from radgraph import RadGraph, get_radgraph_processed_annotations
 
+from llm_calling.chatgpt import request_gpt
 from text_mapping.radgraph_text_mapper import (
     add_end_ix_to_processed_annotations,
     get_entity_mapping_in_user_entered_text,
 )
 
 initialize_app()
-
-
-@backoff.on_exception(backoff.expo, (RateLimitError, APIError))
-def completions_with_backoff(**kwargs):
-    client = OpenAI()
-    return client.chat.completions.create(**kwargs)
-
-
-def call_chatGPT(prompt, temperature, n, model="gpt-3.5-turbo"):
-    return completions_with_backoff(
-        model=model,
-        messages=[{"role": "user", "content": prompt}],
-        temperature=temperature,
-        n=n,
-    )
-
-
-def request_gpt(report: str, user_observation: str) -> str:
-    prompt = f"""Explain in 3 sentences or less the concept "{user_observation}" at a 5th grade reading level given the following context: "{report}". Do not discuss symptoms or treatment."""
-
-    output = call_chatGPT(
-        prompt=prompt,
-        temperature=0,
-        n=1,
-        model="gpt-4-0125-preview",
-    )
-
-    # TODO do some sanity check
-    return output.choices[0].message.content
 
 
 def get_concept(processed_annotation) -> str:
@@ -112,7 +83,8 @@ def on_detailed_explanation_request(req: https_fn.Request) -> https_fn.Response:
 
     concept = get_concept(processed_annotation)
 
-    return request_gpt(user_provided_text, concept)
+    detailed_reponse = request_gpt(user_provided_text, concept)
+    return dataclasses.asdict(detailed_reponse)
 
 
 @storage_fn.on_object_finalized(memory=options.MemoryOption.GB_4)
