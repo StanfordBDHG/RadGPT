@@ -22,7 +22,6 @@ on:
 defaults:
   run:
     working-directory: ./firebase
-
 jobs:
   reuseaction:
     name: REUSE Compliance Check
@@ -30,6 +29,23 @@ jobs:
   markdownlinkcheck:
     name: Markdown Link Check
     uses: StanfordBDHG/.github/.github/workflows/markdown-link-check.yml@v2
+  firebaserulecheck:
+    name: Firebase Rule Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: firebase/package-lock.json
+      - name: Install Node Dependencies
+        run: npm ci
+      - name: Install Firebase CLI Tools
+        run: npm install -g firebase-tools
+      - name: Test Firebase Rules
+        run: npm run emulator:test
 
   # Taken from the Github Docs
   # Url: https://docs.github.com/en/actions/use-cases-and-examples/building-and-testing/building-and-testing-python
