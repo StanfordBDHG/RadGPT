@@ -1,0 +1,19 @@
+{
+  "name": "test",
+  "version": "1.0.0",
+  "main": "test.ts",
+  "scripts": {
+    "emulator:test": "firebase emulators:exec --only firestore \"npm run test run\" --project demo-radgpt",
+    "emulator:report-dev": "firebase emulators:exec --only firestore \"npm run test run && curl http://localhost:8080/emulator/v1/projects/demo-radgpt:ruleCoverage.html > coverage.html && curl http://localhost:8080/emulator/v1/projects/demo-radgpt:ruleCoverage > coverage.json\" --project demo-radgpt",
+    "emulator:test-dev": "firebase emulators:exec --only firestore \"npm run test\" --project demo-radgpt",
+    "test": "vitest"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@firebase/rules-unit-testing": "^4.0.1",
+    "firebase": "^11.1.0",
+    "vitest": "^2.1.8"
+  }
+}

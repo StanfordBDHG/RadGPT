@@ -66,9 +66,9 @@ service cloud.firestore {
     }
 
     function isValidCachedAnswerUpdate(previousData, data, documentName) {
-      return notChangingCachingFields(previousData, data) 
-              && containsOnlyAllowedCachedFields(data) 
-              && documentName.matches('^cached_answer_(([1-9]\\d)|(\\d))$');
+      return documentName.matches('^cached_answer_(([1-9]\\d)|(\\d))$')
+              && notChangingCachingFields(previousData, data) 
+              && containsOnlyAllowedCachedFields(data);
     } 
 
     match /users/{userId}/{documentHash}/{documentName} {
