@@ -59,6 +59,9 @@ export default function ReportText({
     setConceptBasedTemplateQuestionAnswer,
   ] = useState<null | string>(null);
   const [selectedNumber, setSelectedNumber] = useState<null | number>(null);
+  const [selectedObservationNumber, setSelectedObservationNumber] = useState<
+    null | number
+  >(null);
 
   if (!textMapping) {
     return (
@@ -82,6 +85,7 @@ export default function ReportText({
         conceptBasedTemplateQuestionAnswer={conceptBasedTemplateQuestionAnswer}
         selectedNumber={selectedNumber}
         setSelectedNumber={setSelectedNumber}
+        selectedFileName={`${selectedFileName}/cached_answer_${selectedObservationNumber}`}
       />
       <div className="whitespace-pre-wrap tracking-wide leading-5">
         {textBlocks.map(([key, textSnippet, id, position]) => (
@@ -117,10 +121,11 @@ export default function ReportText({
                 { file_name: string; observation_id: number },
                 DetailedResponse
               > = httpsCallable(functions, "on_detailed_explanation_request");
+              const observationId =
+                groupMap.get(+(key ?? -1))?.["observationId"] ?? -1;
               const r = await gptAnswer({
                 file_name: selectedFileName,
-                observation_id:
-                  groupMap.get(+(key ?? -1))?.["observationId"] ?? -1,
+                observation_id: observationId,
               });
               setMainExplanation(r.data.main_explanation);
               setConceptBasedQuestion(r.data.concept_based_question);
@@ -133,6 +138,7 @@ export default function ReportText({
               setConceptBasedTemplateQuestionAnswer(
                 r.data.concept_based_template_question_answer,
               );
+              setSelectedObservationNumber(observationId);
             }}
           >
             {textSnippet}
