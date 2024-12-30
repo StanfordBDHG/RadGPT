@@ -74,9 +74,16 @@ jobs:
       contents: read
       checks: write
     secrets: inherit
+  e2e:
+    name: End-to-end Test
+    uses: ./.github/workflows/playwright-e2e.yml
+    permissions:
+      contents: read
+      checks: write
+    secrets: inherit
   deployfirebase:
     name: Deploy Firebase Project
-    needs: [buildandtest, determineenvironment, vars]
+    needs: [buildandtest, determineenvironment, vars, e2e]
     uses: ./.github/workflows/firebase-deploy.yml
     permissions:
       contents: read
