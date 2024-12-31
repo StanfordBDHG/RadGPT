@@ -5,8 +5,3 @@
 #
 # SPDX-License-Identifier: MIT
 #
-
-backoff==2.2.1
-firebase_functions==0.4.2
-openai==1.57.4
-radgraph==0.1.11
