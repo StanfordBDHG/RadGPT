@@ -7,7 +7,6 @@
 #
 
 import sys
-from traceback import print_tb
 import traceback
 from typing import Any, Dict, List, Tuple, TypeVar
 
@@ -23,7 +22,7 @@ def __get_end_ix_for_start_ix(radgraph_output: Dict[str, Any], start_idx: int) -
 
     # Creating a traceback as this should never happen
     print(f"Matching end_idx not found for {start_idx}", file=sys.stderr)
-    print_tb(traceback.extract_stack())
+    traceback.print_stack()
     return None
 
 
@@ -100,6 +99,7 @@ def __map_radgraph_relevant_token_entities_to_text_ranges(
 T = TypeVar("T")
 
 
+# todo add source
 def __flat(list_of_list: List[List[T]]) -> List[T]:
     return [item for list in list_of_list for item in list]
 
