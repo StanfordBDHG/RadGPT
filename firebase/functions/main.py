@@ -19,7 +19,7 @@ from function_implementation.on_medical_report_upload import (
 initialize_app()
 
 
-@storage_fn.on_object_finalized(memory=options.MemoryOption.GB_4)
+@storage_fn.on_object_finalized(memory=options.MemoryOption.GB_8)
 def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
