@@ -83,9 +83,7 @@ export default function QuestionAnswer({
       <div
         ref={ref}
         style={{ height: height }}
-        className={cn(
-          "border-b border-slate-200 overflow-hidden transition-height duration-200",
-        )}
+        className={"border-b border-slate-200 overflow-hidden duration-200"}
       >
         <div className="text-md text-gray-700">
           {answer}
@@ -121,7 +119,7 @@ export default function QuestionAnswer({
             </form>
           </div>
         </div>
-      </div>
+      </div >
     </>
   );
 }

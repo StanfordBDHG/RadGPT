@@ -30,12 +30,13 @@ const IndexComponent = () => {
   ];
 
   const asidePictureComponent = (
-    <div className="min-h-full flex flex-column flex-center">
+    <div className="min-h-full flex flex-col flex-center">
       <img
-        src="/biodesign-footer-light.png"
+        src="/MIDRC-Logo-Vertical-Version-with-a-lighter-gray.png"
         alt="Stanford Biodesign Logo"
         className="w-[317px]"
       />
+      <p className="text-sm px-10 text-center">This work was supported in part by MIDRC (The Medical Imaging and Data Resource Center) with funding from the National Institute of Biomedical Imaging and Bioengineering (NIBIB) of the National Institutes of Health under contract 75N92020D00021 and the Advanced Research Projects Agency for Health (ARPA-H) under contract 5N92023F00002.</p>
     </div>
   );
 

@@ -37,6 +37,11 @@ SPDX-License-Identifier: MIT
   border-bottom-right-radius: 0.25rem;
 }
 
+
+
+/*
+Based on https://codepen.io/joshuapekera/pen/xGjMMq
+*/
 .shimmer {
   @apply mx-[-3rem] px-[3rem];
   @apply bg-no-repeat bg-clip-text bg-gray-900 text-gray-900/10;
