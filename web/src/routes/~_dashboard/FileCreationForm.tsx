@@ -7,13 +7,13 @@
 //
 
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
+import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
-import { ref, StorageReference, uploadString } from "firebase/storage";
+import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
-import { storage } from "@utils/firebase";
-import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
-import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { storage } from "@/utils/firebase";
 
 const formSchema = z.object({
   medicalReportContent: z
@@ -37,9 +37,7 @@ interface FileCreationFormProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
-export default function FileCreationForm({
-  onUploadSuccess,
-}: FileCreationFormProps) {
+export function FileCreationForm({ onUploadSuccess }: FileCreationFormProps) {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,

@@ -7,27 +7,29 @@
 //
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { StorageReference } from "firebase/storage";
+import { type StorageReference } from "firebase/storage";
+import { type Dispatch, type SetStateAction } from "react";
+import { type GetFileListResult } from "@/utils/queries";
 
-export default function FileList({
+interface FileListProps {
+  files: GetFileListResult;
+  selectedFile: StorageReference | undefined;
+  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
+}
+
+export function FileList({
   files,
   selectedFile,
   setSelectedFile,
-}: {
-  files: { customName: string; ref: StorageReference }[];
-  selectedFile: StorageReference | null;
-  setSelectedFile: React.Dispatch<
-    React.SetStateAction<StorageReference | null>
-  >;
-}) {
+}: FileListProps) {
   return (
     <div className="flex flex-col">
       {files.map((item) => (
         <a
-          key={item.ref.name}
+          key={item.ref?.name}
           onClick={() => setSelectedFile(item.ref)}
           className={cn(
-            item.ref.name === selectedFile?.name ? "font-bold" : "",
+            item.ref?.name === selectedFile?.name ? "font-bold" : "",
             "cursor-pointer",
           )}
         >

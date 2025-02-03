@@ -6,15 +6,33 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { ChevronDown, ChevronUp } from "lucide-react";
-import React, { useEffect, useRef, useState } from "react";
-import { ThumbsDown, ThumbsUp } from "lucide-react";
-import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
-import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
+import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { ChevronDown, ChevronUp, ThumbsDown, ThumbsUp } from "lucide-react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type MouseEventHandler,
+  type FormEvent,
+} from "react";
 
-export default function QuestionAnswer({
+interface QuestionAnswerProps {
+  isSelected: boolean;
+  question: string;
+  answer: string;
+  onClick: MouseEventHandler<HTMLParagraphElement> | undefined;
+  like: boolean;
+  dislike: boolean;
+  onLike: MouseEventHandler<SVGSVGElement>;
+  onDislike: MouseEventHandler<SVGSVGElement>;
+  onFeedbackSubmit: (feedback: string) => Promise<void>;
+  textFeedback: string;
+}
+
+export function QuestionAnswer({
   isSelected,
   question,
   answer,
@@ -25,18 +43,7 @@ export default function QuestionAnswer({
   onDislike,
   onFeedbackSubmit,
   textFeedback,
-}: {
-  isSelected: boolean;
-  question: string;
-  answer: string;
-  onClick: React.MouseEventHandler<HTMLParagraphElement> | undefined;
-  like: boolean;
-  dislike: boolean;
-  onLike: React.MouseEventHandler<SVGSVGElement>;
-  onDislike: React.MouseEventHandler<SVGSVGElement>;
-  onFeedbackSubmit: (feedback: string) => Promise<void>;
-  textFeedback: string;
-}) {
+}: QuestionAnswerProps) {
   const ref = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLInputElement>(null);
   const [isPending, setIsPending] = useState(false);
@@ -51,7 +58,7 @@ export default function QuestionAnswer({
     feedbackRef.current.value = textFeedback;
   }
 
-  const handleSubmit = async (formEvent: React.FormEvent) => {
+  const handleSubmit = async (formEvent: FormEvent) => {
     formEvent.preventDefault();
     setIsPending(true);
 
@@ -61,7 +68,7 @@ export default function QuestionAnswer({
     };
 
     try {
-      await onFeedbackSubmit(target?.textFeedback?.value ?? "");
+      await onFeedbackSubmit(target.textFeedback?.value ?? "");
       toast.success("The feedback has been submitted, thank you!");
     } catch {
       toast.error("An error occurred while submitting the feedback!");
@@ -72,22 +79,20 @@ export default function QuestionAnswer({
 
   return (
     <>
-      <div onClick={onClick} className={"cursor-pointer flex flex-row"}>
+      <div onClick={onClick} className={"flex cursor-pointer flex-row"}>
         {question}
-        {isSelected ? (
-          <ChevronUp className="min-w-[2rem] ml-auto" />
-        ) : (
-          <ChevronDown className="min-w-[2rem] ml-auto" />
-        )}
+        {isSelected ?
+          <ChevronUp className="ml-auto min-w-[2rem]" />
+        : <ChevronDown className="ml-auto min-w-[2rem]" />}
       </div>
       <div
         ref={ref}
         style={{ height: height }}
-        className={"border-b border-slate-200 overflow-hidden duration-200"}
+        className={"overflow-hidden border-b border-slate-200 duration-200"}
       >
         <div className="text-md text-gray-700">
           {answer}
-          <div className="flex flex-row pb-2 mt-2 items-center">
+          <div className="mt-2 flex flex-row items-center pb-2">
             <ThumbsUp
               className={cn(
                 "h-[1.5rem] cursor-pointer",
@@ -104,7 +109,7 @@ export default function QuestionAnswer({
             />
             <form
               action="submit"
-              className="flex flex-row w-full ml-2 items-center"
+              className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}
             >
               <Input
@@ -119,7 +124,7 @@ export default function QuestionAnswer({
             </form>
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 }

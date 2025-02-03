@@ -32,12 +32,13 @@ const numberCompare = (
   return 1;
 };
 
-export interface TextMapping {
-  [id: string]: {
+export type TextMapping = Record<
+  string,
+  {
     user_provided_text_start: number;
     user_provided_text_end: number;
-  };
-}
+  }
+>;
 
 export enum TextBlockPosition {
   LEFT = "-left",
@@ -50,7 +51,8 @@ export const getTextBlocks = (
   textMapping: TextMapping,
   userProvidedText: string,
 ) => {
-  const textArray: [number | null, string, number, TextBlockPosition][] = [];
+  const textArray: Array<[number | null, string, number, TextBlockPosition]> =
+    [];
 
   const map = new Map(Object.entries(textMapping).sort(numberCompare));
 
@@ -79,9 +81,9 @@ export const getTextBlocks = (
           prevToken,
           prevText,
           prevKey,
-          isPreviousTokenRadGraphRelevant
-            ? TextBlockPosition.CENTER
-            : TextBlockPosition.LEFT,
+          isPreviousTokenRadGraphRelevant ?
+            TextBlockPosition.CENTER
+          : TextBlockPosition.LEFT,
         ]);
       }
       isPreviousTokenRadGraphRelevant = true;
@@ -90,9 +92,9 @@ export const getTextBlocks = (
       +key,
       userProvidedText.substring(start, end),
       start,
-      isPreviousTokenRadGraphRelevant
-        ? TextBlockPosition.RIGHT
-        : TextBlockPosition.STAND_ALONE,
+      isPreviousTokenRadGraphRelevant ?
+        TextBlockPosition.RIGHT
+      : TextBlockPosition.STAND_ALONE,
     ]);
     lastIndex = end;
   }

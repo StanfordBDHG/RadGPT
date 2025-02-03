@@ -14,16 +14,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
-import { FilePlus } from "lucide-react";
-import FileCreationForm from "./FileCreationForm";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { StorageReference } from "firebase/storage";
+import { type StorageReference } from "firebase/storage";
+import { FilePlus } from "lucide-react";
+import { FileCreationForm } from "./FileCreationForm";
 
 interface AddFileModalProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
-export default function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
+export function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
   const openState = useOpenState(false);
 
   return (
@@ -42,7 +42,7 @@ export default function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
             if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
             openState.close();
           }}
-        ></FileCreationForm>
+        />
       </DialogContent>
     </Dialog>
   );

@@ -6,17 +6,17 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { httpsCallable, type HttpsCallable } from "firebase/functions";
+import { useState } from "react";
+import { functions } from "@/utils/firebase";
 import {
   getGroupMap,
-  ProcessedAnnotations,
-} from "@/src/utils/processedAnnotations";
-import { getTextBlocks, TextMapping } from "@/src/utils/textMapping";
-import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { functions } from "@/src/utils/firebase";
-import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { httpsCallable, HttpsCallable } from "firebase/functions";
-import { useState } from "react";
-import DetailDialog from "./DetailDialog";
+  type ProcessedAnnotations,
+} from "@/utils/processedAnnotations";
+import { getTextBlocks, type TextMapping } from "@/utils/textMapping";
+import { DetailDialog } from "./DetailDialog";
 
 interface ReportTextProp {
   userProvidedText: string;
@@ -25,7 +25,7 @@ interface ReportTextProp {
   processedAnnotations: ProcessedAnnotations[];
 }
 
-type DetailedResponse = {
+interface DetailedResponse {
   main_explanation: string;
 
   concept_based_question: string | null;
@@ -33,9 +33,9 @@ type DetailedResponse = {
 
   concept_based_template_question: string | null;
   concept_based_template_question_answer: string | null;
-};
+}
 
-export default function ReportText({
+export function ReportText({
   userProvidedText,
   selectedFileName,
   textMapping,
@@ -65,7 +65,7 @@ export default function ReportText({
 
   if (!textMapping) {
     return (
-      <div className="shimmer whitespace-pre-wrap tracking-wide leading-5">
+      <div className="shimmer whitespace-pre-wrap leading-5 tracking-wide">
         {userProvidedText}
       </div>
     );
@@ -87,24 +87,28 @@ export default function ReportText({
         setSelectedNumber={setSelectedNumber}
         selectedFileName={`${selectedFileName}/cached_answer_${selectedObservationNumber}`}
       />
-      <div className="whitespace-pre-wrap tracking-wide leading-5">
+      <div className="whitespace-pre-wrap leading-5 tracking-wide">
         {textBlocks.map(([key, textSnippet, id, position]) => (
           <span
             key={`${selectedFileName} ${id}`}
             className={cn(
-              currentHoveredWordIndex &&
+              (
+                currentHoveredWordIndex &&
+                  key &&
+                  (groupMap.get(key)?.observationGroup ?? []).includes(
+                    currentHoveredWordIndex,
+                  )
+              ) ?
+                `transition-color cursor-pointer bg-green-300 keyword-highlight${position}`
+              : "",
+              (
                 key &&
-                (groupMap.get(key)?.["observationGroup"] ?? []).includes(
-                  currentHoveredWordIndex,
-                )
-                ? `bg-green-300 transition-color cursor-pointer keyword-highlight${position}`
-                : "",
-              key &&
-                !(groupMap.get(key)?.["observationGroup"] ?? []).includes(
-                  currentHoveredWordIndex ?? -1,
-                )
-                ? "underline text-blue-700"
-                : "",
+                  !(groupMap.get(key)?.observationGroup ?? []).includes(
+                    currentHoveredWordIndex ?? -1,
+                  )
+              ) ?
+                "text-blue-700 underline"
+              : "",
             )}
             onMouseEnter={() => setCurrentHoveredWordIndex(key)}
             onMouseLeave={() => setCurrentHoveredWordIndex(null)}
@@ -121,8 +125,7 @@ export default function ReportText({
                 { file_name: string; observation_id: number },
                 DetailedResponse
               > = httpsCallable(functions, "on_detailed_explanation_request");
-              const observationId =
-                groupMap.get(+(key ?? -1))?.["observationId"] ?? -1;
+              const observationId = groupMap.get(key)?.observationId ?? -1;
               const r = await gptAnswer({
                 file_name: selectedFileName,
                 observation_id: observationId,

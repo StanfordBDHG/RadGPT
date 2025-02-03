@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { User } from "firebase/auth";
+import { type User } from "firebase/auth";
 import { createContext } from "react";
 
 export const AuthenticatedUserContext = createContext<User | null>(null);

@@ -6,11 +6,14 @@
 // SPDX-License-Identifier: MIT
 //
 
-/** @type {import('tailwindcss').Config} */
-export default {
+import { type Config } from "tailwindcss";
+
+const tailwindConfig: Config = {
   content: [
     "./src/**/*.{ts,tsx}",
     "./node_modules/@stanfordspezi/spezi-web-design-system/dist/**/*.js",
   ],
   plugins: [],
 };
+
+export default tailwindConfig;

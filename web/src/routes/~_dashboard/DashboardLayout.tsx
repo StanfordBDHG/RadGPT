@@ -34,8 +34,8 @@ export const DashboardLayout = ({
   const menu = useOpenState();
 
   return (
-    <div className="text-foreground [--asideWidth:86px] [--headerHeight:72px] lg:[--headerHeight:86px] lg:[--asideWidth:240px] [&_*]:[box-sizing:border-box]">
-      <header className="border-b-border-layout flex h-[--headerHeight] items-center gap-4 border-x-0 border-b border-t-0 border-solid px-4 py-1 lg:ml-[--asideWidth] xl:px-8 lg:hidden">
+    <div className="text-foreground [--asideWidth:86px] [--headerHeight:72px] lg:[--asideWidth:240px] lg:[--headerHeight:86px] [&_*]:[box-sizing:border-box]">
+      <header className="border-b-border-layout flex h-[--headerHeight] items-center gap-4 border-x-0 border-b border-t-0 border-solid px-4 py-1 lg:ml-[--asideWidth] lg:hidden xl:px-8">
         {title}
         <div className="ml-auto gap-4">
           {actions}
@@ -48,15 +48,15 @@ export const DashboardLayout = ({
           </Button>
         </div>
       </header>
-      <aside className="border-r-border-layout fixed left-0 top-0 hidden h-screen w-[--asideWidth] flex-col items-center border-y-0 border-l-0 border-r border-solid bg-surface py-4 lg:flex xl:px-3">
+      <aside className="border-r-border-layout bg-surface fixed left-0 top-0 hidden h-screen w-[--asideWidth] flex-col items-center border-y-0 border-l-0 border-r border-solid py-4 lg:flex xl:px-3">
         {aside}
       </aside>
       <nav
         className={cn(
-          "fixed left-0 right-0 top-[calc(var(--headerHeight)+1px)] flex h-[calc(100vh-var(--headerHeight)-1px)] w-screen flex-col overflow-y-auto bg-surface transition duration-300 lg:hidden",
-          menu.isOpen
-            ? "z-10 translate-x-0"
-            : "pointer-events-none -translate-x-24 opacity-0",
+          "bg-surface fixed left-0 right-0 top-[calc(var(--headerHeight)+1px)] flex h-[calc(100vh-var(--headerHeight)-1px)] w-screen flex-col overflow-y-auto transition duration-300 lg:hidden",
+          menu.isOpen ? "z-10 translate-x-0" : (
+            "pointer-events-none -translate-x-24 opacity-0"
+          ),
         )}
         hidden={!menu.isOpen}
         data-testid="mobileMenu"

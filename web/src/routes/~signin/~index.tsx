@@ -6,17 +6,17 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { SignInForm } from "@stanfordspezi/spezi-web-design-system/modules/auth";
+import { AsideBrandLayout } from "@stanfordspezi/spezi-web-design-system/molecules/AsideBrandLayout";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { auth } from "@utils/firebase.ts";
 import {
   signInWithPopup,
   GoogleAuthProvider,
   signInWithEmailAndPassword,
   OAuthProvider,
 } from "firebase/auth";
-import { AsideBrandLayout } from "@stanfordspezi/spezi-web-design-system/molecules/AsideBrandLayout";
-import { SignInForm } from "@stanfordspezi/spezi-web-design-system/modules/auth";
 import { Helmet } from "react-helmet";
+import { auth } from "@/utils/firebase";
 
 const IndexComponent = () => {
   const appleProvider = new OAuthProvider("apple.com");
@@ -30,13 +30,19 @@ const IndexComponent = () => {
   ];
 
   const asidePictureComponent = (
-    <div className="min-h-full flex flex-col flex-center">
+    <div className="flex-center flex min-h-full flex-col">
       <img
         src="/MIDRC-Logo-Vertical-Version-with-a-lighter-gray.png"
         alt="Stanford Biodesign Logo"
         className="w-[317px]"
       />
-      <p className="text-sm px-10 text-center">This work was supported in part by MIDRC (The Medical Imaging and Data Resource Center) with funding from the National Institute of Biomedical Imaging and Bioengineering (NIBIB) of the National Institutes of Health under contract 75N92020D00021 and the Advanced Research Projects Agency for Health (ARPA-H) under contract 5N92023F00002.</p>
+      <p className="px-10 text-center text-sm">
+        This work was supported in part by MIDRC (The Medical Imaging and Data
+        Resource Center) with funding from the National Institute of Biomedical
+        Imaging and Bioengineering (NIBIB) of the National Institutes of Health
+        under contract 75N92020D00021 and the Advanced Research Projects Agency
+        for Health (ARPA-H) under contract 5N92023F00002.
+      </p>
     </div>
   );
 

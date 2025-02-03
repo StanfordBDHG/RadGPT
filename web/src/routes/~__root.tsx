@@ -11,7 +11,7 @@ import { createRootRoute, Outlet } from "@tanstack/react-router";
 import { AuthenticationProvider } from "../providers/AuthenticationProvider";
 
 import "@stanfordspezi/spezi-web-design-system/style.css";
-import "@/src/main.css";
+import "@/main.css";
 
 const RootComponent = () => {
   return (
