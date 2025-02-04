@@ -23,7 +23,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.49.1",
-    "@stanfordspezi/spezi-web-configurations": "file:../../spezi-web-configurations",
+    "@stanfordspezi/spezi-web-configurations": "^0.2.0",
     "@tanstack/router-devtools": "^1.62.1",
     "@tanstack/router-plugin": "^1.62.0",
     "@tanstack/router-vite-plugin": "^1.62.0",
