@@ -41,7 +41,7 @@ def __get_concept_explanation(report: str, user_observation: str):
         .message.content
     )
 
-    return main_explanation
+    return main_explanation.strip('"')
 
 
 def __get_LLM_generated_answer(report: str, question: str) -> str:
@@ -56,7 +56,7 @@ def __get_LLM_generated_answer(report: str, question: str) -> str:
         .choices[0]
         .message.content
     )
-    return answer
+    return answer.strip('"')
 
 
 def __get_concept_based_LLM_generated_question_answer(
@@ -72,7 +72,7 @@ def __get_concept_based_LLM_generated_question_answer(
         )
         .choices[0]
         .message.content
-    )
+    ).strip('"')
     answer = __get_LLM_generated_answer(report, question)
     return question, answer
 
@@ -91,7 +91,7 @@ def request_gpt(report: str, user_observation: str) -> DetailedResponse:
     )
 
     concept_based_template_question, concept_based_template_question_answer = (
-        __get_concept_based_templated_question_answer(report, user_observation)
+        __get_concept_based_LLM_generated_question_answer(report, main_explanation)
     )
 
     return DetailedResponse(
