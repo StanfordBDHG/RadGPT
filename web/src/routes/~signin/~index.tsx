@@ -36,7 +36,13 @@ const IndexComponent = () => {
         alt="Stanford Biodesign Logo"
         className="w-[317px]"
       />
-      <p className="text-sm px-10 text-center">This work was supported in part by MIDRC (The Medical Imaging and Data Resource Center) with funding from the National Institute of Biomedical Imaging and Bioengineering (NIBIB) of the National Institutes of Health under contract 75N92020D00021 and the Advanced Research Projects Agency for Health (ARPA-H) under contract 5N92023F00002.</p>
+      <p className="text-sm px-10 text-center">
+        This work was supported in part by MIDRC (The Medical Imaging and Data
+        Resource Center) with funding from the National Institute of Biomedical
+        Imaging and Bioengineering (NIBIB) of the National Institutes of Health
+        under contract 75N92020D00021 and the Advanced Research Projects Agency
+        for Health (ARPA-H) under contract 5N92023F00002.
+      </p>
     </div>
   );
 
