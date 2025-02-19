@@ -69,10 +69,11 @@ const schema = z.object({
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
   const groupMapping = new Map<
     number,
-    { observationId: number; observationGroup: number[] }
+    { observationId: number; observationGroup: number[]; isLocatedAt: boolean }
   >();
   processedAnnotations.forEach((observation, index) => {
-    const observationGroup = [];
+    const observationGroup: number[] = [];
+    const locatedAtElements: number[] = [];
 
     // observations
     const observation_start_indices = observation.observation_start_ix;
@@ -99,6 +100,7 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
         const end_index = end_index_group[located_at_start_index];
         for (let index = start_index; index <= end_index; index++) {
           observationGroup.push(index);
+          locatedAtElements.push(index);
         }
       }
     }
@@ -111,6 +113,8 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
         observationGroup: (previousValue?.["observationGroup"] ?? []).concat(
           observationGroup,
         ),
+        isLocatedAt:
+          previousValue?.["isLocatedAt"] ?? locatedAtElements.includes(element),
       });
     }
   });

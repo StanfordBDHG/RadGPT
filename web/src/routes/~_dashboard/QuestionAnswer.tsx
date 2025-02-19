@@ -119,7 +119,7 @@ export default function QuestionAnswer({
             </form>
           </div>
         </div>
-      </div >
+      </div>
     </>
   );
 }
