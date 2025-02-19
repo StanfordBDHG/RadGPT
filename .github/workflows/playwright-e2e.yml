@@ -1,7 +1,7 @@
 #
 # This source file is part of the Stanford Biodesign Digital Health Group open-source organization
 #
-# SPDX-FileCopyrightText: 2023 Stanford University and the project authors (see CONTRIBUTORS.md)
+# SPDX-FileCopyrightText: 2024 Stanford University and the project authors (see CONTRIBUTORS.md)
 #
 # SPDX-License-Identifier: MIT
 #
@@ -12,6 +12,7 @@ on:
     paths:
     - firebase/**
     - web/**
+    - .github/workflows/playwright-e2e.yml
   workflow_dispatch:
   workflow_call:
 jobs:
@@ -33,7 +34,10 @@ jobs:
       working-directory: web
       run: npm install -g firebase-tools
     - name: Install Playwright Browsers
-      run: npx playwright install --with-deps
+      working-directory: web/e2e-tests
+      run: |
+        npm install
+        npx playwright install --with-deps
     - name: Setup Python
       uses: actions/setup-python@v4
       with:

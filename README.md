@@ -41,7 +41,6 @@ npm install
 cp web/.env.example web/.env
 cp firebase/functions/.secret.local.example firebase/functions/.secret.local
 ```
-<!-- markdown-link-check-disable -->
 
 https://platform.openai.com/api-keys
 
