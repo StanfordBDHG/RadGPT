@@ -12,8 +12,10 @@ import re
 
 from firebase_admin import storage, firestore
 from firebase_functions import storage_fn
-from radgraph import RadGraph, get_radgraph_processed_annotations
 
+from function_implementation.radgraph.radgraph_calling import (
+    get_processed_annotation_from_radgraph,
+)
 from function_implementation.text_mapping.radgraph_text_mapper import (
     add_end_ix_to_processed_annotations,
     get_entity_mapping_in_user_entered_text,
@@ -45,16 +47,8 @@ def __update_report_meta_data(
     ref.update(document_data)
 
 
-def __get_processed_annotation_from_radgraph(user_provided_report: str):
-    radgraph = RadGraph(model_type="radgraph-xl")
-    annotations = radgraph([user_provided_report])
-    return get_radgraph_processed_annotations(annotations)
-
-
 def __get_postprocessed_annotations(user_provided_report):
-    processed_annotations = __get_processed_annotation_from_radgraph(
-        user_provided_report
-    )
+    processed_annotations = get_processed_annotation_from_radgraph(user_provided_report)
     text_mapping = get_entity_mapping_in_user_entered_text(
         user_provided_report, processed_annotations
     )
