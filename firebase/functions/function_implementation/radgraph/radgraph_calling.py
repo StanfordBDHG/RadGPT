@@ -17,7 +17,7 @@ RADGRAPH_FUNCTION_URL = "https://us-central1-radgpt-development-setup.cloudfunct
 
 def get_processed_annotation_from_radgraph(user_report: str):
     payload = {"report": user_report}
-    if os.environ["RADGRAPH_EMULATED"]:
+    if os.environ.get("RADGRAPH_EMULATED"):
         response = requests.post(EMULATED_FUNCTION_URL, json=payload)
     else:
         token = id_token.fetch_id_token(Request(), RADGRAPH_FUNCTION_URL)
