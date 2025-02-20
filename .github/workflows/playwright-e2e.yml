@@ -47,13 +47,20 @@ jobs:
       run: |
         cd functions
         echo -n "OPENAI_API_KEY=" > .secret.local
-        echo -n "${{ secrets.OPENAI_API_KEY }}" >> .secret.local
-    - name: Setup Python Virutal Environment
+        echo "${{ secrets.OPENAI_API_KEY }}" >> .secret.local
+        echo "RADGRAPH_EMULATED=true" >> .secret.local
+    - name: Setup Python Firebase Virutal Environment
       working-directory: firebase
       run: |
         python3.10 -m venv functions/venv
         . functions/venv/bin/activate
         python3.10 -m pip install -r functions/requirements.txt 
+    - name: Setup Python Google Cloud Virutal Environment
+      working-directory: radgraph_function
+      run: |
+        python3.10 -m venv venv
+        . venv/bin/activate
+        python3.10 -m pip install -r requirements.txt 
     - name: Set up Env for Web
       working-directory: web
       run: cp .env.example .env

@@ -81,9 +81,17 @@ export default defineConfig({
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: {
-    command: "cd .. && npm run dev",
-    url: "http://localhost:5173",
-    reuseExistingServer: !process.env.CI,
-  },
+  webServer: [
+    {
+      command: "cd .. && npm run dev",
+      url: "http://localhost:5173",
+      reuseExistingServer: !process.env.CI,
+    },
+    {
+      command:
+        "cd ../../radgraph_function && . venv/bin/activate && functions-framework --target=get_radgraph --port=5002",
+      url: "http://localhost:5002",
+      reuseExistingServer: !process.env.CI,
+    },
+  ],
 });
