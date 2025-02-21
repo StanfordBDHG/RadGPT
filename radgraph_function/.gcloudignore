@@ -1,0 +1,29 @@
+#
+# This source file is part of the Stanford Biodesign Digital Health RadGPT open-source project
+#
+# SPDX-FileCopyrightText: 2024 Stanford University and the project authors (see CONTRIBUTORS.md)
+#
+# SPDX-License-Identifier: MIT
+#
+
+.gcloudignore
+
+.git
+.gitignore
+
+node_modules
+venv
+
+models--StanfordAIMI--RRG_scorers
+.locks
+
+firebase.json
+firebase.json.licence
+.firebaserc
+.firebaserc.licence
+test.py
+setup.py
+
+deploy.sh
+
+*.log

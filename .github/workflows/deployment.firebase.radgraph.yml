@@ -6,14 +6,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-name: Deployment Firebase
+name: Deployment Firebase Radgraph
 
 on:
   push:
     branches:
       - main
     paths:
-        - firebase/**
+        - radgraph_function/**
   workflow_dispatch:
     inputs:
       environment:
@@ -81,13 +81,10 @@ jobs:
       contents: read
       checks: write
     secrets: inherit
-  deployfirebase:
-    name: Deploy Firebase Project
-    needs: [buildandtest, determineenvironment, vars, e2e]
+  deploygooglecloudrun:
+    name: Deploy Google Cloud Run Function
+    needs: [determineenvironment, vars, e2e, buildandtest]
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: 'firebase'
     environment: ${{ inputs.environment }}
     steps:
       - uses: actions/checkout@v4
@@ -95,25 +92,24 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '18'
-      - name: Install Firebase CLI Tools
-        run: npm install -g firebase-tools
       - name: Setup Python Virutal Environment
-        working-directory: firebase
+        working-directory: radgraph_function
         run: |
-          python3.10 -m venv functions/venv
-          . functions/venv/bin/activate
-          python3.10 -m pip install -r functions/requirements.txt
-      - name: Deploy to Firebase
-        working-directory: firebase
+          python3.10 -m venv venv
+          . venv/bin/activate
+          python3.10 -m pip install -r requirements.txt
+      - name: Download RadGraph Model
+        working-directory: radgraph_function
+        run: |
+          . venv/bin/activate
+          python3.10 setup.py
+      - name: Deploy to Google Cloud Run
+        working-directory: radgraph_function
         run: |
             echo -n "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}" | base64 -d > "$RUNNER_TEMP/google-application-credentials.json"
-            export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/google-application-credentials.json"
-            echo "Stored the Google application credentials at $GOOGLE_APPLICATION_CREDENTIALS"
-            firebase deploy --project ${{ needs.vars.outputs.FIREBASE_PROJECT_ID }} --only functions:on_medical_report_upload,functions:on_detailed_explanation_request
+            gcloud auth login --cred-file=$RUNNER_TEMP/google-application-credentials.json
+            gcloud config set project radgpt-development-setup
+            sh deploy.sh
       - name: Clean up Google application credentials
         if: always()
         run: |
