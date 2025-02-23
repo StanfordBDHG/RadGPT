@@ -11,6 +11,10 @@ SPDX-License-Identifier: MIT
 @tailwind components;
 @tailwind utilities;
 
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
 .keyword-highlight {
   margin: 0 -0.1rem;
   padding: 0 0.1rem;

@@ -30,7 +30,7 @@ const IndexComponent = () => {
   ];
 
   const asidePictureComponent = (
-    <div className="min-h-full flex flex-col flex-center">
+    <div className="min-h-full flex-center flex-col">
       <img
         src="/MIDRC-Logo-Vertical-Version-with-a-lighter-gray.png"
         alt="Stanford Biodesign Logo"
