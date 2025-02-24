@@ -13,6 +13,7 @@ import { type StorageReference } from "firebase/storage";
 import { type Dispatch, type SetStateAction } from "react";
 import { type GetFileListResult } from "@/utils/queries";
 import { FileList } from "./FileList";
+import {AddFileButton} from "./AddFileButton";
 
 interface SideMenuProps {
   auth: Auth;
@@ -21,6 +22,7 @@ interface SideMenuProps {
   setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
   className?: string;
   onFileDelete: () => Promise<void>;
+  onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
 export function SideMenu({
@@ -30,18 +32,31 @@ export function SideMenu({
   setSelectedFile,
   className,
   onFileDelete,
+  onUploadSuccess,
 }: SideMenuProps) {
   return (
-    <div className={cn("flex h-full w-full flex-col items-start", className)}>
-      <FileList
+    <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0 lg:mt-0 mt-3">
+      <AddFileButton
+        onUploadSuccess={onUploadSuccess}
         files={files}
-        selectedFile={selectedFile}
         setSelectedFile={setSelectedFile}
-        onFileDelete={onFileDelete}
       />
-      <Button className="mt-auto" onClick={() => auth.signOut()}>
-        Sign out
-      </Button>
+      <div
+        className={cn(
+          "flex flex-col items-start w-full h-full mt-4",
+          className
+        )}
+      >
+        <FileList
+          files={files}
+          selectedFile={selectedFile}
+          setSelectedFile={setSelectedFile}
+          onFileDelete={onFileDelete}
+        />
+        <Button className="mt-auto" onClick={() => auth.signOut()}>
+          Sign out
+        </Button>
+      </div>
     </div>
   );
 }

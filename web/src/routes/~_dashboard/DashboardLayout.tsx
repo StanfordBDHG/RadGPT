@@ -54,12 +54,11 @@ export const DashboardLayout = ({
       <nav
         className={cn(
           "fixed left-0 right-0 top-[calc(var(--headerHeight)+1px)] flex h-[calc(100vh-var(--headerHeight)-1px)] w-screen flex-col overflow-y-auto bg-surface transition duration-300 lg:hidden",
-          menu.isOpen ? "z-10 translate-x-0" : (
-            "pointer-events-none -translate-x-24 opacity-0"
-          ),
+          menu.isOpen
+            ? "z-10 translate-x-0"
+            : "pointer-events-none -translate-x-24 opacity-0"
         )}
         hidden={!menu.isOpen}
-        data-testid="mobileMenu"
       >
         {actions && <div className="p-4">{actions}</div>}
         {mobile}

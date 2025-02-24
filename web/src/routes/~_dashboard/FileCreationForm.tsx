@@ -14,6 +14,7 @@ import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
 import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
 import { storage } from "@/utils/firebase";
+import { GetFileListResult } from "@/utils/queries";
 
 const formSchema = z.object({
   medicalReportContent: z
@@ -35,9 +36,15 @@ const calculateSHA256Hash = async (data: string) => {
 
 interface FileCreationFormProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
+  files: GetFileListResult;
+  onExistingFileUpload: (ref: StorageReference) => void;
 }
 
-export function FileCreationForm({ onUploadSuccess }: FileCreationFormProps) {
+export function FileCreationForm({
+  onUploadSuccess,
+  files,
+  onExistingFileUpload,
+}: FileCreationFormProps) {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
@@ -51,9 +58,22 @@ export function FileCreationForm({ onUploadSuccess }: FileCreationFormProps) {
     async ({ medicalReportContent, medicalReportName }) => {
       const medicalReportContentHash =
         await calculateSHA256Hash(medicalReportContent);
+
+      const hashList = files.map((files) => files?.ref?.name ?? "");
+      const hashIndex = hashList.findIndex(
+        (fileHash) => fileHash === medicalReportContentHash
+      );
+
+      if (hashIndex > -1) {
+        if (files[hashIndex].ref) {
+          onExistingFileUpload(files[hashIndex].ref);
+        }
+        return;
+      }
+
       const storageReference = ref(
         storage,
-        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
+        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`
       );
       const customMetadata = { medicalReportName: medicalReportName };
       const result = await uploadString(
@@ -63,10 +83,10 @@ export function FileCreationForm({ onUploadSuccess }: FileCreationFormProps) {
         {
           contentType: "text/plain",
           customMetadata: customMetadata,
-        },
+        }
       );
       if (onUploadSuccess) onUploadSuccess(result.ref, medicalReportContent);
-    },
+    }
   );
 
   return (
