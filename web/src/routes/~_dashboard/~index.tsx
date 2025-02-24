@@ -92,6 +92,12 @@ function Dashboard() {
     setUserFeedback(null);
   };
 
+  const onFileDelete = async () => {
+    setReportText("")
+    setSelectedFile(null)
+    await fetchFiles()
+  }
+
   return (
     <>
       <Helmet>
@@ -106,6 +112,7 @@ function Dashboard() {
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
+            onFileDelete={onFileDelete}
           />
         }
         aside={
@@ -117,6 +124,7 @@ function Dashboard() {
               files={files}
               selectedFile={selectedFile}
               setSelectedFile={setSelectedFile}
+              onFileDelete={onFileDelete}
             />
           </div>
         }

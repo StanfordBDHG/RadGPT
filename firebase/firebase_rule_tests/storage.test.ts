@@ -7,7 +7,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { beforeAll, beforeEach, describe, test } from 'vitest'
+import { beforeAll, describe, test } from 'vitest'
 import {
     assertFails,
     assertSucceeds,
@@ -67,10 +67,6 @@ describe("Authenticated Processed Annotations Access", () => {
         await assertFails(getBytes(documentRef))
         await assertFails(listAll(folderRef))
     })
-    test("Test Blocked File Deletion", async () => {
-        await assertFails(deleteObject(ref(user1, "/users/user1/reports/document")))
-        await assertFails(deleteObject(ref(user2, "/users/user1/reports/document")))
-    })
     test("Test Allowed File Upload User 1", async() => {
         await assertSucceeds(uploadString(ref(user1, "/users/user1/reports/document1"), "test1", "raw", {
             contentType: "text/plain",
@@ -80,5 +76,20 @@ describe("Authenticated Processed Annotations Access", () => {
         await assertFails(uploadString(ref(user2, "/users/user1/reports/document2"), "test1", "raw", {
             contentType: "text/plain",
         }))
+    })
+})
+
+describe("Authenticated Processed Annotations Deletion", () => {
+    let user1;
+    let user2;
+
+    test("Test Blocked File Deletion", async () => {
+        user1 = db.authenticatedContext("user1").storage();
+        user2 = db.authenticatedContext("user2").storage();
+        await uploadString(ref(user1, "/users/user1/reports/document"), "test", "raw", {
+            contentType: "text/plain",
+        })
+        await assertSucceeds(deleteObject(ref(user1, "/users/user1/reports/document")))
+        await assertFails(deleteObject(ref(user2, "/users/user1/reports/document")))
     })
 })
