@@ -20,6 +20,7 @@ interface SideMenuProps {
     React.SetStateAction<StorageReference | null>
   >;
   className?: string;
+  onFileDelete: () => Promise<void>
 }
 
 export default function SideMenu({
@@ -28,6 +29,7 @@ export default function SideMenu({
   selectedFile,
   setSelectedFile,
   className,
+  onFileDelete
 }: SideMenuProps) {
   return (
     <div className={cn("flex flex-col items-start w-full h-full", className)}>
@@ -35,6 +37,7 @@ export default function SideMenu({
         files={files}
         selectedFile={selectedFile}
         setSelectedFile={setSelectedFile}
+        onFileDelete={onFileDelete}
       />
       <Button className="mt-auto" onClick={() => auth.signOut()}>
         Sign out
