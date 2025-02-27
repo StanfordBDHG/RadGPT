@@ -28,12 +28,10 @@ export async function getFileList(currentUser: User) {
   const fileMetadata = await Promise.all(
     listResult.items.map((i) => getMetadata(i)),
   );
-  const fileList = fileMetadata.sort(metaDataCompare).map((fullMetaData) => {
-    return {
-      ref: fullMetaData.ref,
-      customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
-    };
-  });
+  const fileList = fileMetadata.sort(metaDataCompare).map((fullMetaData) => ({
+    ref: fullMetaData.ref,
+    customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
+  }));
   return fileList;
 }
 
