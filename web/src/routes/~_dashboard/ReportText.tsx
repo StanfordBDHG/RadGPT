@@ -142,8 +142,7 @@ export function ReportText({
                   { file_name: string; observation_id: number },
                   DetailedResponse
                 > = httpsCallable(functions, "on_detailed_explanation_request");
-                const observationId =
-                  groupMap.get(+(key ?? -1))?.observationId ?? -1;
+                const observationId = groupMap.get(key)?.observationId ?? -1;
                 const r = await gptAnswer({
                   file_name: selectedFileName,
                   observation_id: observationId,
