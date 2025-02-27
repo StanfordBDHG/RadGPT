@@ -11,7 +11,7 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { type StorageReference } from "firebase/storage";
 import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { auth, firestore } from "@/utils/firebase";
 import {ReportText} from "./ReportText";
 import {

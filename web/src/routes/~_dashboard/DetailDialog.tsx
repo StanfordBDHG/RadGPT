@@ -16,7 +16,7 @@ import {
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { firestore } from "@/utils/firebase";
 import { QuestionAnswer } from "./QuestionAnswer";
 

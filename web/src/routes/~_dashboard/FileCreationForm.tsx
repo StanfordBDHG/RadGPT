@@ -12,7 +12,7 @@ import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Text
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { storage } from "@/utils/firebase";
 import { GetFileListResult } from "@/utils/queries";
 

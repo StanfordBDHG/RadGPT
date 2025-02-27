@@ -12,7 +12,7 @@ import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Text
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { doc, updateDoc } from "firebase/firestore";
 import { z } from "zod";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { firestore } from "@/utils/firebase";
 
 const formSchema = z.object({
