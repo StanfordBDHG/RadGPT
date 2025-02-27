@@ -6,15 +6,9 @@
 // SPDX-License-Identifier: MIT
 //
 
-import {
-  FullMetadata,
-  getMetadata,
-  listAll,
-  ref,
-  StorageReference,
-} from "firebase/storage";
+import { type User } from "firebase/auth";
+import { type FullMetadata, getMetadata, listAll, ref } from "firebase/storage";
 import { storage } from "./firebase";
-import { User } from "firebase/auth";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   const dateFile1 = new Date(metaData1.updated);
@@ -25,11 +19,7 @@ const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   return 0;
 };
 
-export async function getFileList(currentUser: User | null) {
-  if (currentUser === null) {
-    return null;
-  }
-
+export async function getFileList(currentUser: User) {
   const storageReportsReference = ref(
     storage,
     `users/${currentUser.uid}/reports`,
@@ -40,10 +30,11 @@ export async function getFileList(currentUser: User | null) {
   );
   const fileList = fileMetadata.sort(metaDataCompare).map((fullMetaData) => {
     return {
-      ref: fullMetaData.ref as StorageReference,
-      customName:
-        fullMetaData.customMetadata?.["medicalReportName"] ?? "undefined",
+      ref: fullMetaData.ref,
+      customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
     };
   });
   return fileList;
 }
+
+export type GetFileListResult = Awaited<ReturnType<typeof getFileList>>;

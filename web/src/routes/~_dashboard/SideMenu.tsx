@@ -8,31 +8,31 @@
 
 import { cn } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
-import { Auth } from "firebase/auth";
-import { StorageReference } from "firebase/storage";
-import FileList from "./FileList";
+import { type Auth } from "firebase/auth";
+import { type StorageReference } from "firebase/storage";
+import { type Dispatch, type SetStateAction } from "react";
+import { type GetFileListResult } from "@/utils/queries";
+import { FileList } from "./FileList";
 
 interface SideMenuProps {
   auth: Auth;
-  files: { customName: string; ref: StorageReference }[];
-  selectedFile: StorageReference | null;
-  setSelectedFile: React.Dispatch<
-    React.SetStateAction<StorageReference | null>
-  >;
+  files: GetFileListResult;
+  selectedFile: StorageReference | undefined;
+  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
   className?: string;
-  onFileDelete: () => Promise<void>
+  onFileDelete: () => Promise<void>;
 }
 
-export default function SideMenu({
+export function SideMenu({
   auth,
   files,
   selectedFile,
   setSelectedFile,
   className,
-  onFileDelete
+  onFileDelete,
 }: SideMenuProps) {
   return (
-    <div className={cn("flex flex-col items-start w-full h-full", className)}>
+    <div className={cn("flex h-full w-full flex-col items-start", className)}>
       <FileList
         files={files}
         selectedFile={selectedFile}

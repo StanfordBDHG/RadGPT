@@ -6,39 +6,37 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { auth, firestore } from "@/src/utils/firebase";
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { DashboardLayout } from "./DashboardLayout";
-import SideMenu from "./SideMenu";
 import { doc, onSnapshot } from "firebase/firestore";
+import { type StorageReference } from "firebase/storage";
 import { useCallback, useEffect, useState } from "react";
-import { StorageReference } from "firebase/storage";
-import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
-import AddFileButton from "./AddFileButton";
-import ReportText from "./ReportText";
+import { Helmet } from "react-helmet";
+import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { auth, firestore } from "@/utils/firebase";
 import {
   getProcessedAnnotationsFromJSONString,
-  ProcessedAnnotations,
-} from "@/src/utils/processedAnnotations";
-import { TextMapping } from "@/src/utils/textMapping";
-import { getFileList } from "@/src/utils/queries";
-import { Helmet } from "react-helmet";
-import FeedbackForm from "./FeedbackForm";
+  type ProcessedAnnotations,
+} from "@/utils/processedAnnotations";
+import { type GetFileListResult, getFileList } from "@/utils/queries";
+import { type TextMapping } from "@/utils/textMapping";
+import { AddFileButton } from "./AddFileButton";
+import { DashboardLayout } from "./DashboardLayout";
+import { FeedbackForm } from "./FeedbackForm";
+import { ReportText } from "./ReportText";
+import { SideMenu } from "./SideMenu";
 
 function Dashboard() {
   const currentUser = useAuthenticatedUser();
 
-  const [files, setFiles] = useState<
-    { customName: string; ref: StorageReference }[]
-  >([]);
+  const [files, setFiles] = useState<GetFileListResult>([]);
 
   const fetchFiles = useCallback(async () => {
-    const fileList = (await getFileList(currentUser)) ?? [];
+    const fileList = currentUser ? await getFileList(currentUser) : [];
     setFiles(fileList);
   }, [currentUser]);
 
   useEffect(() => {
-    fetchFiles();
+    void fetchFiles();
   }, [fetchFiles]);
 
   const [reportText, setReportText] = useState<string>("");
@@ -46,9 +44,9 @@ function Dashboard() {
   const [processedAnnotations, setProcessedAnnotations] = useState<
     ProcessedAnnotations[]
   >([]);
-  const [selectedFile, setSelectedFile] = useState<StorageReference | null>(
-    null,
-  );
+  const [selectedFile, setSelectedFile] = useState<
+    StorageReference | undefined
+  >(undefined);
   const [userFeedback, setUserFeedback] = useState<string | null>(null);
 
   useEffect(() => {
@@ -84,7 +82,7 @@ function Dashboard() {
   }, [selectedFile, currentUser]);
 
   const onUploadSuccess = (ref: StorageReference, medicalReport: string) => {
-    fetchFiles();
+    void fetchFiles();
     setSelectedFile(ref);
     setReportText(medicalReport);
     setTextMapping(null);
@@ -93,10 +91,10 @@ function Dashboard() {
   };
 
   const onFileDelete = async () => {
-    setReportText("")
-    setSelectedFile(null)
-    await fetchFiles()
-  }
+    setReportText("");
+    setSelectedFile(null);
+    await fetchFiles();
+  };
 
   return (
     <>
@@ -116,7 +114,7 @@ function Dashboard() {
           />
         }
         aside={
-          <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0">
+          <div className="justify-begin flex h-full w-full flex-col items-start px-2 xl:px-0">
             <AddFileButton onUploadSuccess={onUploadSuccess} />
             <SideMenu
               className="mt-4"
@@ -129,7 +127,7 @@ function Dashboard() {
           </div>
         }
       >
-        {reportText ? (
+        {reportText ?
           <div className="flex flex-col justify-between">
             <ReportText
               userProvidedText={reportText}
@@ -145,9 +143,7 @@ function Dashboard() {
               />
             )}
           </div>
-        ) : (
-          <p>Please add or select a file</p>
-        )}
+        : <p>Please add or select a file</p>}
       </DashboardLayout>
     </>
   );

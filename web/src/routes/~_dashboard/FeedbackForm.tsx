@@ -6,14 +6,14 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { useAuthenticatedUser } from "@/src/hooks/useAuthenticatedUser";
-import { firestore } from "@/src/utils/firebase";
 import { toast, Toaster } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { doc, updateDoc } from "firebase/firestore";
 import { z } from "zod";
+import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { firestore } from "@/utils/firebase";
 
 const formSchema = z.object({
   medicalReportAnnotationsFeedback: z
@@ -21,7 +21,7 @@ const formSchema = z.object({
     .min(1, "Content for medical report feedback is required!"),
 });
 
-export default function FeedbackForm({
+export function FeedbackForm({
   className,
   selectedFileName,
   feedback,
@@ -55,7 +55,7 @@ export default function FeedbackForm({
     <>
       <Toaster />
       <div className={className}>
-        <h1 className="text-xl mb-3 mt-5">Feedback</h1>
+        <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
         <form action="submit" onSubmit={handleSubmit}>
           <Field
             control={form.control}

@@ -6,10 +6,10 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { DocumentData } from "firebase/firestore";
+import { type DocumentData } from "firebase/firestore";
 import { z } from "zod";
 
-export type ProcessedAnnotations = {
+export interface ProcessedAnnotations {
   observation: string;
   observation_start_ix: number[];
   located_at: string[];
@@ -18,16 +18,16 @@ export type ProcessedAnnotations = {
   tags: string[];
   suggestive_of: string[] | null;
   observation_end_ix: number[];
-};
+}
 
 // Source: https://github.com/JacobWeisenburger/zod_utilz/blob/4093595e5a6d95770872598ba3bc405d4e9c963b/src/stringToJSON.ts#LL4-L12C8
 const jsonStringToProcessedAnnotations = z
   .string()
   .optional()
-  .transform((str, ctx): ProcessedAnnotations[] => {
+  .transform((str, ctx) => {
     try {
       if (!str) return [];
-      return JSON.parse(str);
+      return JSON.parse(str) as ProcessedAnnotations[];
     } catch (e) {
       ctx.addIssue({ code: "custom", message: "Invalid JSON" });
       throw e;
@@ -76,45 +76,43 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
     const locatedAtElements: number[] = [];
 
     // observations
-    const observation_start_indices = observation.observation_start_ix;
-    const observation_end_indices = observation.observation_end_ix;
-    for (const observation_start_index in observation_start_indices) {
-      const start_index = observation_start_indices[observation_start_index];
-      const end_index = observation_end_indices[observation_start_index];
+    observation.observation_start_ix.forEach(
+      (startIndex, observationStartIndex) => {
+        const endIndex = observation.observation_end_ix[observationStartIndex];
 
-      for (let index = start_index; index <= end_index; index++) {
-        observationGroup.push(index);
-      }
-    }
+        for (let index = startIndex; index <= endIndex; index++) {
+          observationGroup.push(index);
+        }
+      },
+    );
 
     // located at
-    const located_at_start_indices = observation.located_at_start_ix;
-    const located_at_end_indices = observation.located_at_end_ix;
-    for (const located_at_start_group_index in located_at_start_indices) {
-      const start_index_group =
-        located_at_start_indices[located_at_start_group_index];
-      const end_index_group =
-        located_at_end_indices[located_at_start_group_index];
-      for (const located_at_start_index in start_index_group) {
-        const start_index = start_index_group[located_at_start_index];
-        const end_index = end_index_group[located_at_start_index];
-        for (let index = start_index; index <= end_index; index++) {
-          observationGroup.push(index);
-          locatedAtElements.push(index);
-        }
-      }
-    }
+    observation.located_at_start_ix.forEach(
+      (startIndexGroup, locatedAtStartGroupIndex) => {
+        const endIndexGroup =
+          observation.located_at_end_ix[locatedAtStartGroupIndex];
+
+        startIndexGroup.forEach((startIndex, locatedAtStartIndex) => {
+          const endIndex = endIndexGroup[locatedAtStartIndex];
+
+          for (let index = startIndex; index <= endIndex; index++) {
+            locatedAtElements.push(index);
+            observationGroup.push(index);
+          }
+        });
+      },
+    );
 
     // Attach to element group
     for (const element of observationGroup) {
       const previousValue = groupMapping.get(element);
       groupMapping.set(element, {
-        observationId: previousValue?.["observationId"] ?? index,
-        observationGroup: (previousValue?.["observationGroup"] ?? []).concat(
+        observationId: previousValue?.observationId ?? index,
+        observationGroup: (previousValue?.observationGroup ?? []).concat(
           observationGroup,
         ),
         isLocatedAt:
-          previousValue?.["isLocatedAt"] ?? locatedAtElements.includes(element),
+          previousValue?.isLocatedAt ?? locatedAtElements.includes(element),
       });
     }
   });

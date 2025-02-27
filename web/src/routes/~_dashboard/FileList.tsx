@@ -7,20 +7,19 @@
 //
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { deleteObject, type StorageReference } from "firebase/storage";
 import { Trash2 } from "lucide-react";
-import { deleteObject, StorageReference } from "firebase/storage";
+import { type Dispatch, type SetStateAction } from "react";
 
-export default function FileList({
+export function FileList({
   files,
   selectedFile,
   setSelectedFile,
   onFileDelete,
 }: {
-  files: { customName: string; ref: StorageReference }[];
+  files: Array<{ customName: string; ref: StorageReference }>;
   selectedFile: StorageReference | null;
-  setSelectedFile: React.Dispatch<
-    React.SetStateAction<StorageReference | null>
-  >;
+  setSelectedFile: Dispatch<SetStateAction<StorageReference | null>>;
   onFileDelete: () => Promise<void>;
 }) {
   const onDelete = async (fileRef: StorageReference) => {
@@ -28,14 +27,14 @@ export default function FileList({
     await onFileDelete();
   };
   return (
-    <div className="flex flex-col w-full">
+    <div className="flex w-full flex-col">
       {files.map((item) => (
         <div className="flex flex-row" key={item.ref.name}>
           <a
             onClick={() => setSelectedFile(item.ref)}
             className={cn(
               item.ref.name === selectedFile?.name ? "font-bold" : "",
-              "cursor-pointer"
+              "cursor-pointer",
             )}
           >
             {item.customName}

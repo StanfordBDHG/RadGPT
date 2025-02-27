@@ -6,11 +6,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { ReactNode, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { type User } from "firebase/auth";
+import { type ReactNode, useState } from "react";
+import { auth } from "@/utils/firebase";
 import { AuthenticatedUserContext } from "../context/AuthenticatedUserContext";
-import { User } from "firebase/auth";
-import { auth } from "@utils/firebase";
 
 interface AuthenticationProviderProps {
   children?: ReactNode;
@@ -24,9 +24,9 @@ export const AuthenticationProvider = ({
 
   auth.onAuthStateChanged((newUser) => {
     if (newUser && window.location.pathname === "/signin") {
-      navigate({ to: "/" });
+      void navigate({ to: "/" });
     } else if (!newUser) {
-      navigate({ to: "/signin" });
+      void navigate({ to: "/signin" });
     }
     setCurrentUser(newUser);
   });

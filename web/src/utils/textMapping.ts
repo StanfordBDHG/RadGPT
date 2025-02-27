@@ -32,12 +32,13 @@ const numberCompare = (
   return 1;
 };
 
-export interface TextMapping {
-  [id: string]: {
+export type TextMapping = Record<
+  string,
+  {
     user_provided_text_start: number;
     user_provided_text_end: number;
-  };
-}
+  }
+>;
 
 export enum TextBlockPosition {
   LEFT = "keyword-highlight-left",
@@ -104,8 +105,9 @@ export const getTextBlocks = (
           token: prevToken,
           textString: prevText,
           startPosition: prevKey,
-          textBlockPosition: isPreviousTokenRadGraphRelevant
-            ? TextBlockPosition.CENTER
+          textBlockPosition:
+            isPreviousTokenRadGraphRelevant ?
+              TextBlockPosition.CENTER
             : TextBlockPosition.LEFT,
         });
       }
@@ -115,8 +117,9 @@ export const getTextBlocks = (
       token: Number(key),
       textString: userProvidedText.substring(start, end),
       startPosition: start,
-      textBlockPosition: isPreviousTokenRadGraphRelevant
-        ? TextBlockPosition.RIGHT
+      textBlockPosition:
+        isPreviousTokenRadGraphRelevant ?
+          TextBlockPosition.RIGHT
         : TextBlockPosition.STAND_ALONE,
     });
     lastIndex = end;

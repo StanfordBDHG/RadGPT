@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { type User } from "firebase/auth";
-import { createContext } from "react";
+const { prettierConfig } = require("@stanfordspezi/spezi-web-configurations");
 
-export const AuthenticatedUserContext = createContext<User | null>(null);
+module.exports = prettierConfig;

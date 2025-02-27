@@ -9,10 +9,10 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp, getApp, getApps } from "firebase/app";
 import { getAuth, connectAuthEmulator } from "firebase/auth";
-import { env } from "@/env.ts";
-import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
+import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { env } from "@/env";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
