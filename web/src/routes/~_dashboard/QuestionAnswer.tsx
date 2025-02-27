@@ -82,8 +82,8 @@ export const QuestionAnswer = ({
       <div onClick={onClick} className={"flex cursor-pointer flex-row"}>
         {question}
         {isSelected ?
-          <ChevronUp className="ml-auto min-w-[2rem]" />
-        : <ChevronDown className="ml-auto min-w-[2rem]" />}
+          <ChevronUp className="ml-auto min-w-8" />
+        : <ChevronDown className="ml-auto min-w-8" />}
       </div>
       <div
         ref={ref}
