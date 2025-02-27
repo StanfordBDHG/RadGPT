@@ -92,7 +92,7 @@ function Dashboard() {
 
   const onFileDelete = async () => {
     setReportText("");
-    setSelectedFile(null);
+    setSelectedFile(undefined);
     await fetchFiles();
   };
 
