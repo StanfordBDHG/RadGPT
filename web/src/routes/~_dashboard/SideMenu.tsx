@@ -20,7 +20,7 @@ interface SideMenuProps {
   selectedFile: StorageReference | undefined;
   setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
   className?: string;
-  onFileDelete: () => Promise<void>
+  onFileDelete: () => Promise<void>;
 }
 
 export function SideMenu({
@@ -29,7 +29,7 @@ export function SideMenu({
   selectedFile,
   setSelectedFile,
   className,
-  onFileDelete
+  onFileDelete,
 }: SideMenuProps) {
   return (
     <div className={cn("flex h-full w-full flex-col items-start", className)}>

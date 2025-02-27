@@ -91,10 +91,10 @@ function Dashboard() {
   };
 
   const onFileDelete = async () => {
-    setReportText("")
-    setSelectedFile(null)
-    await fetchFiles()
-  }
+    setReportText("");
+    setSelectedFile(null);
+    await fetchFiles();
+  };
 
   return (
     <>

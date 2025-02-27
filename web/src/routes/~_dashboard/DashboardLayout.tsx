@@ -48,12 +48,12 @@ export const DashboardLayout = ({
           </Button>
         </div>
       </header>
-      <aside className="border-r-border-layout bg-surface fixed left-0 top-0 hidden h-screen w-[--asideWidth] flex-col items-center border-y-0 border-l-0 border-r border-solid py-4 lg:flex xl:px-3">
+      <aside className="border-r-border-layout fixed left-0 top-0 hidden h-screen w-[--asideWidth] flex-col items-center border-y-0 border-l-0 border-r border-solid bg-surface py-4 lg:flex xl:px-3">
         {aside}
       </aside>
       <nav
         className={cn(
-          "bg-surface fixed left-0 right-0 top-[calc(var(--headerHeight)+1px)] flex h-[calc(100vh-var(--headerHeight)-1px)] w-screen flex-col overflow-y-auto transition duration-300 lg:hidden",
+          "fixed left-0 right-0 top-[calc(var(--headerHeight)+1px)] flex h-[calc(100vh-var(--headerHeight)-1px)] w-screen flex-col overflow-y-auto bg-surface transition duration-300 lg:hidden",
           menu.isOpen ? "z-10 translate-x-0" : (
             "pointer-events-none -translate-x-24 opacity-0"
           ),

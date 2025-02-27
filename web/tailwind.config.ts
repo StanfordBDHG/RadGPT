@@ -7,9 +7,9 @@
 //
 
 import { tailwindColors } from "@stanfordspezi/spezi-web-design-system";
+import { type Config } from "tailwindcss";
 
-/** @type {import('tailwindcss').Config} */
-export default {
+const tailwindConfig: Config = {
   content: [
     "./src/**/*.{ts,tsx}",
     "./node_modules/@stanfordspezi/spezi-web-design-system/dist/**/*.js",
@@ -21,3 +21,5 @@ export default {
   },
   plugins: [],
 };
+
+export default tailwindConfig;
