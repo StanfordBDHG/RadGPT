@@ -38,7 +38,7 @@ interface DetailDialogProps {
   selectedFileName: string;
 }
 
-export function DetailDialog({
+export const DetailDialog = ({
   answer,
   openState,
   conceptBasedQuestion: concept_based_question,
@@ -48,7 +48,7 @@ export function DetailDialog({
   selectedNumber,
   setSelectedNumber,
   selectedFileName,
-}: DetailDialogProps) {
+}: DetailDialogProps) => {
   const currentUser = useAuthenticatedUser();
 
   const [like1, setLike1] = useState(false);
@@ -186,4 +186,4 @@ export function DetailDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};

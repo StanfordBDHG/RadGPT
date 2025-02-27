@@ -19,7 +19,7 @@ const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   return 0;
 };
 
-export async function getFileList(currentUser: User) {
+export const getFileList = async (currentUser: User) => {
   const storageReportsReference = ref(
     storage,
     `users/${currentUser.uid}/reports`
@@ -33,6 +33,6 @@ export async function getFileList(currentUser: User) {
     customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
   }));
   return fileList;
-}
+};
 
 export type GetFileListResult = Awaited<ReturnType<typeof getFileList>>;

@@ -24,7 +24,7 @@ import { DashboardLayout } from "./DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
 import { SideMenu } from "./SideMenu";
 
-function Dashboard() {
+const Dashboard = () => {
   const currentUser = useAuthenticatedUser();
 
   const [files, setFiles] = useState<GetFileListResult>([]);
@@ -143,7 +143,7 @@ function Dashboard() {
       </DashboardLayout>
     </>
   );
-}
+};
 
 export const Route = createFileRoute("/_dashboard/")({
   component: Dashboard,

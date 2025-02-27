@@ -35,12 +35,12 @@ interface DetailedResponse {
   concept_based_template_question_answer: string | null;
 }
 
-export function ReportText({
+export const ReportText = ({
   userProvidedText,
   selectedFileName,
   textMapping,
   processedAnnotations,
-}: ReportTextProp) {
+}: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
@@ -168,4 +168,4 @@ export function ReportText({
       </div>
     </>
   );
-}
+};

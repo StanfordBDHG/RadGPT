@@ -40,11 +40,11 @@ interface FileCreationFormProps {
   onExistingFileUpload: (ref: StorageReference) => void;
 }
 
-export function FileCreationForm({
+export const FileCreationForm = ({
   onUploadSuccess,
   files,
   onExistingFileUpload,
-}: FileCreationFormProps) {
+}: FileCreationFormProps) => {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
@@ -112,4 +112,4 @@ export function FileCreationForm({
       </Button>
     </form>
   );
-}
+};

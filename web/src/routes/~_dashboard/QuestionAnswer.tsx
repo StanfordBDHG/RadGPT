@@ -32,7 +32,7 @@ interface QuestionAnswerProps {
   textFeedback: string;
 }
 
-export function QuestionAnswer({
+export const QuestionAnswer = ({
   isSelected,
   question,
   answer,
@@ -43,7 +43,7 @@ export function QuestionAnswer({
   onDislike,
   onFeedbackSubmit,
   textFeedback,
-}: QuestionAnswerProps) {
+}: QuestionAnswerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLInputElement>(null);
   const [isPending, setIsPending] = useState(false);
@@ -127,4 +127,4 @@ export function QuestionAnswer({
       </div>
     </>
   );
-}
+};

@@ -12,7 +12,7 @@ import { Trash2 } from "lucide-react";
 import { type Dispatch, type SetStateAction } from "react";
 import { type GetFileListResult } from "@/utils/queries";
 
-export function FileList({
+export const FileList = ({
   files,
   selectedFile,
   setSelectedFile,
@@ -22,7 +22,7 @@ export function FileList({
   selectedFile: StorageReference | undefined;
   setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
   onFileDelete: () => Promise<void>;
-}) {
+}) => {
   const onDelete = async (fileRef: StorageReference | undefined) => {
     if (fileRef) {
       await deleteObject(fileRef);
@@ -52,4 +52,4 @@ export function FileList({
       ))}
     </div>
   );
-}
+};

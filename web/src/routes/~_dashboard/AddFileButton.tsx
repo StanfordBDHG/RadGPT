@@ -29,11 +29,11 @@ interface AddFileModalProps {
   >;
 }
 
-export function AddFileButton({
+export const AddFileButton = ({
   onUploadSuccess,
   files,
   setSelectedFile,
-}: AddFileModalProps) {
+}: AddFileModalProps) => {
   const openState = useOpenState(false);
 
   const onUploadSuccessDialogClose = (
@@ -70,4 +70,4 @@ export function AddFileButton({
       </DialogContent>
     </Dialog>
   );
-}
+};

@@ -25,7 +25,7 @@ interface SideMenuProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
 }
 
-export function SideMenu({
+export const SideMenu = ({
   auth,
   files,
   selectedFile,
@@ -33,7 +33,7 @@ export function SideMenu({
   className,
   onFileDelete,
   onUploadSuccess,
-}: SideMenuProps) {
+}: SideMenuProps) => {
   return (
     <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0 lg:mt-0 mt-3">
       <AddFileButton
