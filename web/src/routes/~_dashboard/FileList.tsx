@@ -7,34 +7,46 @@
 //
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { type StorageReference } from "firebase/storage";
-import { type Dispatch, type SetStateAction } from "react";
-import { type GetFileListResult } from "@/utils/queries";
+import { Trash2 } from "lucide-react";
+import { deleteObject, StorageReference } from "firebase/storage";
 
-interface FileListProps {
-  files: GetFileListResult;
-  selectedFile: StorageReference | undefined;
-  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
-}
-
-export function FileList({
+export default function FileList({
   files,
   selectedFile,
   setSelectedFile,
-}: FileListProps) {
+  onFileDelete,
+}: {
+  files: { customName: string; ref: StorageReference }[];
+  selectedFile: StorageReference | null;
+  setSelectedFile: React.Dispatch<
+    React.SetStateAction<StorageReference | null>
+  >;
+  onFileDelete: () => Promise<void>;
+}) {
+  const onDelete = async (fileRef: StorageReference) => {
+    await deleteObject(fileRef);
+    await onFileDelete();
+  };
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col w-full">
       {files.map((item) => (
-        <a
-          key={item.ref?.name}
-          onClick={() => setSelectedFile(item.ref)}
-          className={cn(
-            item.ref?.name === selectedFile?.name ? "font-bold" : "",
-            "cursor-pointer",
-          )}
-        >
-          {item.customName}
-        </a>
+        <div className="flex flex-row" key={item.ref.name}>
+          <a
+            onClick={() => setSelectedFile(item.ref)}
+            className={cn(
+              item.ref.name === selectedFile?.name ? "font-bold" : "",
+              "cursor-pointer"
+            )}
+          >
+            {item.customName}
+          </a>
+          <a
+            className="ml-auto cursor-pointer"
+            onClick={() => onDelete(item.ref)}
+          >
+            <Trash2 className="w-5" />
+          </a>
+        </div>
       ))}
     </div>
   );

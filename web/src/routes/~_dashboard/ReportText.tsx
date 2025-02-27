@@ -6,17 +6,17 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { httpsCallable, type HttpsCallable } from "firebase/functions";
-import { useState } from "react";
-import { functions } from "@/utils/firebase";
 import {
   getGroupMap,
-  type ProcessedAnnotations,
-} from "@/utils/processedAnnotations";
-import { getTextBlocks, type TextMapping } from "@/utils/textMapping";
-import { DetailDialog } from "./DetailDialog";
+  ProcessedAnnotations,
+} from "@/src/utils/processedAnnotations";
+import { getTextBlocks, TextMapping } from "@/src/utils/textMapping";
+import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { functions } from "@/src/utils/firebase";
+import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { httpsCallable, HttpsCallable } from "firebase/functions";
+import { useState } from "react";
+import DetailDialog from "./DetailDialog";
 
 interface ReportTextProp {
   userProvidedText: string;
@@ -25,7 +25,7 @@ interface ReportTextProp {
   processedAnnotations: ProcessedAnnotations[];
 }
 
-interface DetailedResponse {
+type DetailedResponse = {
   main_explanation: string;
 
   concept_based_question: string | null;
@@ -33,9 +33,9 @@ interface DetailedResponse {
 
   concept_based_template_question: string | null;
   concept_based_template_question_answer: string | null;
-}
+};
 
-export function ReportText({
+export default function ReportText({
   userProvidedText,
   selectedFileName,
   textMapping,
@@ -65,7 +65,7 @@ export function ReportText({
 
   if (!textMapping) {
     return (
-      <div className="shimmer whitespace-pre-wrap leading-5 tracking-wide">
+      <div className="shimmer whitespace-pre-wrap tracking-wide leading-5">
         {userProvidedText}
       </div>
     );
@@ -87,66 +87,79 @@ export function ReportText({
         setSelectedNumber={setSelectedNumber}
         selectedFileName={`${selectedFileName}/cached_answer_${selectedObservationNumber}`}
       />
-      <div className="whitespace-pre-wrap leading-5 tracking-wide">
-        {textBlocks.map(([key, textSnippet, id, position]) => (
-          <span
-            key={`${selectedFileName} ${id}`}
-            className={cn(
-              (
-                currentHoveredWordIndex &&
-                  key &&
+      <div className="whitespace-pre-wrap tracking-wide leading-5">
+        {textBlocks.map(
+          ({
+            token: key,
+            textString: textSnippet,
+            startPosition: id,
+            textBlockPosition: position,
+          }) => (
+            <span
+              key={`${selectedFileName} ${id}`}
+              className={cn(
+                currentHoveredWordIndex !== null &&
+                  key !== null &&
                   (groupMap.get(key)?.observationGroup ?? []).includes(
                     currentHoveredWordIndex,
                   )
-              ) ?
-                `transition-color cursor-pointer bg-green-300 keyword-highlight${position}`
-              : "",
-              (
-                key &&
-                  !(groupMap.get(key)?.observationGroup ?? []).includes(
+                  ? (groupMap.get(key)?.isLocatedAt ?? false)
+                    ? "bg-yellow-300"
+                    : "bg-green-300"
+                  : "",
+                currentHoveredWordIndex !== null &&
+                  key !== null &&
+                  (groupMap.get(key)?.["observationGroup"] ?? []).includes(
+                    currentHoveredWordIndex,
+                  )
+                  ? `transition-color cursor-pointer ${position}`
+                  : "",
+                key !== null &&
+                  !(groupMap.get(key)?.["observationGroup"] ?? []).includes(
                     currentHoveredWordIndex ?? -1,
                   )
-              ) ?
-                "text-blue-700 underline"
-              : "",
-            )}
-            onMouseEnter={() => setCurrentHoveredWordIndex(key)}
-            onMouseLeave={() => setCurrentHoveredWordIndex(null)}
-            onClick={async () => {
-              if (key === null) return;
-              setMainExplanation(null);
-              setConceptBasedQuestion(null);
-              setConceptBasedTemplateQuestion(null);
-              setConceptBasedQuestionAnswer(null);
-              setConceptBasedTemplateQuestionAnswer(null);
-              setSelectedNumber(null);
-              openState.open();
-              const gptAnswer: HttpsCallable<
-                { file_name: string; observation_id: number },
-                DetailedResponse
-              > = httpsCallable(functions, "on_detailed_explanation_request");
-              const observationId = groupMap.get(key)?.observationId ?? -1;
-              const r = await gptAnswer({
-                file_name: selectedFileName,
-                observation_id: observationId,
-              });
-              setMainExplanation(r.data.main_explanation);
-              setConceptBasedQuestion(r.data.concept_based_question);
-              setConceptBasedTemplateQuestion(
-                r.data.concept_based_template_question,
-              );
-              setConceptBasedQuestionAnswer(
-                r.data.concept_based_question_answer,
-              );
-              setConceptBasedTemplateQuestionAnswer(
-                r.data.concept_based_template_question_answer,
-              );
-              setSelectedObservationNumber(observationId);
-            }}
-          >
-            {textSnippet}
-          </span>
-        ))}
+                  ? "underline text-blue-700"
+                  : "",
+              )}
+              onMouseEnter={() => setCurrentHoveredWordIndex(key)}
+              onMouseLeave={() => setCurrentHoveredWordIndex(null)}
+              onClick={async () => {
+                if (key === null) return;
+                setMainExplanation(null);
+                setConceptBasedQuestion(null);
+                setConceptBasedTemplateQuestion(null);
+                setConceptBasedQuestionAnswer(null);
+                setConceptBasedTemplateQuestionAnswer(null);
+                setSelectedNumber(null);
+                openState.open();
+                const gptAnswer: HttpsCallable<
+                  { file_name: string; observation_id: number },
+                  DetailedResponse
+                > = httpsCallable(functions, "on_detailed_explanation_request");
+                const observationId =
+                  groupMap.get(+(key ?? -1))?.["observationId"] ?? -1;
+                const r = await gptAnswer({
+                  file_name: selectedFileName,
+                  observation_id: observationId,
+                });
+                setMainExplanation(r.data.main_explanation);
+                setConceptBasedQuestion(r.data.concept_based_question);
+                setConceptBasedTemplateQuestion(
+                  r.data.concept_based_template_question,
+                );
+                setConceptBasedQuestionAnswer(
+                  r.data.concept_based_question_answer,
+                );
+                setConceptBasedTemplateQuestionAnswer(
+                  r.data.concept_based_template_question_answer,
+                );
+                setSelectedObservationNumber(observationId);
+              }}
+            >
+              {textSnippet}
+            </span>
+          ),
+        )}
       </div>
     </>
   );

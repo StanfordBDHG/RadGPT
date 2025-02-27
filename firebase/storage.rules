@@ -18,6 +18,7 @@ service firebase.storage {
       allow read: if isAuthenticatedUserID(userId);
       allow create: if isAuthenticatedUserID(userId)
                     && request.resource.contentType.matches("text/plain");
+      allow delete: if isAuthenticatedUserID(userId);
     } 
   }
 }

@@ -5,6 +5,11 @@
 #
 # SPDX-License-Identifier: MIT
 #
-backoff==2.2.1
-firebase_functions==0.4.2
-openai==1.57.4
+
+from radgraph import RadGraph
+
+model = RadGraph(
+    model_type="radgraph-xl",
+    model_cache_dir="./",
+    tokenizer_cache_dir="./",
+)

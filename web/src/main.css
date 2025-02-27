@@ -11,6 +11,10 @@ SPDX-License-Identifier: MIT
 @tailwind components;
 @tailwind utilities;
 
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
 .keyword-highlight {
   margin: 0 -0.1rem;
   padding: 0 0.1rem;
@@ -36,8 +40,6 @@ SPDX-License-Identifier: MIT
   border-top-right-radius: 0.25rem;
   border-bottom-right-radius: 0.25rem;
 }
-
-
 
 /*
 Based on https://codepen.io/joshuapekera/pen/xGjMMq

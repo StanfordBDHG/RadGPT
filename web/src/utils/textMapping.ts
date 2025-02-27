@@ -22,8 +22,8 @@ const numberCompare = (
     },
   ],
 ) => {
-  const numberA = +a;
-  const numberB = +b;
+  const numberA = Number(a);
+  const numberB = Number(b);
   if (isNaN(numberA) || isNaN(numberB)) {
     throw "Element is not a number";
   }
@@ -32,77 +32,100 @@ const numberCompare = (
   return 1;
 };
 
-export type TextMapping = Record<
-  string,
-  {
+export interface TextMapping {
+  [id: string]: {
     user_provided_text_start: number;
     user_provided_text_end: number;
-  }
->;
+  };
+}
 
 export enum TextBlockPosition {
-  LEFT = "-left",
-  CENTER = "-center",
-  RIGHT = "-right",
-  STAND_ALONE = "",
+  LEFT = "keyword-highlight-left",
+  CENTER = "keyword-highlight-center",
+  RIGHT = "keyword-highlight-right",
+  STAND_ALONE = "keyword-highlight",
+}
+
+export interface TextBlock {
+  token: number | null;
+  textString: string;
+  startPosition: number;
+  textBlockPosition: TextBlockPosition;
 }
 
 export const getTextBlocks = (
   textMapping: TextMapping,
   userProvidedText: string,
 ) => {
-  const textArray: Array<[number | null, string, number, TextBlockPosition]> =
-    [];
+  const textArray: TextBlock[] = [];
 
-  const map = new Map(Object.entries(textMapping).sort(numberCompare));
+  // Sorting the Map according to its keys
+  const sortedMap = new Map(Object.entries(textMapping).sort(numberCompare));
 
   let lastIndex = 0;
   let isPreviousTokenRadGraphRelevant = false;
-  for (const [key, value] of map) {
-    const start = value.user_provided_text_start;
-    const end = value.user_provided_text_end;
+  for (const [key, value] of sortedMap) {
+    const { user_provided_text_start: start, user_provided_text_end: end } =
+      value;
+    if (lastIndex === 0 && start === lastIndex) {
+      // If the first word is already an RadGraph token, it should be added to the textArray right away
+      textArray.push({
+        token: Number(key),
+        textString: userProvidedText.substring(start, end),
+        startPosition: lastIndex,
+        textBlockPosition: TextBlockPosition.STAND_ALONE,
+      });
+      isPreviousTokenRadGraphRelevant = true;
+      lastIndex = end;
+      continue;
+    }
+
     const stringInBetweenRadgraphRelevantTokens = userProvidedText.substring(
       lastIndex,
       start,
     );
     if (stringInBetweenRadgraphRelevantTokens.length > 0) {
-      textArray.push([
-        null,
-        stringInBetweenRadgraphRelevantTokens,
-        lastIndex,
-        TextBlockPosition.STAND_ALONE,
-      ]);
+      textArray.push({
+        token: null,
+        textString: stringInBetweenRadgraphRelevantTokens,
+        startPosition: lastIndex,
+        textBlockPosition: TextBlockPosition.STAND_ALONE,
+      });
       isPreviousTokenRadGraphRelevant = false;
     } else {
       const lastElement = textArray.pop();
       if (lastElement) {
-        const [prevToken, prevText, prevKey] = lastElement;
-        textArray.push([
-          prevToken,
-          prevText,
-          prevKey,
-          isPreviousTokenRadGraphRelevant ?
-            TextBlockPosition.CENTER
-          : TextBlockPosition.LEFT,
-        ]);
+        const {
+          token: prevToken,
+          textString: prevText,
+          startPosition: prevKey,
+        } = lastElement;
+        textArray.push({
+          token: prevToken,
+          textString: prevText,
+          startPosition: prevKey,
+          textBlockPosition: isPreviousTokenRadGraphRelevant
+            ? TextBlockPosition.CENTER
+            : TextBlockPosition.LEFT,
+        });
       }
       isPreviousTokenRadGraphRelevant = true;
     }
-    textArray.push([
-      +key,
-      userProvidedText.substring(start, end),
-      start,
-      isPreviousTokenRadGraphRelevant ?
-        TextBlockPosition.RIGHT
-      : TextBlockPosition.STAND_ALONE,
-    ]);
+    textArray.push({
+      token: Number(key),
+      textString: userProvidedText.substring(start, end),
+      startPosition: start,
+      textBlockPosition: isPreviousTokenRadGraphRelevant
+        ? TextBlockPosition.RIGHT
+        : TextBlockPosition.STAND_ALONE,
+    });
     lastIndex = end;
   }
-  textArray.push([
-    null,
-    userProvidedText.substring(lastIndex),
-    lastIndex,
-    TextBlockPosition.STAND_ALONE,
-  ]);
+  textArray.push({
+    token: null,
+    textString: userProvidedText.substring(lastIndex),
+    startPosition: lastIndex,
+    textBlockPosition: TextBlockPosition.STAND_ALONE,
+  });
   return textArray;
 };
