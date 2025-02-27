@@ -85,7 +85,7 @@ function Dashboard() {
     void fetchFiles();
     setSelectedFile(ref);
     setReportText(medicalReport);
-    setTextMapping(null);
+    setTextMapping(undefined);
     setProcessedAnnotations([]);
     setUserFeedback(null);
   };
