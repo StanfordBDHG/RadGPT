@@ -90,7 +90,7 @@ export function FileCreationForm({
   );
 
   return (
-    <form action="submit" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <Field
         control={form.control}
         name="medicalReportName"

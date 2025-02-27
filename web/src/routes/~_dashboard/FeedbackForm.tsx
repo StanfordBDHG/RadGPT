@@ -56,7 +56,7 @@ export function FeedbackForm({
       <Toaster />
       <div className={className}>
         <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
-        <form action="submit" onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit}>
           <Field
             control={form.control}
             name="medicalReportAnnotationsFeedback"
