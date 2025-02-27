@@ -13,16 +13,15 @@ import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
 import { auth, firestore } from "@/utils/firebase";
+import {ReportText} from "./ReportText";
 import {
   getProcessedAnnotationsFromJSONString,
   type ProcessedAnnotations,
 } from "@/utils/processedAnnotations";
 import { type GetFileListResult, getFileList } from "@/utils/queries";
 import { type TextMapping } from "@/utils/textMapping";
-import { AddFileButton } from "./AddFileButton";
 import { DashboardLayout } from "./DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
-import { ReportText } from "./ReportText";
 import { SideMenu } from "./SideMenu";
 
 function Dashboard() {
@@ -55,14 +54,14 @@ function Dashboard() {
     let ignore = false;
     const annotationReference = doc(
       firestore,
-      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`,
+      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`
     );
     const unsubscribe = onSnapshot(annotationReference, (documentSnapshot) => {
       if (ignore) {
         return;
       }
       const data = getProcessedAnnotationsFromJSONString(
-        documentSnapshot.data(),
+        documentSnapshot.data()
       );
       if (!data) {
         setTextMapping(null);
@@ -102,20 +101,17 @@ function Dashboard() {
         <title>RadGPT</title>
       </Helmet>
       <DashboardLayout
-        title={<AddFileButton onUploadSuccess={onUploadSuccess} />}
         mobile={
           <SideMenu
-            className="px-2 pt-4"
             auth={auth}
             files={files}
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
             onFileDelete={onFileDelete}
+            onUploadSuccess={onUploadSuccess}
           />
         }
         aside={
-          <div className="justify-begin flex h-full w-full flex-col items-start px-2 xl:px-0">
-            <AddFileButton onUploadSuccess={onUploadSuccess} />
             <SideMenu
               className="mt-4"
               auth={auth}
@@ -123,8 +119,8 @@ function Dashboard() {
               selectedFile={selectedFile}
               setSelectedFile={setSelectedFile}
               onFileDelete={onFileDelete}
+            onUploadSuccess={onUploadSuccess}
             />
-          </div>
         }
       >
         {reportText ?

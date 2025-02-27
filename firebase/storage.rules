@@ -17,7 +17,8 @@ service firebase.storage {
     match /users/{userId}/reports/{reportHash} {
       allow read: if isAuthenticatedUserID(userId);
       allow create: if isAuthenticatedUserID(userId)
-                    && request.resource.contentType.matches("text/plain");
+                    && request.resource.contentType.matches("text/plain")
+                    && resource == null;
       allow delete: if isAuthenticatedUserID(userId);
     } 
   }

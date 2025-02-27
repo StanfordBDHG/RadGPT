@@ -72,6 +72,11 @@ describe("Authenticated Processed Annotations Access", () => {
             contentType: "text/plain",
         }))
     })
+    test("Test Blocked Overwrite through File Upload User 1", async() => {
+        await assertFails(uploadString(ref(user1, "/users/user1/reports/document"), "test1", "raw", {
+            contentType: "text/plain",
+        }))
+    })
     test("Test Allowed File Upload User 2", async() => {
         await assertFails(uploadString(ref(user2, "/users/user1/reports/document2"), "test1", "raw", {
             contentType: "text/plain",

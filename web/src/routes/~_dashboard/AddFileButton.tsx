@@ -18,13 +18,38 @@ import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOp
 import { type StorageReference } from "firebase/storage";
 import { FilePlus } from "lucide-react";
 import { FileCreationForm } from "./FileCreationForm";
+import { toast } from "@stanfordspezi/spezi-web-design-system";
+import { GetFileListResult } from "@/utils/queries";
 
 interface AddFileModalProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
+  files: GetFileListResult;
+  setSelectedFile: React.Dispatch<
+    React.SetStateAction<StorageReference |undefined>
+  >;
 }
 
-export function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
+export function AddFileButton({
+  onUploadSuccess,
+  files,
+  setSelectedFile,
+}: AddFileModalProps) {
   const openState = useOpenState(false);
+
+  const onUploadSuccessDialogClose = (
+    ref: StorageReference,
+    medicalReport: string
+  ) => {
+    if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
+    openState.close();
+  };
+  const onExistingFileUploadDialogClose = (ref: StorageReference) => {
+    setSelectedFile(ref);
+    toast.info(
+      "This medical report has already been uploaded. It has now been selected."
+    );
+    openState.close();
+  };
 
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
@@ -38,11 +63,10 @@ export function AddFileButton({ onUploadSuccess }: AddFileModalProps) {
           <DialogTitle>Add New Medical Report</DialogTitle>
         </DialogHeader>
         <FileCreationForm
-          onUploadSuccess={(ref, medicalReport) => {
-            if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
-            openState.close();
-          }}
-        />
+          onUploadSuccess={onUploadSuccessDialogClose}
+          files={files}
+          onExistingFileUpload={onExistingFileUploadDialogClose}
+        ></FileCreationForm>
       </DialogContent>
     </Dialog>
   );
