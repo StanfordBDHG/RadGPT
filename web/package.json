@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "lint:ci": "eslint --output-file eslint_report.json --format json .",
-    "prepush": "npm run lint:fix && tsc --noEmit",
+    "prepush": "npm run lint:fix && tsc --b",
     "preview": "vite preview"
   },
   "dependencies": {
