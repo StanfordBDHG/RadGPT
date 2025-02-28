@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { toast } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import {
   Dialog,
@@ -17,16 +18,14 @@ import {
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { type StorageReference } from "firebase/storage";
 import { FilePlus } from "lucide-react";
+import { type Dispatch, type SetStateAction } from "react";
+import { type GetFileListResult } from "@/utils/queries";
 import { FileCreationForm } from "./FileCreationForm";
-import { toast } from "@stanfordspezi/spezi-web-design-system";
-import { GetFileListResult } from "@/utils/queries";
 
 interface AddFileModalProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
   files: GetFileListResult;
-  setSelectedFile: React.Dispatch<
-    React.SetStateAction<StorageReference |undefined>
-  >;
+  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
 }
 
 export const AddFileButton = ({
@@ -38,15 +37,16 @@ export const AddFileButton = ({
 
   const onUploadSuccessDialogClose = (
     ref: StorageReference,
-    medicalReport: string
+    medicalReport: string,
   ) => {
     if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
     openState.close();
   };
+
   const onExistingFileUploadDialogClose = (ref: StorageReference) => {
     setSelectedFile(ref);
     toast.info(
-      "This medical report has already been uploaded. It has now been selected."
+      "This medical report has already been uploaded. It has now been selected.",
     );
     openState.close();
   };

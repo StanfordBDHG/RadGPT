@@ -13,7 +13,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
 import { useAuthenticatedUser } from "@/modules/user";
 import { auth, firestore } from "@/utils/firebase";
-import {ReportText} from "./ReportText";
 import {
   getProcessedAnnotationsFromJSONString,
   type ProcessedAnnotations,
@@ -22,6 +21,7 @@ import { type GetFileListResult, getFileList } from "@/utils/queries";
 import { type TextMapping } from "@/utils/textMapping";
 import { DashboardLayout } from "./DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
+import { ReportText } from "./ReportText";
 import { SideMenu } from "./SideMenu";
 
 const Dashboard = () => {
@@ -54,14 +54,14 @@ const Dashboard = () => {
     let ignore = false;
     const annotationReference = doc(
       firestore,
-      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`
+      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`,
     );
     const unsubscribe = onSnapshot(annotationReference, (documentSnapshot) => {
       if (ignore) {
         return;
       }
       const data = getProcessedAnnotationsFromJSONString(
-        documentSnapshot.data()
+        documentSnapshot.data(),
       );
       if (!data) {
         setTextMapping(null);
@@ -112,15 +112,15 @@ const Dashboard = () => {
           />
         }
         aside={
-            <SideMenu
-              className="mt-4"
-              auth={auth}
-              files={files}
-              selectedFile={selectedFile}
-              setSelectedFile={setSelectedFile}
-              onFileDelete={onFileDelete}
+          <SideMenu
+            className="mt-4"
+            auth={auth}
+            files={files}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+            onFileDelete={onFileDelete}
             onUploadSuccess={onUploadSuccess}
-            />
+          />
         }
       >
         {reportText ?

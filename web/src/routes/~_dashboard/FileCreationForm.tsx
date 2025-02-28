@@ -14,7 +14,7 @@ import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
 import { useAuthenticatedUser } from "@/modules/user";
 import { storage } from "@/utils/firebase";
-import { GetFileListResult } from "@/utils/queries";
+import { type GetFileListResult } from "@/utils/queries";
 
 const formSchema = z.object({
   medicalReportContent: z
@@ -59,9 +59,9 @@ export const FileCreationForm = ({
       const medicalReportContentHash =
         await calculateSHA256Hash(medicalReportContent);
 
-      const hashList = files.map((files) => files?.ref?.name ?? "");
+      const hashList = files.map((files) => files.ref?.name ?? "");
       const hashIndex = hashList.findIndex(
-        (fileHash) => fileHash === medicalReportContentHash
+        (fileHash) => fileHash === medicalReportContentHash,
       );
 
       if (hashIndex > -1) {
@@ -73,7 +73,7 @@ export const FileCreationForm = ({
 
       const storageReference = ref(
         storage,
-        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`
+        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
       );
       const customMetadata = { medicalReportName: medicalReportName };
       const result = await uploadString(
@@ -83,10 +83,10 @@ export const FileCreationForm = ({
         {
           contentType: "text/plain",
           customMetadata: customMetadata,
-        }
+        },
       );
       if (onUploadSuccess) onUploadSuccess(result.ref, medicalReportContent);
-    }
+    },
   );
 
   return (

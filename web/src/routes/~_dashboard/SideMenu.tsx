@@ -12,8 +12,8 @@ import { type Auth } from "firebase/auth";
 import { type StorageReference } from "firebase/storage";
 import { type Dispatch, type SetStateAction } from "react";
 import { type GetFileListResult } from "@/utils/queries";
+import { AddFileButton } from "./AddFileButton";
 import { FileList } from "./FileList";
-import {AddFileButton} from "./AddFileButton";
 
 interface SideMenuProps {
   auth: Auth;
@@ -35,7 +35,7 @@ export const SideMenu = ({
   onUploadSuccess,
 }: SideMenuProps) => {
   return (
-    <div className="flex flex-col items-start justify-begin w-full h-full px-2 xl:px-0 lg:mt-0 mt-3">
+    <div className="justify-begin mt-3 flex h-full w-full flex-col items-start px-2 lg:mt-0 xl:px-0">
       <AddFileButton
         onUploadSuccess={onUploadSuccess}
         files={files}
@@ -43,8 +43,8 @@ export const SideMenu = ({
       />
       <div
         className={cn(
-          "flex flex-col items-start w-full h-full mt-4",
-          className
+          "mt-4 flex h-full w-full flex-col items-start",
+          className,
         )}
       >
         <FileList
@@ -59,4 +59,4 @@ export const SideMenu = ({
       </div>
     </div>
   );
-}
+};
