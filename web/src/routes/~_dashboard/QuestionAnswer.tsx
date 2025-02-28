@@ -108,7 +108,6 @@ export const QuestionAnswer = ({
               onClick={onDislike}
             />
             <form
-              action="submit"
               className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}
             >
