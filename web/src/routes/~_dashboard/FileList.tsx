@@ -38,14 +38,14 @@ export const FileList = ({
           <button
             onClick={() => setSelectedFile(item.ref)}
             className={cn(
-              item.ref?.name === selectedFile?.name ? "font-bold" : "",
-              "cursor-pointer",
+              "interactive-opacity",
+              item.ref?.name === selectedFile?.name && "font-bold",
             )}
           >
             {item.customName}
           </button>
           <button
-            className="ml-auto cursor-pointer"
+            className="interactive-opacity ml-auto"
             onClick={() => onDelete(item.ref)}
           >
             <Trash2 className="w-5" />
