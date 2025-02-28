@@ -35,7 +35,7 @@ export const FileList = ({
     <div className="flex w-full flex-col">
       {files.map((item) => (
         <div className="flex flex-row" key={item.ref?.name}>
-          <a
+          <button
             onClick={() => setSelectedFile(item.ref)}
             className={cn(
               item.ref?.name === selectedFile?.name ? "font-bold" : "",
@@ -43,13 +43,13 @@ export const FileList = ({
             )}
           >
             {item.customName}
-          </a>
-          <a
+          </button>
+          <button
             className="ml-auto cursor-pointer"
             onClick={() => onDelete(item.ref)}
           >
             <Trash2 className="w-5" />
-          </a>
+          </button>
         </div>
       ))}
     </div>
