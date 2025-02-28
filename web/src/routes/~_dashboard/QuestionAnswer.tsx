@@ -95,14 +95,14 @@ export const QuestionAnswer = ({
           <div className="mt-2 flex flex-row items-center pb-2">
             <ThumbsUp
               className={cn(
-                "h-[1.5rem] cursor-pointer",
+                "h-6 cursor-pointer",
                 like ? "text-green-700" : "text-gray-300 hover:text-green-700",
               )}
               onClick={onLike}
             />
             <ThumbsDown
               className={cn(
-                "h-[1.5rem] cursor-pointer",
+                "h-6 cursor-pointer",
                 dislike ? "text-red-700" : "text-gray-300 hover:text-red-700",
               )}
               onClick={onDislike}
