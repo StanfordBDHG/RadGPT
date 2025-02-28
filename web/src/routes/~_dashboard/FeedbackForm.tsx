@@ -21,15 +21,17 @@ const formSchema = z.object({
     .min(1, "Content for medical report feedback is required!"),
 });
 
+interface FeedbackFormProps {
+  className: string;
+  selectedFileName: string;
+  feedback: string | null;
+}
+
 export const FeedbackForm = ({
   className,
   selectedFileName,
   feedback,
-}: {
-  className: string;
-  selectedFileName: string;
-  feedback: string | null;
-}) => {
+}: FeedbackFormProps) => {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
