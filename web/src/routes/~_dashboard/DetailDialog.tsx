@@ -16,8 +16,8 @@ import {
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import { firestore } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
-import { firestore } from "@/utils/firebase";
 import { QuestionAnswer } from "./QuestionAnswer";
 
 interface DetailDialogProps {

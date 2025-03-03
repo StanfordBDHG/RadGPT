@@ -8,7 +8,7 @@
 
 import { type User } from "firebase/auth";
 import { type FullMetadata, getMetadata, listAll, ref } from "firebase/storage";
-import { storage } from "./firebase";
+import { storage } from "@/modules/firebase/app";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   const dateFile1 = new Date(metaData1.timeCreated);

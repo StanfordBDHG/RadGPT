@@ -10,7 +10,7 @@ import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { httpsCallable, type HttpsCallable } from "firebase/functions";
 import { useState } from "react";
-import { functions } from "@/utils/firebase";
+import { functions } from "@/modules/firebase/app";
 import {
   getGroupMap,
   type ProcessedAnnotations,
