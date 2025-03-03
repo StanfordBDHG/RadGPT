@@ -19,11 +19,11 @@ interface QuestionAnswerProps {
   isSelected: boolean;
   question: string;
   answer: string;
-  onClick: MouseEventHandler<HTMLParagraphElement> | undefined;
+  onClick: MouseEventHandler;
   like: boolean;
   dislike: boolean;
-  onLike: MouseEventHandler<SVGSVGElement>;
-  onDislike: MouseEventHandler<SVGSVGElement>;
+  onLike: MouseEventHandler;
+  onDislike: MouseEventHandler;
   onFeedbackSubmit: (feedback: string) => Promise<void>;
   textFeedback: string;
 }
@@ -70,12 +70,12 @@ export const QuestionAnswer = ({
 
   return (
     <>
-      <div onClick={onClick} className={"flex cursor-pointer flex-row"}>
+      <button onClick={onClick} className={"interactive-opacity flex flex-row"}>
         {question}
         {isSelected ?
           <ChevronUp className="ml-auto min-w-8" />
         : <ChevronDown className="ml-auto min-w-8" />}
-      </div>
+      </button>
       <div
         ref={ref}
         style={{ height }}
@@ -84,20 +84,32 @@ export const QuestionAnswer = ({
         <div className="text-md text-gray-700">
           {answer}
           <div className="mt-2 flex flex-row items-center pb-2">
-            <ThumbsUp
-              className={cn(
-                "h-6 cursor-pointer",
-                like ? "text-green-700" : "text-gray-300 hover:text-green-700",
-              )}
+            <button
+              aria-label="Like answer"
+              className="focus-ring"
               onClick={onLike}
-            />
-            <ThumbsDown
-              className={cn(
-                "h-6 cursor-pointer",
-                dislike ? "text-red-700" : "text-gray-300 hover:text-red-700",
-              )}
+            >
+              <ThumbsUp
+                className={cn(
+                  "h-6 transition",
+                  like ? "text-green-700" : (
+                    "text-gray-300 hover:text-green-700"
+                  ),
+                )}
+              />
+            </button>
+            <button
               onClick={onDislike}
-            />
+              aria-label="Dislike answer"
+              className="focus-ring"
+            >
+              <ThumbsDown
+                className={cn(
+                  "h-6 transition",
+                  dislike ? "text-red-700" : "text-gray-300 hover:text-red-700",
+                )}
+              />
+            </button>
             <form
               className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}
