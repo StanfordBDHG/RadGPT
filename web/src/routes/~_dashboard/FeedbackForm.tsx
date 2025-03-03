@@ -35,9 +35,6 @@ export const FeedbackForm = ({
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
-    defaultValues: {
-      medicalReportAnnotationsFeedback: "",
-    },
     values: {
       medicalReportAnnotationsFeedback: feedback ?? "",
     },
