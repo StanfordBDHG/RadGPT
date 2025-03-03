@@ -94,7 +94,7 @@ export const FileCreationForm = ({
       <Field
         control={form.control}
         name="medicalReportName"
-        label={"Name"}
+        label="Name"
         render={({ field }) => {
           return <Input type="text" {...field} />;
         }}
@@ -102,7 +102,7 @@ export const FileCreationForm = ({
       <Field
         control={form.control}
         name="medicalReportContent"
-        label={"Medical Report Content"}
+        label="Medical Report Content"
         render={({ field }) => {
           return <Textarea {...field} rows={10} />;
         }}

@@ -66,7 +66,7 @@ export const AddFileButton = ({
           onUploadSuccess={onUploadSuccessDialogClose}
           files={files}
           onExistingFileUpload={onExistingFileUploadDialogClose}
-        ></FileCreationForm>
+        />
       </DialogContent>
     </Dialog>
   );

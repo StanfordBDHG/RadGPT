@@ -70,7 +70,7 @@ export const QuestionAnswer = ({
 
   return (
     <>
-      <button onClick={onClick} className={"interactive-opacity flex flex-row"}>
+      <button onClick={onClick} className="interactive-opacity flex flex-row">
         {question}
         {isSelected ?
           <ChevronUp className="ml-auto min-w-8" />
@@ -79,7 +79,7 @@ export const QuestionAnswer = ({
       <div
         ref={ref}
         style={{ height }}
-        className={"overflow-hidden border-b border-slate-200 duration-200"}
+        className="overflow-hidden border-b border-slate-200 duration-200"
       >
         <div className="text-md text-gray-700">
           {answer}
