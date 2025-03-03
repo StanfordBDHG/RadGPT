@@ -54,8 +54,9 @@ export const AddFileButton = ({
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" onClick={openState.open}>
+        <Button className="mx-auto" onClick={openState.open}>
           <FilePlus />
+          Add New Report
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-screen overflow-y-auto">

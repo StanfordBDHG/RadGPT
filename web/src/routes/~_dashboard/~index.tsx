@@ -113,7 +113,6 @@ const Dashboard = () => {
         }
         aside={
           <SideMenu
-            className="mt-4"
             auth={auth}
             files={files}
             selectedFile={selectedFile}
