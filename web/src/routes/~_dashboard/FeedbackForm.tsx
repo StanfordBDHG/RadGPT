@@ -62,9 +62,7 @@ export const FeedbackForm = ({
           <Field
             control={form.control}
             name="medicalReportAnnotationsFeedback"
-            render={({ field }) => {
-              return <Textarea {...field} />;
-            }}
+            render={({ field }) => <Textarea {...field} />}
           />
           <Button type="submit" isPending={form.formState.isSubmitting}>
             Submit

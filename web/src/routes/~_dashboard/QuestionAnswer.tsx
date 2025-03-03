@@ -9,15 +9,11 @@
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
+import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { ChevronDown, ChevronUp, ThumbsDown, ThumbsUp } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type MouseEventHandler,
-  type FormEvent,
-} from "react";
+import { useEffect, useRef, useState, type MouseEventHandler } from "react";
+import { z } from "zod";
 
 interface QuestionAnswerProps {
   isSelected: boolean;
@@ -32,6 +28,10 @@ interface QuestionAnswerProps {
   textFeedback: string;
 }
 
+const formSchema = z.object({
+  feedback: z.string(),
+});
+
 export const QuestionAnswer = ({
   isSelected,
   question,
@@ -45,37 +45,28 @@ export const QuestionAnswer = ({
   textFeedback,
 }: QuestionAnswerProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const feedbackRef = useRef<HTMLInputElement>(null);
-  const [isPending, setIsPending] = useState(false);
   const [height, setHeight] = useState(0);
+
+  const form = useForm({
+    formSchema,
+    defaultValues: {
+      feedback: textFeedback,
+    },
+  });
 
   useEffect(() => {
     const heightString = !isSelected ? 0 : (ref.current?.scrollHeight ?? 0);
     setHeight(heightString);
   }, [isSelected]);
 
-  if (feedbackRef.current !== null) {
-    feedbackRef.current.value = textFeedback;
-  }
-
-  const handleSubmit = async (formEvent: FormEvent) => {
-    formEvent.preventDefault();
-    setIsPending(true);
-
-    // Source: https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forms_and_events/
-    const target = formEvent.target as typeof formEvent.target & {
-      textFeedback: { value: string | null } | null;
-    };
-
+  const handleSubmit = form.handleSubmit(async ({ feedback }) => {
     try {
-      await onFeedbackSubmit(target.textFeedback?.value ?? "");
+      await onFeedbackSubmit(feedback);
       toast.success("The feedback has been submitted, thank you!");
     } catch {
       toast.error("An error occurred while submitting the feedback!");
-    } finally {
-      setIsPending(false);
     }
-  };
+  });
 
   return (
     <>
@@ -87,7 +78,7 @@ export const QuestionAnswer = ({
       </div>
       <div
         ref={ref}
-        style={{ height: height }}
+        style={{ height }}
         className={"overflow-hidden border-b border-slate-200 duration-200"}
       >
         <div className="text-md text-gray-700">
@@ -111,13 +102,20 @@ export const QuestionAnswer = ({
               className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}
             >
-              <Input
-                ref={feedbackRef}
+              <Field
+                control={form.control}
+                name="feedback"
                 className="w-full"
-                name="textFeedback"
-                placeholder="Feedback"
+                checkEmptyError
+                render={({ field }) => (
+                  <Input placeholder="Feedback" {...field} />
+                )}
               />
-              <Button type="submit" className="ml-3" isPending={isPending}>
+              <Button
+                type="submit"
+                className="ml-3"
+                isPending={form.formState.isSubmitting}
+              >
                 Submit
               </Button>
             </form>
