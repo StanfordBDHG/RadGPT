@@ -8,9 +8,8 @@
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { httpsCallable, type HttpsCallable } from "firebase/functions";
 import { useState } from "react";
-import { functions } from "@/modules/firebase/app";
+import { callables } from "@/modules/firebase/app";
 import {
   getGroupMap,
   type ProcessedAnnotations,
@@ -23,16 +22,6 @@ interface ReportTextProp {
   selectedFileName: string;
   textMapping: TextMapping | null;
   processedAnnotations: ProcessedAnnotations[];
-}
-
-interface DetailedResponse {
-  main_explanation: string;
-
-  concept_based_question: string | null;
-  concept_based_question_answer: string | null;
-
-  concept_based_template_question: string | null;
-  concept_based_template_question_answer: string | null;
 }
 
 export const ReportText = ({
@@ -128,27 +117,22 @@ export const ReportText = ({
                   setConceptBasedTemplateQuestionAnswer(null);
                   setSelectedNumber(null);
                   openState.open();
-                  const gptAnswer: HttpsCallable<
-                    { file_name: string; observation_id: number },
-                    DetailedResponse
-                  > = httpsCallable(
-                    functions,
-                    "on_detailed_explanation_request",
+                  const response = await callables.onDetailedExplanationRequest(
+                    {
+                      file_name: selectedFileName,
+                      observation_id: group.observationId,
+                    },
                   );
-                  const r = await gptAnswer({
-                    file_name: selectedFileName,
-                    observation_id: group.observationId,
-                  });
-                  setMainExplanation(r.data.main_explanation);
-                  setConceptBasedQuestion(r.data.concept_based_question);
+                  setMainExplanation(response.data.main_explanation);
+                  setConceptBasedQuestion(response.data.concept_based_question);
                   setConceptBasedTemplateQuestion(
-                    r.data.concept_based_template_question,
+                    response.data.concept_based_template_question,
                   );
                   setConceptBasedQuestionAnswer(
-                    r.data.concept_based_question_answer,
+                    response.data.concept_based_question_answer,
                   );
                   setConceptBasedTemplateQuestionAnswer(
-                    r.data.concept_based_template_question_answer,
+                    response.data.concept_based_template_question_answer,
                   );
                   setSelectedObservationNumber(group.observationId);
                 }}

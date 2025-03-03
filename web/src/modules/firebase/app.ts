@@ -12,6 +12,7 @@ import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
+import { getCallables } from "./utils";
 import { env } from "@/env";
 
 // Your web app's Firebase configuration
@@ -47,3 +48,5 @@ export const functions = getFunctions(app);
 if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
   connectFunctionsEmulator(functions, "localhost", 5001);
 }
+
+export const callables = getCallables(functions);
