@@ -7,77 +7,40 @@
 //
 
 import { test, expect } from "@playwright/test";
-import { authenticateWithGoogle } from "../utils";
+import { addNewReport, authenticateWithGoogle } from "../utils";
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
-  await expect(
-    page.locator("div").filter({ hasText: /^Please add or select a file$/ }),
-  ).toBeVisible();
-  await page.getByRole("button").first().click();
-  await page.getByLabel("Name").fill("Abdomen CT");
-  await page.getByLabel("Name").press("Tab");
-  await page
-    .getByLabel("Medical Report Content")
-    .fill(
+  await expect(page.getByText(/Please add or select a file/)).toBeVisible();
+  await addNewReport(page, {
+    name: "Abdomen CT",
+    content:
       "Study Type: CT Abdomen and Pelvis\nIndication: Evaluation for kidney stones due to symptoms of flank pain and hematuria.\nFindings:\nThe kidneys appear normal in size, shape, and position. There is no evidence of hydronephrosis, masses, or calcifications within either kidney. The renal parenchyma and collecting systems are within normal limits. No signs of renal calculi or obstruction in either ureter.\nIn the urinary bladder, a small, non-obstructing calculus is visualized measuring approximately [size in mm]. The calculus is located in the lower portion of the bladder and is not causing any noticeable obstruction or irritation of the bladder wall.\nImpression:\nSmall non-obstructing bladder calculus without evidence of associated hydronephrosis or renal calculi. The stone appears benign, and no immediate intervention is necessary.\nNo other abnormalities detected in the kidneys or urinary tract.",
-    );
-  await page.getByRole("button", { name: "Submit" }).click();
-  await expect(
-    page
-      .locator("div")
-      .filter({ hasText: "Study Type: CT Abdomen and" })
-      .nth(2),
-  ).toBeVisible();
+  });
+  await expect(page.getByText(/Study Type: CT Abdomen and/)).toBeVisible();
   await expect(page.getByText("FeedbackSubmit")).toBeVisible();
-  await page.getByRole("button").first().click();
-  await page.getByLabel("Name").fill("Hypodense Lesion");
-  await page.getByLabel("Medical Report Content").click();
-  await page
-    .getByLabel("Medical Report Content")
-    .fill(
+  await addNewReport(page, {
+    name: "Hypodense Lesion",
+    content:
       "Hypodense lesion is observed in the right hepatic lobe, measuring 2.5 cm and appearing non-enhancing on contrast-enhanced imaging, suggestive of a benign cyst.",
-    );
-  await page.getByRole("button", { name: "Submit" }).click();
+  });
   await expect(page.getByText("Hypodense lesion is observed")).toBeVisible();
   await page.getByText("FeedbackSubmit").click();
   await expect(page.getByText("FeedbackSubmit")).toBeVisible();
-  await expect(
-    page
-      .locator("div")
-      .filter({ hasText: /^Abdomen CT$/ })
-      .nth(0),
-  ).toBeVisible();
-  await expect(
-    page
-      .locator("div")
-      .filter({ hasText: /^Hypodense Lesion$/ })
-      .nth(0),
-  ).toBeVisible();
-  await page
-    .locator("div")
-    .filter({ hasText: /^Abdomen CT$/ })
-    .nth(0)
-    .locator("a > .lucide")
+  const getUpload = (hasText: RegExp) =>
+    page.locator("div").filter({ hasText }).nth(0);
+  await expect(getUpload(/^Abdomen CT$/)).toBeVisible();
+  await expect(getUpload(/^Hypodense Lesion$/)).toBeVisible();
+  await getUpload(/^Abdomen CT$/)
+    .getByLabel("Delete")
     .click();
   await expect(
     page.locator("div").filter({ hasText: /^Abdomen CT$/ }),
   ).toHaveCount(0);
-  await expect(
-    page
-      .locator("div")
-      .filter({ hasText: /^Hypodense Lesion$/ })
-      .nth(0),
-  ).toBeVisible();
-  await page
-    .locator("div")
-    .filter({ hasText: /^Hypodense Lesion$/ })
-    .nth(0)
-    .locator("a > .lucide")
+  await expect(getUpload(/^Hypodense Lesion$/)).toBeVisible();
+  await getUpload(/^Hypodense Lesion$/)
+    .getByLabel("Delete")
     .click();
-  await expect(
-    page.locator("div").filter({ hasText: /^Abdomen CT$/ }),
-  ).toHaveCount(0);
   await expect(
     page.locator("div").filter({ hasText: /^Hypodense Lesion$/ }),
   ).toHaveCount(0);

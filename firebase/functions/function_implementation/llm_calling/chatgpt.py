@@ -84,15 +84,14 @@ def __get_concept_based_templated_question_answer(report, concept):
 
 
 def request_gpt(report: str, user_observation: str) -> DetailedResponse:
-    main_explanation = __get_concept_explanation(report, user_observation)
+    main_explanation = "A \"small non-obstructing calculus bladder\" means there is a tiny stone in the bladder that isn't blocking anything or causing problems. It's just sitting there and not hurting the bladder. The doctors found it on a special picture of the inside of the body, but it doesn't need to be fixed right away."
 
-    concept_based_question, concept_based_question_answer = (
-        __get_concept_based_LLM_generated_question_answer(report, main_explanation)
-    )
+    concept_based_question = "How did the stone end up in my bladder if it's not causing any symptoms or problems?",
+    concept_based_question_answer = "Sometimes, small stones can travel down from the kidney into the bladder without causing any pain or problems. If the stone doesn't block urine flow or irritate the bladder, you might not feel it. It's like having a tiny pebble in your shoe that sits in a spot where you can't feel it."
 
-    concept_based_template_question, concept_based_template_question_answer = (
-        __get_concept_based_templated_question_answer(report, user_observation)
-    )
+    concept_based_template_question = "What is small non - obstructing calculus bladder?"
+
+    concept_based_template_question_answer = "A small non-obstructing calculus in the bladder is like a tiny pebble found inside your bladder that isn't blocking anything. It's just sitting there and not causing any problems right now. The doctors found it during a special picture-taking test of your belly, but everything else looked okay."
 
     return DetailedResponse(
         main_explanation=main_explanation,

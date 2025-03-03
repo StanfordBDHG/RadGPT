@@ -8,5 +8,5 @@
 
 --find-links https://download.pytorch.org/whl/torch_stable.html
 functions_framework==3.8.2
-torch==2.3.0+cpu
+torch==2.3.0
 radgraph==0.1.14

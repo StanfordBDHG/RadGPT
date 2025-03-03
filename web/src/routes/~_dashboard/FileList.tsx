@@ -47,6 +47,7 @@ export const FileList = ({
           <button
             className="interactive-opacity ml-auto"
             onClick={() => onDelete(item.ref)}
+            aria-label="Delete"
           >
             <Trash2 className="w-5" />
           </button>
