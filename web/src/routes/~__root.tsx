@@ -9,6 +9,7 @@
 import { SpeziProvider, Toaster } from "@stanfordspezi/spezi-web-design-system";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { type ComponentProps } from "react";
+import { ReactQueryClientProvider } from "@/modules/query/ReactQueryClientProvider";
 import {
   AuthenticatedUserContext,
   useAuthenticatedUserContextProvider,
@@ -23,10 +24,12 @@ const RootComponent = () => (
   <AuthenticatedUserContext.Provider
     value={useAuthenticatedUserContextProvider()}
   >
-    <SpeziProvider router={routerProps}>
-      <Outlet />
-      <Toaster />
-    </SpeziProvider>
+    <ReactQueryClientProvider>
+      <SpeziProvider router={routerProps}>
+        <Outlet />
+        <Toaster />
+      </SpeziProvider>
+    </ReactQueryClientProvider>
   </AuthenticatedUserContext.Provider>
 );
 
