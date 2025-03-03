@@ -12,8 +12,8 @@ import { getAuth, connectAuthEmulator } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
-import { getCallables } from "./utils";
 import { env } from "@/env";
+import { getCallables } from "./utils";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {

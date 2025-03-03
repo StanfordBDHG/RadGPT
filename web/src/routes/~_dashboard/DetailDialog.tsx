@@ -5,6 +5,7 @@
 //
 // SPDX-License-Identifier: MIT
 //
+/* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
 import { type DocumentReference } from "@firebase/firestore";
 import {
@@ -13,84 +14,95 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
+import { type useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { firestore } from "@/modules/firebase/app";
+import { callables, firestore } from "@/modules/firebase/app";
+import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
 import { useAuthenticatedUser } from "@/modules/user";
 import { QuestionAnswer } from "./QuestionAnswer";
 
 interface DetailDialogProps {
-  answer: string | null;
-  openState: {
-    isOpen: boolean;
-    setIsOpen: Dispatch<SetStateAction<boolean>>;
-    close: () => void;
-    open: () => void;
-    toggle: () => void;
-  };
-  conceptBasedQuestion: string | null;
-  conceptBasedQuestionAnswer: string | null;
-  conceptBasedTemplateQuestion: string | null;
-  conceptBasedTemplateQuestionAnswer: string | null;
-  selectedNumber: number | null;
-  setSelectedNumber: Dispatch<SetStateAction<number | null>>;
+  openState: ReturnType<typeof useStatefulOpenState<{ observationId: number }>>;
+  selectedNumber: number | undefined;
+  setSelectedNumber: Dispatch<SetStateAction<number | undefined>>;
   selectedFileName: string;
 }
 
+interface Feedback {
+  feedback: {
+    like1: boolean | null;
+    like2: boolean | null;
+    dislike1: boolean | null;
+    dislike2: boolean | null;
+    textFeedback1: string | null;
+    textFeedback2: string | null;
+  };
+}
+
+const detailDialogQueries = {
+  onDetailedExplanationRequest: (
+    payload: OnDetailedExplanationRequestInput | null,
+  ) =>
+    queryOptions({
+      queryKey: ["onDetailedExplanationRequest", payload],
+      queryFn:
+        payload ?
+          () => callables.onDetailedExplanationRequest(payload)
+        : skipToken,
+    }),
+};
+
 export const DetailDialog = ({
-  answer,
   openState,
-  conceptBasedQuestion: concept_based_question,
-  conceptBasedQuestionAnswer: concept_based_question_answer,
-  conceptBasedTemplateQuestion: concept_based_template_question,
-  conceptBasedTemplateQuestionAnswer: concept_based_template_question_answer,
   selectedNumber,
   setSelectedNumber,
   selectedFileName,
 }: DetailDialogProps) => {
   const currentUser = useAuthenticatedUser();
 
-  const [like1, setLike1] = useState(false);
-  const [dislike1, setDislike1] = useState(false);
-  const [textFeedback1, setTextFeedback1] = useState("");
-  const [like2, setLike2] = useState(false);
-  const [dislike2, setDislike2] = useState(false);
-  const [textFeedback2, setTextFeedback2] = useState("");
+  const detailedExplanationRequestQuery = useQuery(
+    detailDialogQueries.onDetailedExplanationRequest({
+      observation_id: openState.state?.observationId ?? -1,
+      file_name: selectedFileName,
+    }),
+  );
+  const {
+    main_explanation,
+    concept_based_question_answer = "",
+    concept_based_template_question = "",
+    concept_based_template_question_answer = "",
+    concept_based_question = "",
+  } = detailedExplanationRequestQuery.data?.data ?? {};
 
-  interface Feedback {
-    feedback: {
-      like1: boolean | null;
-      like2: boolean | null;
-      dislike1: boolean | null;
-      dislike2: boolean | null;
-      textFeedback1: string | null;
-      textFeedback2: string | null;
+  const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationId}`;
+
+  const [feedback, setFeedback] = useState<Feedback>();
+
+  const { like1, dislike1, textFeedback1, like2, dislike2, textFeedback2 } =
+    feedback?.feedback ?? {
+      like1: false,
+      dislike1: false,
+      textFeedback1: "",
+      like2: false,
+      dislike2: false,
+      textFeedback2: "",
     };
-  }
 
   const feedbackRef = doc(
     firestore,
-    `users/${currentUser?.uid}/${selectedFileName}`,
+    `users/${currentUser?.uid}/${cachedFileName}`,
   ) as DocumentReference<Feedback, Feedback>;
 
   useEffect(() => {
-    if (currentUser === null) {
-      return;
-    }
+    if (currentUser === null) return;
     let ignore = false;
 
     const unsubscribe = onSnapshot(feedbackRef, (documentSnapshot) => {
-      if (ignore) {
-        return;
-      }
-      const data = documentSnapshot.data()?.feedback;
-      setLike1(data?.like1 ?? false);
-      setLike2(data?.like2 ?? false);
-      setDislike1(data?.dislike1 ?? false);
-      setDislike2(data?.dislike2 ?? false);
-      setTextFeedback1(data?.textFeedback1 ?? "");
-      setTextFeedback2(data?.textFeedback2 ?? "");
+      if (ignore) return;
+      setFeedback(documentSnapshot.data());
     });
     return () => {
       ignore = true;
@@ -98,7 +110,7 @@ export const DetailDialog = ({
     };
   }, [currentUser, feedbackRef]);
 
-  const onLikeFunctor = (id: number) => () =>
+  const createOnLike = (id: number) => () =>
     updateDoc(feedbackRef, {
       feedback: {
         like1: (like1 && id !== 1) || (!like1 && id === 1),
@@ -109,7 +121,7 @@ export const DetailDialog = ({
         textFeedback2: textFeedback2,
       },
     });
-  const onDislikeFunctor = (id: number) => () =>
+  const createOnDislike = (id: number) => () =>
     updateDoc(feedbackRef, {
       feedback: {
         dislike1: (dislike1 && id !== 1) || (!dislike1 && id === 1),
@@ -120,7 +132,7 @@ export const DetailDialog = ({
         textFeedback2: textFeedback2,
       },
     });
-  const onFeedbackFunctor = (id: number) => async (feedback: string) =>
+  const createOnFeedback = (id: number) => async (feedback: string) =>
     updateDoc(feedbackRef, {
       feedback: {
         dislike1: dislike1,
@@ -133,12 +145,12 @@ export const DetailDialog = ({
     });
 
   return (
-    <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
+    <Dialog open={openState.isOpen} onOpenChange={openState.close}>
       <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detailed Explanation</DialogTitle>
-          {answer !== null ?
-            <p>{answer}</p>
+          {main_explanation ?
+            <p>{main_explanation}</p>
           : <Loader2 className="mt-2 animate-spin" />}
           {concept_based_question && concept_based_question_answer && (
             <h3 className="text-lg font-semibold">
@@ -149,18 +161,18 @@ export const DetailDialog = ({
             <QuestionAnswer
               onClick={() =>
                 selectedNumber === 1 ?
-                  setSelectedNumber(null)
+                  setSelectedNumber(undefined)
                 : setSelectedNumber(1)
               }
               isSelected={selectedNumber === 1}
               question={concept_based_question}
               answer={concept_based_question_answer}
-              onLike={onLikeFunctor(1)}
-              onDislike={onDislikeFunctor(1)}
+              onLike={createOnLike(1)}
+              onDislike={createOnDislike(1)}
               like={like1}
               dislike={dislike1}
               textFeedback={textFeedback1}
-              onFeedbackSubmit={onFeedbackFunctor(1)}
+              onFeedbackSubmit={createOnFeedback(1)}
             />
           )}
           {concept_based_template_question &&
@@ -168,18 +180,18 @@ export const DetailDialog = ({
               <QuestionAnswer
                 onClick={() =>
                   selectedNumber === 2 ?
-                    setSelectedNumber(null)
+                    setSelectedNumber(undefined)
                   : setSelectedNumber(2)
                 }
                 isSelected={selectedNumber === 2}
                 question={concept_based_template_question}
                 answer={concept_based_template_question_answer}
-                onLike={onLikeFunctor(2)}
-                onDislike={onDislikeFunctor(2)}
+                onLike={createOnLike(2)}
+                onDislike={createOnDislike(2)}
                 like={like2}
                 dislike={dislike2}
                 textFeedback={textFeedback2}
-                onFeedbackSubmit={onFeedbackFunctor(2)}
+                onFeedbackSubmit={createOnFeedback(2)}
               />
             )}
         </DialogHeader>

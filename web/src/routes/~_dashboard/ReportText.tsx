@@ -7,9 +7,8 @@
 //
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { useState } from "react";
-import { callables } from "@/modules/firebase/app";
 import {
   getGroupMap,
   type ProcessedAnnotations,
@@ -33,24 +32,8 @@ export const ReportText = ({
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
-  const openState = useOpenState(false);
-  const [mainExplanation, setMainExplanation] = useState<null | string>(null);
-  const [conceptBasedQuestion, setConceptBasedQuestion] = useState<
-    null | string
-  >(null);
-  const [conceptBasedQuestionAnswer, setConceptBasedQuestionAnswer] = useState<
-    null | string
-  >(null);
-  const [conceptBasedTemplateQuestion, setConceptBasedTemplateQuestion] =
-    useState<null | string>(null);
-  const [
-    conceptBasedTemplateQuestionAnswer,
-    setConceptBasedTemplateQuestionAnswer,
-  ] = useState<null | string>(null);
-  const [selectedNumber, setSelectedNumber] = useState<null | number>(null);
-  const [selectedObservationNumber, setSelectedObservationNumber] = useState<
-    null | number
-  >(null);
+  const openState = useStatefulOpenState<{ observationId: number }>();
+  const [selectedNumber, setSelectedNumber] = useState<number>();
 
   if (!textMapping) {
     return (
@@ -66,15 +49,10 @@ export const ReportText = ({
   return (
     <>
       <DetailDialog
-        answer={mainExplanation}
         openState={openState}
-        conceptBasedQuestion={conceptBasedQuestion}
-        conceptBasedQuestionAnswer={conceptBasedQuestionAnswer}
-        conceptBasedTemplateQuestion={conceptBasedTemplateQuestion}
-        conceptBasedTemplateQuestionAnswer={conceptBasedTemplateQuestionAnswer}
         selectedNumber={selectedNumber}
         setSelectedNumber={setSelectedNumber}
-        selectedFileName={`${selectedFileName}/cached_answer_${selectedObservationNumber}`}
+        selectedFileName={selectedFileName}
       />
       <div className="whitespace-pre-wrap leading-5 tracking-wide">
         {textBlocks.map(
@@ -109,33 +87,9 @@ export const ReportText = ({
                 )}
                 onMouseEnter={() => setCurrentHoveredWordIndex(key)}
                 onMouseLeave={() => setCurrentHoveredWordIndex(null)}
-                onClick={async () => {
-                  setMainExplanation(null);
-                  setConceptBasedQuestion(null);
-                  setConceptBasedTemplateQuestion(null);
-                  setConceptBasedQuestionAnswer(null);
-                  setConceptBasedTemplateQuestionAnswer(null);
-                  setSelectedNumber(null);
-                  openState.open();
-                  const response = await callables.onDetailedExplanationRequest(
-                    {
-                      file_name: selectedFileName,
-                      observation_id: group.observationId,
-                    },
-                  );
-                  setMainExplanation(response.data.main_explanation);
-                  setConceptBasedQuestion(response.data.concept_based_question);
-                  setConceptBasedTemplateQuestion(
-                    response.data.concept_based_template_question,
-                  );
-                  setConceptBasedQuestionAnswer(
-                    response.data.concept_based_question_answer,
-                  );
-                  setConceptBasedTemplateQuestionAnswer(
-                    response.data.concept_based_template_question_answer,
-                  );
-                  setSelectedObservationNumber(group.observationId);
-                }}
+                onClick={() =>
+                  openState.open({ observationId: group.observationId })
+                }
               >
                 {textSnippet}
               </button>
