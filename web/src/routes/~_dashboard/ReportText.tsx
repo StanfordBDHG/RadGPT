@@ -121,7 +121,6 @@ export const ReportText = ({
                 onMouseEnter={() => setCurrentHoveredWordIndex(key)}
                 onMouseLeave={() => setCurrentHoveredWordIndex(null)}
                 onClick={async () => {
-                  if (key === null) return;
                   setMainExplanation(null);
                   setConceptBasedQuestion(null);
                   setConceptBasedTemplateQuestion(null);
@@ -136,10 +135,9 @@ export const ReportText = ({
                     functions,
                     "on_detailed_explanation_request",
                   );
-                  const observationId = groupMap.get(key)?.observationId ?? -1;
                   const r = await gptAnswer({
                     file_name: selectedFileName,
-                    observation_id: observationId,
+                    observation_id: group.observationId,
                   });
                   setMainExplanation(r.data.main_explanation);
                   setConceptBasedQuestion(r.data.concept_based_question);
@@ -152,7 +150,7 @@ export const ReportText = ({
                   setConceptBasedTemplateQuestionAnswer(
                     r.data.concept_based_template_question_answer,
                   );
-                  setSelectedObservationNumber(observationId);
+                  setSelectedObservationNumber(group.observationId);
                 }}
               >
                 {textSnippet}
