@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { SpeziProvider } from "@stanfordspezi/spezi-web-design-system";
+import { SpeziProvider, Toaster } from "@stanfordspezi/spezi-web-design-system";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { type ComponentProps } from "react";
 import {
@@ -25,6 +25,7 @@ const RootComponent = () => (
   >
     <SpeziProvider router={routerProps}>
       <Outlet />
+      <Toaster />
     </SpeziProvider>
   </AuthenticatedUserContext.Provider>
 );

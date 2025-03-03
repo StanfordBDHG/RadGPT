@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { toast, Toaster } from "@stanfordspezi/spezi-web-design-system";
+import { toast } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
@@ -51,21 +51,18 @@ export const FeedbackForm = ({
   );
 
   return (
-    <>
-      <Toaster />
-      <div className={className}>
-        <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
-        <form onSubmit={handleSubmit}>
-          <Field
-            control={form.control}
-            name="medicalReportAnnotationsFeedback"
-            render={({ field }) => <Textarea {...field} />}
-          />
-          <Button type="submit" isPending={form.formState.isSubmitting}>
-            Submit
-          </Button>
-        </form>
-      </div>
-    </>
+    <div className={className}>
+      <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
+      <form onSubmit={handleSubmit}>
+        <Field
+          control={form.control}
+          name="medicalReportAnnotationsFeedback"
+          render={({ field }) => <Textarea {...field} />}
+        />
+        <Button type="submit" isPending={form.formState.isSubmitting}>
+          Submit
+        </Button>
+      </form>
+    </div>
   );
 };
