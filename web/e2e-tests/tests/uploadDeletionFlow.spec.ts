@@ -7,17 +7,10 @@
 //
 
 import { test, expect } from "@playwright/test";
+import { authenticateWithGoogle } from "../utils";
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
-  await page.goto("./signin?redirect=%2F");
-  const page1Promise = page.waitForEvent("popup");
-  await page.getByRole("button", { name: "Sign in with Google" }).click();
-  const page1 = await page1Promise;
-  await page1.getByRole("button", { name: "Add new account" }).click();
-  await page1
-    .getByRole("button", { name: "Auto-generate user information" })
-    .click();
-  await page1.getByRole("button", { name: "Sign in with Google.com" }).click();
+  await authenticateWithGoogle(page);
   await expect(
     page.locator("div").filter({ hasText: /^Please add or select a file$/ }),
   ).toBeVisible();
