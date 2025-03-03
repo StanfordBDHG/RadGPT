@@ -94,76 +94,71 @@ export const ReportText = ({
             textString: textSnippet,
             startPosition: id,
             textBlockPosition: position,
-          }) => (
-            <span
-              key={`${selectedFileName} ${id}`}
-              className={cn(
-                (
-                  currentHoveredWordIndex !== null &&
-                    key !== null &&
-                    (groupMap.get(key)?.observationGroup ?? []).includes(
-                      currentHoveredWordIndex,
-                    )
-                ) ?
-                  (groupMap.get(key)?.isLocatedAt ?? false) ?
-                    "bg-yellow-300"
-                  : "bg-green-300"
-                : "",
-                (
-                  currentHoveredWordIndex !== null &&
-                    key !== null &&
-                    (groupMap.get(key)?.observationGroup ?? []).includes(
-                      currentHoveredWordIndex,
-                    )
-                ) ?
-                  `transition-color cursor-pointer ${position}`
-                : "",
-                (
-                  key !== null &&
-                    !(groupMap.get(key)?.observationGroup ?? []).includes(
-                      currentHoveredWordIndex ?? -1,
-                    )
-                ) ?
-                  "text-blue-700 underline"
-                : "",
-              )}
-              onMouseEnter={() => setCurrentHoveredWordIndex(key)}
-              onMouseLeave={() => setCurrentHoveredWordIndex(null)}
-              onClick={async () => {
-                if (key === null) return;
-                setMainExplanation(null);
-                setConceptBasedQuestion(null);
-                setConceptBasedTemplateQuestion(null);
-                setConceptBasedQuestionAnswer(null);
-                setConceptBasedTemplateQuestionAnswer(null);
-                setSelectedNumber(null);
-                openState.open();
-                const gptAnswer: HttpsCallable<
-                  { file_name: string; observation_id: number },
-                  DetailedResponse
-                > = httpsCallable(functions, "on_detailed_explanation_request");
-                const observationId = groupMap.get(key)?.observationId ?? -1;
-                const r = await gptAnswer({
-                  file_name: selectedFileName,
-                  observation_id: observationId,
-                });
-                setMainExplanation(r.data.main_explanation);
-                setConceptBasedQuestion(r.data.concept_based_question);
-                setConceptBasedTemplateQuestion(
-                  r.data.concept_based_template_question,
-                );
-                setConceptBasedQuestionAnswer(
-                  r.data.concept_based_question_answer,
-                );
-                setConceptBasedTemplateQuestionAnswer(
-                  r.data.concept_based_template_question_answer,
-                );
-                setSelectedObservationNumber(observationId);
-              }}
-            >
-              {textSnippet}
-            </span>
-          ),
+          }) => {
+            const group = key !== null ? groupMap.get(key) : undefined;
+
+            if (!group)
+              return (
+                <span key={`${selectedFileName} ${id}`}>{textSnippet}</span>
+              );
+
+            const isHovered = group.observationGroup.includes(
+              currentHoveredWordIndex ?? -1,
+            );
+
+            return (
+              <button
+                key={`${selectedFileName} ${id}`}
+                className={cn(
+                  "focus-ring transition-all",
+                  isHovered ?
+                    [
+                      position,
+                      group.isLocatedAt ? "bg-yellow-300" : "bg-green-300",
+                    ]
+                  : "text-blue-700 underline",
+                )}
+                onMouseEnter={() => setCurrentHoveredWordIndex(key)}
+                onMouseLeave={() => setCurrentHoveredWordIndex(null)}
+                onClick={async () => {
+                  if (key === null) return;
+                  setMainExplanation(null);
+                  setConceptBasedQuestion(null);
+                  setConceptBasedTemplateQuestion(null);
+                  setConceptBasedQuestionAnswer(null);
+                  setConceptBasedTemplateQuestionAnswer(null);
+                  setSelectedNumber(null);
+                  openState.open();
+                  const gptAnswer: HttpsCallable<
+                    { file_name: string; observation_id: number },
+                    DetailedResponse
+                  > = httpsCallable(
+                    functions,
+                    "on_detailed_explanation_request",
+                  );
+                  const observationId = groupMap.get(key)?.observationId ?? -1;
+                  const r = await gptAnswer({
+                    file_name: selectedFileName,
+                    observation_id: observationId,
+                  });
+                  setMainExplanation(r.data.main_explanation);
+                  setConceptBasedQuestion(r.data.concept_based_question);
+                  setConceptBasedTemplateQuestion(
+                    r.data.concept_based_template_question,
+                  );
+                  setConceptBasedQuestionAnswer(
+                    r.data.concept_based_question_answer,
+                  );
+                  setConceptBasedTemplateQuestionAnswer(
+                    r.data.concept_based_template_question_answer,
+                  );
+                  setSelectedObservationNumber(observationId);
+                }}
+              >
+                {textSnippet}
+              </button>
+            );
+          },
         )}
       </div>
     </>
