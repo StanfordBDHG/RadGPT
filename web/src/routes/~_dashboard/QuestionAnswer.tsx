@@ -72,9 +72,12 @@ export const QuestionAnswer = ({
     <>
       <button onClick={onClick} className="interactive-opacity flex flex-row">
         {question}
-        {isSelected ?
-          <ChevronUp className="ml-auto min-w-8" />
-        : <ChevronDown className="ml-auto min-w-8" />}
+        <ChevronDown
+          className={cn(
+            "ml-auto min-w-8 transition",
+            isSelected && "rotate-180",
+          )}
+        />
       </button>
       <div
         ref={ref}
