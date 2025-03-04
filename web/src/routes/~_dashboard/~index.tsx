@@ -11,9 +11,8 @@ import { doc, onSnapshot } from "firebase/firestore";
 import { type StorageReference } from "firebase/storage";
 import { useCallback, useEffect, useState } from "react";
 import { Helmet } from "react-helmet";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { auth, firestore } from "@/utils/firebase";
-import {ReportText} from "./ReportText";
 import {
   getProcessedAnnotationsFromJSONString,
   type ProcessedAnnotations,
@@ -22,9 +21,10 @@ import { type GetFileListResult, getFileList } from "@/utils/queries";
 import { type TextMapping } from "@/utils/textMapping";
 import { DashboardLayout } from "./DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
+import { ReportText } from "./ReportText";
 import { SideMenu } from "./SideMenu";
 
-function Dashboard() {
+const Dashboard = () => {
   const currentUser = useAuthenticatedUser();
 
   const [files, setFiles] = useState<GetFileListResult>([]);
@@ -54,14 +54,14 @@ function Dashboard() {
     let ignore = false;
     const annotationReference = doc(
       firestore,
-      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`
+      `users/${currentUser?.uid}/${selectedFile.name}/report_meta_data`,
     );
     const unsubscribe = onSnapshot(annotationReference, (documentSnapshot) => {
       if (ignore) {
         return;
       }
       const data = getProcessedAnnotationsFromJSONString(
-        documentSnapshot.data()
+        documentSnapshot.data(),
       );
       if (!data) {
         setTextMapping(null);
@@ -112,15 +112,14 @@ function Dashboard() {
           />
         }
         aside={
-            <SideMenu
-              className="mt-4"
-              auth={auth}
-              files={files}
-              selectedFile={selectedFile}
-              setSelectedFile={setSelectedFile}
-              onFileDelete={onFileDelete}
+          <SideMenu
+            auth={auth}
+            files={files}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+            onFileDelete={onFileDelete}
             onUploadSuccess={onUploadSuccess}
-            />
+          />
         }
       >
         {reportText ?
@@ -143,7 +142,7 @@ function Dashboard() {
       </DashboardLayout>
     </>
   );
-}
+};
 
 export const Route = createFileRoute("/_dashboard/")({
   component: Dashboard,

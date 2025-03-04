@@ -19,20 +19,20 @@ const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   return 0;
 };
 
-export async function getFileList(currentUser: User) {
+export const getFileList = async (currentUser: User) => {
   const storageReportsReference = ref(
     storage,
-    `users/${currentUser.uid}/reports`
+    `users/${currentUser.uid}/reports`,
   );
   const listResult = await listAll(storageReportsReference);
   const fileMetadata = await Promise.all(
-    listResult.items.map((i) => getMetadata(i))
+    listResult.items.map((i) => getMetadata(i)),
   );
   const fileList = fileMetadata.sort(metaDataCompare).map((fullMetaData) => ({
     ref: fullMetaData.ref,
     customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
   }));
   return fileList;
-}
+};
 
 export type GetFileListResult = Awaited<ReturnType<typeof getFileList>>;

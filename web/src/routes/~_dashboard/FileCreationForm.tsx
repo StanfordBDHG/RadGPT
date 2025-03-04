@@ -12,9 +12,9 @@ import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Text
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { storage } from "@/utils/firebase";
-import { GetFileListResult } from "@/utils/queries";
+import { type GetFileListResult } from "@/utils/queries";
 
 const formSchema = z.object({
   medicalReportContent: z
@@ -40,11 +40,11 @@ interface FileCreationFormProps {
   onExistingFileUpload: (ref: StorageReference) => void;
 }
 
-export function FileCreationForm({
+export const FileCreationForm = ({
   onUploadSuccess,
   files,
   onExistingFileUpload,
-}: FileCreationFormProps) {
+}: FileCreationFormProps) => {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
@@ -59,9 +59,9 @@ export function FileCreationForm({
       const medicalReportContentHash =
         await calculateSHA256Hash(medicalReportContent);
 
-      const hashList = files.map((files) => files?.ref?.name ?? "");
+      const hashList = files.map((files) => files.ref?.name ?? "");
       const hashIndex = hashList.findIndex(
-        (fileHash) => fileHash === medicalReportContentHash
+        (fileHash) => fileHash === medicalReportContentHash,
       );
 
       if (hashIndex > -1) {
@@ -73,7 +73,7 @@ export function FileCreationForm({
 
       const storageReference = ref(
         storage,
-        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`
+        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
       );
       const customMetadata = { medicalReportName: medicalReportName };
       const result = await uploadString(
@@ -83,18 +83,18 @@ export function FileCreationForm({
         {
           contentType: "text/plain",
           customMetadata: customMetadata,
-        }
+        },
       );
       if (onUploadSuccess) onUploadSuccess(result.ref, medicalReportContent);
-    }
+    },
   );
 
   return (
-    <form action="submit" onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit}>
       <Field
         control={form.control}
         name="medicalReportName"
-        label={"Name"}
+        label="Name"
         render={({ field }) => {
           return <Input type="text" {...field} />;
         }}
@@ -102,7 +102,7 @@ export function FileCreationForm({
       <Field
         control={form.control}
         name="medicalReportContent"
-        label={"Medical Report Content"}
+        label="Medical Report Content"
         render={({ field }) => {
           return <Textarea {...field} rows={10} />;
         }}
@@ -112,4 +112,4 @@ export function FileCreationForm({
       </Button>
     </form>
   );
-}
+};

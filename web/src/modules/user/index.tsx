@@ -8,17 +8,10 @@
 
 import { useNavigate } from "@tanstack/react-router";
 import { type User } from "firebase/auth";
-import { type ReactNode, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { auth } from "@/utils/firebase";
-import { AuthenticatedUserContext } from "../context/AuthenticatedUserContext";
 
-interface AuthenticationProviderProps {
-  children?: ReactNode;
-}
-
-export const AuthenticationProvider = ({
-  children,
-}: AuthenticationProviderProps) => {
+export const useAuthenticatedUserContextProvider = () => {
   const [currentUser, setCurrentUser] = useState<null | User>(auth.currentUser);
   const navigate = useNavigate();
 
@@ -31,9 +24,10 @@ export const AuthenticationProvider = ({
     setCurrentUser(newUser);
   });
 
-  return (
-    <AuthenticatedUserContext.Provider value={currentUser}>
-      {children}
-    </AuthenticatedUserContext.Provider>
-  );
+  return currentUser;
 };
+
+export const AuthenticatedUserContext =
+  createContext<ReturnType<typeof useAuthenticatedUserContextProvider>>(null);
+
+export const useAuthenticatedUser = () => useContext(AuthenticatedUserContext);

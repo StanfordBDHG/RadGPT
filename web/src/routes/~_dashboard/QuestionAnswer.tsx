@@ -9,30 +9,30 @@
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
+import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { ChevronDown, ChevronUp, ThumbsDown, ThumbsUp } from "lucide-react";
-import {
-  useEffect,
-  useRef,
-  useState,
-  type MouseEventHandler,
-  type FormEvent,
-} from "react";
+import { useEffect, useRef, useState, type MouseEventHandler } from "react";
+import { z } from "zod";
 
 interface QuestionAnswerProps {
   isSelected: boolean;
   question: string;
   answer: string;
-  onClick: MouseEventHandler<HTMLParagraphElement> | undefined;
+  onClick: MouseEventHandler;
   like: boolean;
   dislike: boolean;
-  onLike: MouseEventHandler<SVGSVGElement>;
-  onDislike: MouseEventHandler<SVGSVGElement>;
+  onLike: MouseEventHandler;
+  onDislike: MouseEventHandler;
   onFeedbackSubmit: (feedback: string) => Promise<void>;
   textFeedback: string;
 }
 
-export function QuestionAnswer({
+const formSchema = z.object({
+  feedback: z.string(),
+});
+
+export const QuestionAnswer = ({
   isSelected,
   question,
   answer,
@@ -43,82 +43,91 @@ export function QuestionAnswer({
   onDislike,
   onFeedbackSubmit,
   textFeedback,
-}: QuestionAnswerProps) {
+}: QuestionAnswerProps) => {
   const ref = useRef<HTMLDivElement>(null);
-  const feedbackRef = useRef<HTMLInputElement>(null);
-  const [isPending, setIsPending] = useState(false);
   const [height, setHeight] = useState(0);
+
+  const form = useForm({
+    formSchema,
+    defaultValues: {
+      feedback: textFeedback,
+    },
+  });
 
   useEffect(() => {
     const heightString = !isSelected ? 0 : (ref.current?.scrollHeight ?? 0);
     setHeight(heightString);
   }, [isSelected]);
 
-  if (feedbackRef.current !== null) {
-    feedbackRef.current.value = textFeedback;
-  }
-
-  const handleSubmit = async (formEvent: FormEvent) => {
-    formEvent.preventDefault();
-    setIsPending(true);
-
-    // Source: https://react-typescript-cheatsheet.netlify.app/docs/basic/getting-started/forms_and_events/
-    const target = formEvent.target as typeof formEvent.target & {
-      textFeedback: { value: string | null } | null;
-    };
-
+  const handleSubmit = form.handleSubmit(async ({ feedback }) => {
     try {
-      await onFeedbackSubmit(target.textFeedback?.value ?? "");
+      await onFeedbackSubmit(feedback);
       toast.success("The feedback has been submitted, thank you!");
     } catch {
       toast.error("An error occurred while submitting the feedback!");
-    } finally {
-      setIsPending(false);
     }
-  };
+  });
 
   return (
     <>
-      <div onClick={onClick} className={"flex cursor-pointer flex-row"}>
+      <button onClick={onClick} className="interactive-opacity flex flex-row">
         {question}
         {isSelected ?
-          <ChevronUp className="ml-auto min-w-[2rem]" />
-        : <ChevronDown className="ml-auto min-w-[2rem]" />}
-      </div>
+          <ChevronUp className="ml-auto min-w-8" />
+        : <ChevronDown className="ml-auto min-w-8" />}
+      </button>
       <div
         ref={ref}
-        style={{ height: height }}
-        className={"overflow-hidden border-b border-slate-200 duration-200"}
+        style={{ height }}
+        className="overflow-hidden border-b border-slate-200 duration-200"
       >
         <div className="text-md text-gray-700">
           {answer}
           <div className="mt-2 flex flex-row items-center pb-2">
-            <ThumbsUp
-              className={cn(
-                "h-[1.5rem] cursor-pointer",
-                like ? "text-green-700" : "text-gray-300 hover:text-green-700",
-              )}
+            <button
+              aria-label="Like answer"
+              className="focus-ring"
               onClick={onLike}
-            />
-            <ThumbsDown
-              className={cn(
-                "h-[1.5rem] cursor-pointer",
-                dislike ? "text-red-700" : "text-gray-300 hover:text-red-700",
-              )}
+            >
+              <ThumbsUp
+                className={cn(
+                  "h-6 transition",
+                  like ? "text-green-700" : (
+                    "text-gray-300 hover:text-green-700"
+                  ),
+                )}
+              />
+            </button>
+            <button
               onClick={onDislike}
-            />
+              aria-label="Dislike answer"
+              className="focus-ring"
+            >
+              <ThumbsDown
+                className={cn(
+                  "h-6 transition",
+                  dislike ? "text-red-700" : "text-gray-300 hover:text-red-700",
+                )}
+              />
+            </button>
             <form
-              action="submit"
               className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}
             >
-              <Input
-                ref={feedbackRef}
+              <Field
+                control={form.control}
+                name="feedback"
                 className="w-full"
-                name="textFeedback"
-                placeholder="Feedback"
+                checkEmptyError
+                render={({ field }) => (
+                  <Input placeholder="Feedback" {...field} />
+                )}
               />
-              <Button type="submit" className="ml-3" isPending={isPending}>
+              <Button
+                type="submit"
+                className="ml-3"
+                isPending={form.formState.isSubmitting}
+              >
                 Submit
               </Button>
             </form>
@@ -127,4 +136,4 @@ export function QuestionAnswer({
       </div>
     </>
   );
-}
+};

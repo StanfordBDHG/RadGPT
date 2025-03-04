@@ -12,17 +12,19 @@ import { Trash2 } from "lucide-react";
 import { type Dispatch, type SetStateAction } from "react";
 import { type GetFileListResult } from "@/utils/queries";
 
-export function FileList({
-  files,
-  selectedFile,
-  setSelectedFile,
-  onFileDelete,
-}: {
+interface FileListProps {
   files: GetFileListResult;
   selectedFile: StorageReference | undefined;
   setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
   onFileDelete: () => Promise<void>;
-}) {
+}
+
+export const FileList = ({
+  files,
+  selectedFile,
+  setSelectedFile,
+  onFileDelete,
+}: FileListProps) => {
   const onDelete = async (fileRef: StorageReference | undefined) => {
     if (fileRef) {
       await deleteObject(fileRef);
@@ -33,23 +35,24 @@ export function FileList({
     <div className="flex w-full flex-col">
       {files.map((item) => (
         <div className="flex flex-row" key={item.ref?.name}>
-          <a
+          <button
             onClick={() => setSelectedFile(item.ref)}
             className={cn(
-              item.ref?.name === selectedFile?.name ? "font-bold" : "",
-              "cursor-pointer",
+              "interactive-opacity",
+              item.ref?.name === selectedFile?.name && "font-bold",
             )}
           >
             {item.customName}
-          </a>
-          <a
-            className="ml-auto cursor-pointer"
+          </button>
+          <button
+            className="interactive-opacity ml-auto"
             onClick={() => onDelete(item.ref)}
+            aria-label="Delete"
           >
             <Trash2 className="w-5" />
-          </a>
+          </button>
         </div>
       ))}
     </div>
   );
-}
+};

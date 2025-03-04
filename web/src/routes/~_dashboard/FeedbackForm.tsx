@@ -6,13 +6,13 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { toast, Toaster } from "@stanfordspezi/spezi-web-design-system";
+import { toast } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { doc, updateDoc } from "firebase/firestore";
 import { z } from "zod";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { firestore } from "@/utils/firebase";
 
 const formSchema = z.object({
@@ -21,21 +21,20 @@ const formSchema = z.object({
     .min(1, "Content for medical report feedback is required!"),
 });
 
-export function FeedbackForm({
-  className,
-  selectedFileName,
-  feedback,
-}: {
+interface FeedbackFormProps {
   className: string;
   selectedFileName: string;
   feedback: string | null;
-}) {
+}
+
+export const FeedbackForm = ({
+  className,
+  selectedFileName,
+  feedback,
+}: FeedbackFormProps) => {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
-    defaultValues: {
-      medicalReportAnnotationsFeedback: "",
-    },
     values: {
       medicalReportAnnotationsFeedback: feedback ?? "",
     },
@@ -52,23 +51,18 @@ export function FeedbackForm({
   );
 
   return (
-    <>
-      <Toaster />
-      <div className={className}>
-        <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
-        <form action="submit" onSubmit={handleSubmit}>
-          <Field
-            control={form.control}
-            name="medicalReportAnnotationsFeedback"
-            render={({ field }) => {
-              return <Textarea {...field} />;
-            }}
-          />
-          <Button type="submit" isPending={form.formState.isSubmitting}>
-            Submit
-          </Button>
-        </form>
-      </div>
-    </>
+    <div className={className}>
+      <h1 className="mb-3 mt-5 text-xl">Feedback</h1>
+      <form onSubmit={handleSubmit}>
+        <Field
+          control={form.control}
+          name="medicalReportAnnotationsFeedback"
+          render={({ field }) => <Textarea {...field} />}
+        />
+        <Button type="submit" isPending={form.formState.isSubmitting}>
+          Submit
+        </Button>
+      </form>
+    </div>
   );
-}
+};

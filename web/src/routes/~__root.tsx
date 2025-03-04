@@ -6,26 +6,29 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { SpeziProvider } from "@stanfordspezi/spezi-web-design-system";
+import { SpeziProvider, Toaster } from "@stanfordspezi/spezi-web-design-system";
 import { createRootRoute, Link, Outlet } from "@tanstack/react-router";
 import { type ComponentProps } from "react";
-import { AuthenticationProvider } from "../providers/AuthenticationProvider";
-
+import {
+  AuthenticatedUserContext,
+  useAuthenticatedUserContextProvider,
+} from "@/modules/user";
 import "@/main.css";
 
 const routerProps: ComponentProps<typeof SpeziProvider>["router"] = {
   Link: ({ href, ...props }) => <Link to={href} {...props} />,
 };
 
-const RootComponent = () => {
-  return (
-    <AuthenticationProvider>
-      <SpeziProvider router={routerProps}>
-        <Outlet />
-      </SpeziProvider>
-    </AuthenticationProvider>
-  );
-};
+const RootComponent = () => (
+  <AuthenticatedUserContext.Provider
+    value={useAuthenticatedUserContextProvider()}
+  >
+    <SpeziProvider router={routerProps}>
+      <Outlet />
+      <Toaster />
+    </SpeziProvider>
+  </AuthenticatedUserContext.Provider>
+);
 
 export const Route = createRootRoute({
   component: RootComponent,

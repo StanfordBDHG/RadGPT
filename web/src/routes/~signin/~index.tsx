@@ -18,17 +18,17 @@ import {
 import { Helmet } from "react-helmet";
 import { auth } from "@/utils/firebase";
 
-const IndexComponent = () => {
-  const appleProvider = new OAuthProvider("apple.com");
-  const googleProvider = new GoogleAuthProvider();
-  const providers = [
-    {
-      name: "Google",
-      provider: googleProvider,
-    },
-    { name: "Apple", provider: appleProvider },
-  ];
+const appleProvider = new OAuthProvider("apple.com");
+const googleProvider = new GoogleAuthProvider();
+const providers = [
+  {
+    name: "Google",
+    provider: googleProvider,
+  },
+  { name: "Apple", provider: appleProvider },
+];
 
+const IndexComponent = () => {
   const asidePictureComponent = (
     <div className="flex-center min-h-full flex-col">
       <img

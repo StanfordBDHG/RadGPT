@@ -12,3 +12,4 @@ SPDX-License-Identifier: MIT
 
 * [Paul Schmiedmayer](https://github.com/PSchmiedmayer)
 * [Thomas Kaar](https://github.com/ThomasKaar)
+* [Arkadiusz Bachorski](https://github.com/arkadiuszbachorski)

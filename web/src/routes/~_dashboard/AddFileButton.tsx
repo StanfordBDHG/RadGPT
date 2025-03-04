@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { toast } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import {
   Dialog,
@@ -17,36 +18,35 @@ import {
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { type StorageReference } from "firebase/storage";
 import { FilePlus } from "lucide-react";
+import { type Dispatch, type SetStateAction } from "react";
+import { type GetFileListResult } from "@/utils/queries";
 import { FileCreationForm } from "./FileCreationForm";
-import { toast } from "@stanfordspezi/spezi-web-design-system";
-import { GetFileListResult } from "@/utils/queries";
 
 interface AddFileModalProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
   files: GetFileListResult;
-  setSelectedFile: React.Dispatch<
-    React.SetStateAction<StorageReference |undefined>
-  >;
+  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
 }
 
-export function AddFileButton({
+export const AddFileButton = ({
   onUploadSuccess,
   files,
   setSelectedFile,
-}: AddFileModalProps) {
+}: AddFileModalProps) => {
   const openState = useOpenState(false);
 
   const onUploadSuccessDialogClose = (
     ref: StorageReference,
-    medicalReport: string
+    medicalReport: string,
   ) => {
     if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
     openState.close();
   };
+
   const onExistingFileUploadDialogClose = (ref: StorageReference) => {
     setSelectedFile(ref);
     toast.info(
-      "This medical report has already been uploaded. It has now been selected."
+      "This medical report has already been uploaded. It has now been selected.",
     );
     openState.close();
   };
@@ -54,8 +54,9 @@ export function AddFileButton({
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
       <DialogTrigger asChild>
-        <Button size="sm" onClick={openState.open}>
+        <Button className="mx-auto" onClick={openState.open}>
           <FilePlus />
+          Add New Report
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-screen overflow-y-auto">
@@ -66,8 +67,8 @@ export function AddFileButton({
           onUploadSuccess={onUploadSuccessDialogClose}
           files={files}
           onExistingFileUpload={onExistingFileUploadDialogClose}
-        ></FileCreationForm>
+        />
       </DialogContent>
     </Dialog>
   );
-}
+};

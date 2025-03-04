@@ -16,7 +16,7 @@ import {
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
 import { Loader2 } from "lucide-react";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { useAuthenticatedUser } from "@/hooks/useAuthenticatedUser";
+import { useAuthenticatedUser } from "@/modules/user";
 import { firestore } from "@/utils/firebase";
 import { QuestionAnswer } from "./QuestionAnswer";
 
@@ -38,7 +38,7 @@ interface DetailDialogProps {
   selectedFileName: string;
 }
 
-export function DetailDialog({
+export const DetailDialog = ({
   answer,
   openState,
   conceptBasedQuestion: concept_based_question,
@@ -48,7 +48,7 @@ export function DetailDialog({
   selectedNumber,
   setSelectedNumber,
   selectedFileName,
-}: DetailDialogProps) {
+}: DetailDialogProps) => {
   const currentUser = useAuthenticatedUser();
 
   const [like1, setLike1] = useState(false);
@@ -186,4 +186,4 @@ export function DetailDialog({
       </DialogContent>
     </Dialog>
   );
-}
+};
