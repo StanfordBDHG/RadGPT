@@ -14,6 +14,7 @@ import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
 import { storage } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
+import { calculateSHA256Hash } from "@/utils/crypto";
 import { type GetFileListResult } from "@/utils/queries";
 
 const formSchema = z.object({
@@ -22,17 +23,6 @@ const formSchema = z.object({
     .min(1, "Content of medical report is required"),
   medicalReportName: z.string().min(1, "Name of medical report is required"),
 });
-
-// Source: https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/digest
-const calculateSHA256Hash = async (data: string) => {
-  const msgUint8 = new TextEncoder().encode(data);
-  const hashBuffer = await window.crypto.subtle.digest("SHA-256", msgUint8);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  const hashHex = hashArray
-    .map((b) => b.toString(16).padStart(2, "0"))
-    .join("");
-  return hashHex;
-};
 
 interface FileCreationFormProps {
   onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
