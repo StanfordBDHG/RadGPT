@@ -21,11 +21,17 @@
 // Import Routes
 
 import { Route as rootRoute } from './routes/~__root'
+import { Route as DashboardImport } from './routes/~_dashboard'
 import { Route as SigninIndexImport } from './routes/~signin/~index'
 import { Route as DashboardIndexImport } from './routes/~_dashboard/~index'
-
+import { Route as DashboardFileNameImport } from './routes/~_dashboard/~file/~$name'
 
 // Create/Update Routes
+
+const DashboardRoute = DashboardImport.update({
+  id: '/_dashboard',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const SigninIndexRoute = SigninIndexImport.update({
   id: '/signin/',
@@ -34,21 +40,34 @@ const SigninIndexRoute = SigninIndexImport.update({
 } as any)
 
 const DashboardIndexRoute = DashboardIndexImport.update({
-  id: '/_dashboard/',
+  id: '/',
   path: '/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => DashboardRoute,
+} as any)
+
+const DashboardFileNameRoute = DashboardFileNameImport.update({
+  id: '/file/$name',
+  path: '/file/$name',
+  getParentRoute: () => DashboardRoute,
 } as any)
 
 // Populate the FileRoutesByPath interface
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/_dashboard': {
+      id: '/_dashboard'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof DashboardImport
+      parentRoute: typeof rootRoute
+    }
     '/_dashboard/': {
       id: '/_dashboard/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof DashboardIndexImport
-      parentRoute: typeof rootRoute
+      parentRoute: typeof DashboardImport
     }
     '/signin/': {
       id: '/signin/'
@@ -57,43 +76,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SigninIndexImport
       parentRoute: typeof rootRoute
     }
+    '/_dashboard/file/$name': {
+      id: '/_dashboard/file/$name'
+      path: '/file/$name'
+      fullPath: '/file/$name'
+      preLoaderRoute: typeof DashboardFileNameImport
+      parentRoute: typeof DashboardImport
+    }
   }
 }
 
 // Create and export the route tree
 
+interface DashboardRouteChildren {
+  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardFileNameRoute: typeof DashboardFileNameRoute
+}
+
+const DashboardRouteChildren: DashboardRouteChildren = {
+  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardFileNameRoute: DashboardFileNameRoute,
+}
+
+const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
+  DashboardRouteChildren,
+)
+
 export interface FileRoutesByFullPath {
+  '': typeof DashboardRouteWithChildren
   '/': typeof DashboardIndexRoute
   '/signin': typeof SigninIndexRoute
+  '/file/$name': typeof DashboardFileNameRoute
 }
 
 export interface FileRoutesByTo {
   '/': typeof DashboardIndexRoute
   '/signin': typeof SigninIndexRoute
+  '/file/$name': typeof DashboardFileNameRoute
 }
 
 export interface FileRoutesById {
   __root__: typeof rootRoute
+  '/_dashboard': typeof DashboardRouteWithChildren
   '/_dashboard/': typeof DashboardIndexRoute
   '/signin/': typeof SigninIndexRoute
+  '/_dashboard/file/$name': typeof DashboardFileNameRoute
 }
 
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/signin'
+  fullPaths: '' | '/' | '/signin' | '/file/$name'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin'
-  id: '__root__' | '/_dashboard/' | '/signin/'
+  to: '/' | '/signin' | '/file/$name'
+  id:
+    | '__root__'
+    | '/_dashboard'
+    | '/_dashboard/'
+    | '/signin/'
+    | '/_dashboard/file/$name'
   fileRoutesById: FileRoutesById
 }
 
 export interface RootRouteChildren {
-  DashboardIndexRoute: typeof DashboardIndexRoute
+  DashboardRoute: typeof DashboardRouteWithChildren
   SigninIndexRoute: typeof SigninIndexRoute
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  DashboardIndexRoute: DashboardIndexRoute,
+  DashboardRoute: DashboardRouteWithChildren,
   SigninIndexRoute: SigninIndexRoute,
 }
 
@@ -107,15 +157,27 @@ export const routeTree = rootRoute
     "__root__": {
       "filePath": "~__root.tsx",
       "children": [
-        "/_dashboard/",
+        "/_dashboard",
         "/signin/"
       ]
     },
+    "/_dashboard": {
+      "filePath": "~_dashboard.tsx",
+      "children": [
+        "/_dashboard/",
+        "/_dashboard/file/$name"
+      ]
+    },
     "/_dashboard/": {
-      "filePath": "~_dashboard/~index.tsx"
+      "filePath": "~_dashboard/~index.tsx",
+      "parent": "/_dashboard"
     },
     "/signin/": {
       "filePath": "~signin/~index.tsx"
+    },
+    "/_dashboard/file/$name": {
+      "filePath": "~_dashboard/~file/~$name.tsx",
+      "parent": "/_dashboard"
     }
   }
 }

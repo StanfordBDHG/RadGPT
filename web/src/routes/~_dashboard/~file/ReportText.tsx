@@ -9,42 +9,32 @@
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { useState } from "react";
-import {
-  getGroupMap,
-  type ProcessedAnnotations,
-} from "@/utils/processedAnnotations";
-import { getTextBlocks, type TextMapping } from "@/utils/textMapping";
-import { DetailDialog } from "./DetailDialog";
+import { getGroupMap } from "@/modules/files/processedAnnotations";
+import { type FileDetails } from "@/modules/files/queries";
+import { getTextBlocks } from "@/modules/files/textMapping";
+import { DetailDialog } from "@/routes/~_dashboard/~file/DetailDialog";
 
 interface ReportTextProp {
-  userProvidedText: string;
-  selectedFileName: string;
-  textMapping: TextMapping | null;
-  processedAnnotations: ProcessedAnnotations[];
+  file: FileDetails;
 }
 
-export const ReportText = ({
-  userProvidedText,
-  selectedFileName,
-  textMapping,
-  processedAnnotations,
-}: ReportTextProp) => {
+export const ReportText = ({ file }: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
   const openState = useStatefulOpenState<{ observationId: number }>();
   const [selectedNumber, setSelectedNumber] = useState<number>();
 
-  if (!textMapping) {
+  if (!file.text_mapping) {
     return (
       <div className="shimmer whitespace-pre-wrap leading-5 tracking-wide">
-        {userProvidedText}
+        {file.user_provided_text}
       </div>
     );
   }
 
-  const textBlocks = getTextBlocks(textMapping, userProvidedText);
-  const groupMap = getGroupMap(processedAnnotations);
+  const textBlocks = getTextBlocks(file.text_mapping, file.user_provided_text);
+  const groupMap = getGroupMap(file.processed_annotations ?? []);
 
   return (
     <>
@@ -52,7 +42,7 @@ export const ReportText = ({
         openState={openState}
         selectedNumber={selectedNumber}
         setSelectedNumber={setSelectedNumber}
-        selectedFileName={selectedFileName}
+        selectedFileName={file.name}
       />
       <div className="whitespace-pre-wrap leading-5 tracking-wide">
         {textBlocks.map(
@@ -65,9 +55,7 @@ export const ReportText = ({
             const group = key !== null ? groupMap.get(key) : undefined;
 
             if (!group)
-              return (
-                <span key={`${selectedFileName} ${id}`}>{textSnippet}</span>
-              );
+              return <span key={`${file.name} ${id}`}>{textSnippet}</span>;
 
             const isHovered = group.observationGroup.includes(
               currentHoveredWordIndex ?? -1,
@@ -75,7 +63,7 @@ export const ReportText = ({
 
             return (
               <button
-                key={`${selectedFileName} ${id}`}
+                key={`${file.name} ${id}`}
                 className={cn(
                   "focus-ring transition-all",
                   isHovered ?

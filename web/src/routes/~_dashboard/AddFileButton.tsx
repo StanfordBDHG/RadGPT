@@ -16,38 +16,29 @@ import {
   DialogTrigger,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
+import { useQueryClient } from "@tanstack/react-query";
+import { useNavigate } from "@tanstack/react-router";
 import { type StorageReference } from "firebase/storage";
 import { FilePlus } from "lucide-react";
-import { type Dispatch, type SetStateAction } from "react";
-import { type GetFileListResult } from "@/utils/queries";
+import { filesQueries } from "@/modules/files/queries";
 import { FileCreationForm } from "./FileCreationForm";
 
-interface AddFileModalProps {
-  onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
-  files: GetFileListResult;
-  setSelectedFile: Dispatch<SetStateAction<StorageReference | undefined>>;
-}
-
-export const AddFileButton = ({
-  onUploadSuccess,
-  files,
-  setSelectedFile,
-}: AddFileModalProps) => {
+export const AddFileButton = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
   const openState = useOpenState(false);
 
-  const onUploadSuccessDialogClose = (
-    ref: StorageReference,
-    medicalReport: string,
-  ) => {
-    if (onUploadSuccess) onUploadSuccess(ref, medicalReport);
+  const onUploadSuccessDialogClose = (ref: StorageReference) => {
+    void queryClient.invalidateQueries(filesQueries.listFiles());
+    void navigate({ to: `/file/${ref.name}` });
     openState.close();
   };
 
   const onExistingFileUploadDialogClose = (ref: StorageReference) => {
-    setSelectedFile(ref);
     toast.info(
       "This medical report has already been uploaded. It has now been selected.",
     );
+    void navigate({ to: `/file/${ref.name}` });
     openState.close();
   };
 
@@ -65,7 +56,6 @@ export const AddFileButton = ({
         </DialogHeader>
         <FileCreationForm
           onUploadSuccess={onUploadSuccessDialogClose}
-          files={files}
           onExistingFileUpload={onExistingFileUploadDialogClose}
         />
       </DialogContent>

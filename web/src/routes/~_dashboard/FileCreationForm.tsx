@@ -10,92 +10,77 @@ import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
+import { useQuery } from "@tanstack/react-query";
 import { ref, type StorageReference, uploadString } from "firebase/storage";
 import { z } from "zod";
+import { filesQueries } from "@/modules/files/queries";
 import { storage } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
 import { calculateSHA256Hash } from "@/utils/crypto";
-import { type GetFileListResult } from "@/utils/queries";
 
 const formSchema = z.object({
-  medicalReportContent: z
-    .string()
-    .min(1, "Content of medical report is required"),
-  medicalReportName: z.string().min(1, "Name of medical report is required"),
+  name: z.string().min(1, "Name of medical report is required"),
+  content: z.string().min(1, "Content of medical report is required"),
 });
 
 interface FileCreationFormProps {
-  onUploadSuccess?: (ref: StorageReference, medicalReport: string) => void;
-  files: GetFileListResult;
+  onUploadSuccess: (ref: StorageReference, medicalReport: string) => void;
   onExistingFileUpload: (ref: StorageReference) => void;
 }
 
 export const FileCreationForm = ({
   onUploadSuccess,
-  files,
   onExistingFileUpload,
 }: FileCreationFormProps) => {
   const currentUser = useAuthenticatedUser();
+  const { data: files } = useQuery(filesQueries.listFiles());
   const form = useForm({
     formSchema,
     defaultValues: {
-      medicalReportContent: "",
-      medicalReportName: "",
+      content: "",
+      name: "",
     },
   });
 
-  const handleSubmit = form.handleSubmit(
-    async ({ medicalReportContent, medicalReportName }) => {
-      const medicalReportContentHash =
-        await calculateSHA256Hash(medicalReportContent);
+  const handleSubmit = form.handleSubmit(async (medicalReport) => {
+    const contentHash = await calculateSHA256Hash(medicalReport.content);
+    const existingFile = files.find((file) => file.ref?.name === contentHash);
 
-      const hashList = files.map((files) => files.ref?.name ?? "");
-      const hashIndex = hashList.findIndex(
-        (fileHash) => fileHash === medicalReportContentHash,
-      );
-
-      if (hashIndex > -1) {
-        if (files[hashIndex].ref) {
-          onExistingFileUpload(files[hashIndex].ref);
-        }
-        return;
+    if (existingFile) {
+      if (existingFile.ref) {
+        onExistingFileUpload(existingFile.ref);
       }
-
-      const storageReference = ref(
-        storage,
-        `users/${currentUser?.uid}/reports/${medicalReportContentHash}`,
-      );
-      const customMetadata = { medicalReportName: medicalReportName };
-      const result = await uploadString(
-        storageReference,
-        medicalReportContent,
-        "raw",
-        {
-          contentType: "text/plain",
-          customMetadata: customMetadata,
-        },
-      );
-      if (onUploadSuccess) onUploadSuccess(result.ref, medicalReportContent);
-    },
-  );
+      return;
+    }
+    const storageReference = ref(
+      storage,
+      `users/${currentUser?.uid}/reports/${contentHash}`,
+    );
+    const result = await uploadString(
+      storageReference,
+      medicalReport.content,
+      "raw",
+      {
+        contentType: "text/plain",
+        customMetadata: { medicalReportName: medicalReport.name },
+      },
+    );
+    onUploadSuccess(result.ref, medicalReport.content);
+  });
 
   return (
     <form onSubmit={handleSubmit}>
       <Field
         control={form.control}
-        name="medicalReportName"
+        name="name"
         label="Name"
-        render={({ field }) => {
-          return <Input type="text" {...field} />;
-        }}
+        render={({ field }) => <Input {...field} />}
       />
       <Field
         control={form.control}
-        name="medicalReportContent"
+        name="content"
         label="Medical Report Content"
-        render={({ field }) => {
-          return <Textarea {...field} rows={10} />;
-        }}
+        render={({ field }) => <Textarea {...field} rows={10} />}
       />
       <Button type="submit" isPending={form.formState.isSubmitting}>
         Submit

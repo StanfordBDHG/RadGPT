@@ -12,43 +12,37 @@ import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Text
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { doc, updateDoc } from "firebase/firestore";
 import { z } from "zod";
+import { type FileDetails } from "@/modules/files/queries";
 import { firestore } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
 
 const formSchema = z.object({
-  medicalReportAnnotationsFeedback: z
+  feedback: z
     .string()
     .min(1, "Content for medical report feedback is required!"),
 });
 
 interface FeedbackFormProps {
   className: string;
-  selectedFileName: string;
-  feedback: string | null;
+  file: FileDetails;
 }
 
-export const FeedbackForm = ({
-  className,
-  selectedFileName,
-  feedback,
-}: FeedbackFormProps) => {
+export const FeedbackForm = ({ className, file }: FeedbackFormProps) => {
   const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
     values: {
-      medicalReportAnnotationsFeedback: feedback ?? "",
+      feedback: file.user_feedback ?? "",
     },
   });
 
-  const handleSubmit = form.handleSubmit(
-    async ({ medicalReportAnnotationsFeedback }) => {
-      const path = `users/${currentUser?.uid}/${selectedFileName}/report_meta_data`;
-      await updateDoc(doc(firestore, path), {
-        user_feedback: medicalReportAnnotationsFeedback,
-      });
-      toast.success("The feedback has been submitted, thank you!");
-    },
-  );
+  const handleSubmit = form.handleSubmit(async ({ feedback }) => {
+    const path = `users/${currentUser?.uid}/${file.name}/report_meta_data`;
+    await updateDoc(doc(firestore, path), {
+      user_feedback: feedback,
+    });
+    toast.success("The feedback has been submitted, thank you!");
+  });
 
   return (
     <div className={className}>
@@ -56,7 +50,7 @@ export const FeedbackForm = ({
       <form onSubmit={handleSubmit}>
         <Field
           control={form.control}
-          name="medicalReportAnnotationsFeedback"
+          name="feedback"
           render={({ field }) => <Textarea {...field} />}
         />
         <Button type="submit" isPending={form.formState.isSubmitting}>

@@ -22,7 +22,7 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { callables, firestore } from "@/modules/firebase/app";
 import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
 import { useAuthenticatedUser } from "@/modules/user";
-import { QuestionAnswer } from "./QuestionAnswer";
+import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
 
 interface DetailDialogProps {
   openState: ReturnType<typeof useStatefulOpenState<{ observationId: number }>>;
@@ -64,10 +64,14 @@ export const DetailDialog = ({
   const currentUser = useAuthenticatedUser();
 
   const detailedExplanationRequestQuery = useQuery(
-    detailDialogQueries.onDetailedExplanationRequest({
-      observation_id: openState.state?.observationId ?? -1,
-      file_name: selectedFileName,
-    }),
+    detailDialogQueries.onDetailedExplanationRequest(
+      openState.state?.observationId ?
+        {
+          observation_id: openState.state.observationId,
+          file_name: selectedFileName,
+        }
+      : null,
+    ),
   );
   const {
     main_explanation,
@@ -97,7 +101,6 @@ export const DetailDialog = ({
   ) as DocumentReference<Feedback, Feedback>;
 
   useEffect(() => {
-    if (currentUser === null) return;
     let ignore = false;
 
     const unsubscribe = onSnapshot(feedbackRef, (documentSnapshot) => {
