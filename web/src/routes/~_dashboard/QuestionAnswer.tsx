@@ -70,7 +70,10 @@ export const QuestionAnswer = ({
 
   return (
     <>
-      <button onClick={onClick} className="interactive-opacity flex flex-row">
+      <button
+        onClick={onClick}
+        className="interactive-opacity flex flex-row text-left"
+      >
         {question}
         {isSelected ?
           <ChevronUp className="ml-auto min-w-8" />
