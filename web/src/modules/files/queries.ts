@@ -6,13 +6,19 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { queryOptions, useQueryClient } from "@tanstack/react-query";
+import { queryOptions, skipToken, useQueryClient } from "@tanstack/react-query";
 import { notFound } from "@tanstack/react-router";
 import { doc, getDoc, onSnapshot, type DocumentData } from "firebase/firestore";
 import { type FullMetadata, getMetadata, listAll, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
 import { type z } from "zod";
-import { firestore, getCurrentUser, storage } from "@/modules/firebase/app";
+import {
+  callables,
+  firestore,
+  getCurrentUser,
+  storage,
+} from "@/modules/firebase/app";
+import type { OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
 import { processedAnnotationsSchema } from "./processedAnnotations";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
@@ -76,6 +82,14 @@ export const filesQueries = {
     queryOptions({
       queryKey: ["getFile", payload],
       queryFn: () => getFileDetails(payload),
+    }),
+  getDetailedExplanation: (payload: OnDetailedExplanationRequestInput | null) =>
+    queryOptions({
+      queryKey: ["onDetailedExplanationRequest", payload],
+      queryFn:
+        payload ?
+          () => callables.onDetailedExplanationRequest(payload)
+        : skipToken,
     }),
 };
 

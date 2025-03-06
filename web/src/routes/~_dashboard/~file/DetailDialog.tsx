@@ -19,11 +19,11 @@ import {
   DialogTitle,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import { type useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
-import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
-import { callables, firestore } from "@/modules/firebase/app";
-import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
+import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
+import { filesQueries } from "@/modules/files/queries";
+import { firestore } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
 import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
 
@@ -47,19 +47,6 @@ interface Feedback {
   };
 }
 
-const detailDialogQueries = {
-  onDetailedExplanationRequest: (
-    payload: OnDetailedExplanationRequestInput | null,
-  ) =>
-    queryOptions({
-      queryKey: ["onDetailedExplanationRequest", payload],
-      queryFn:
-        payload ?
-          () => callables.onDetailedExplanationRequest(payload)
-        : skipToken,
-    }),
-};
-
 export const DetailDialog = ({
   openState,
   selectedNumber,
@@ -68,8 +55,8 @@ export const DetailDialog = ({
 }: DetailDialogProps) => {
   const currentUser = useAuthenticatedUser();
 
-  const detailedExplanationRequestQuery = useQuery(
-    detailDialogQueries.onDetailedExplanationRequest(
+  const detailedExplanationQuery = useQuery(
+    filesQueries.getDetailedExplanation(
       openState.state ?
         {
           observation_id: openState.state.observationIndex,
@@ -84,7 +71,7 @@ export const DetailDialog = ({
     concept_based_template_question,
     concept_based_template_question_answer,
     concept_based_question,
-  } = detailedExplanationRequestQuery.data?.data ?? {};
+  } = detailedExplanationQuery.data?.data ?? {};
 
   const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationIndex}`;
 
@@ -157,7 +144,7 @@ export const DetailDialog = ({
       <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detailed Explanation</DialogTitle>
-          <Async {...queriesToAsyncProps([detailedExplanationRequestQuery])}>
+          <Async {...queriesToAsyncProps([detailedExplanationQuery])}>
             <p>{main_explanation}</p>
             {concept_based_question && concept_based_question_answer && (
               <h3 className="text-lg font-semibold">
