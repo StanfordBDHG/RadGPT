@@ -9,6 +9,10 @@
 
 import { type DocumentReference } from "@firebase/firestore";
 import {
+  Async,
+  queriesToAsyncProps,
+} from "@stanfordspezi/spezi-web-design-system/components/Async";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -17,7 +21,6 @@ import {
 import { type useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { queryOptions, skipToken, useQuery } from "@tanstack/react-query";
 import { doc, onSnapshot, updateDoc } from "firebase/firestore";
-import { Loader2 } from "lucide-react";
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import { callables, firestore } from "@/modules/firebase/app";
 import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
@@ -77,10 +80,10 @@ export const DetailDialog = ({
   );
   const {
     main_explanation,
-    concept_based_question_answer = "",
-    concept_based_template_question = "",
-    concept_based_template_question_answer = "",
-    concept_based_question = "",
+    concept_based_question_answer,
+    concept_based_template_question,
+    concept_based_template_question_answer,
+    concept_based_question,
   } = detailedExplanationRequestQuery.data?.data ?? {};
 
   const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationIndex}`;
@@ -154,51 +157,51 @@ export const DetailDialog = ({
       <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detailed Explanation</DialogTitle>
-          {main_explanation ?
+          <Async {...queriesToAsyncProps([detailedExplanationRequestQuery])}>
             <p>{main_explanation}</p>
-          : <Loader2 className="mt-2 animate-spin" />}
-          {concept_based_question && concept_based_question_answer && (
-            <h3 className="text-lg font-semibold">
-              Other questions you may have
-            </h3>
-          )}
-          {concept_based_question && concept_based_question_answer && (
-            <QuestionAnswer
-              onClick={() =>
-                selectedNumber === 1 ?
-                  setSelectedNumber(undefined)
-                : setSelectedNumber(1)
-              }
-              isSelected={selectedNumber === 1}
-              question={concept_based_question}
-              answer={concept_based_question_answer}
-              onLike={createOnLike(1)}
-              onDislike={createOnDislike(1)}
-              like={like1}
-              dislike={dislike1}
-              textFeedback={textFeedback1}
-              onFeedbackSubmit={createOnFeedback(1)}
-            />
-          )}
-          {concept_based_template_question &&
-            concept_based_template_question_answer && (
+            {concept_based_question && concept_based_question_answer && (
+              <h3 className="text-lg font-semibold">
+                Other questions you may have
+              </h3>
+            )}
+            {concept_based_question && concept_based_question_answer && (
               <QuestionAnswer
                 onClick={() =>
-                  selectedNumber === 2 ?
+                  selectedNumber === 1 ?
                     setSelectedNumber(undefined)
-                  : setSelectedNumber(2)
+                  : setSelectedNumber(1)
                 }
-                isSelected={selectedNumber === 2}
-                question={concept_based_template_question}
-                answer={concept_based_template_question_answer}
-                onLike={createOnLike(2)}
-                onDislike={createOnDislike(2)}
-                like={like2}
-                dislike={dislike2}
-                textFeedback={textFeedback2}
-                onFeedbackSubmit={createOnFeedback(2)}
+                isSelected={selectedNumber === 1}
+                question={concept_based_question}
+                answer={concept_based_question_answer}
+                onLike={createOnLike(1)}
+                onDislike={createOnDislike(1)}
+                like={like1}
+                dislike={dislike1}
+                textFeedback={textFeedback1}
+                onFeedbackSubmit={createOnFeedback(1)}
               />
             )}
+            {concept_based_template_question &&
+              concept_based_template_question_answer && (
+                <QuestionAnswer
+                  onClick={() =>
+                    selectedNumber === 2 ?
+                      setSelectedNumber(undefined)
+                    : setSelectedNumber(2)
+                  }
+                  isSelected={selectedNumber === 2}
+                  question={concept_based_template_question}
+                  answer={concept_based_template_question_answer}
+                  onLike={createOnLike(2)}
+                  onDislike={createOnDislike(2)}
+                  like={like2}
+                  dislike={dislike2}
+                  textFeedback={textFeedback2}
+                  onFeedbackSubmit={createOnFeedback(2)}
+                />
+              )}
+          </Async>
         </DialogHeader>
       </DialogContent>
     </Dialog>
