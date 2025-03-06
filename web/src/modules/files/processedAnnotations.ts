@@ -70,7 +70,11 @@ export const processedAnnotationsSchema = z.object({
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
   const groupMapping = new Map<
     number,
-    { observationId: number; observationGroup: number[]; isLocatedAt: boolean }
+    {
+      observationIndex: number;
+      observationGroup: number[];
+      isLocatedAt: boolean;
+    }
   >();
   processedAnnotations.forEach((observation, index) => {
     const observationGroup: number[] = [];
@@ -108,7 +112,7 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
     for (const element of observationGroup) {
       const previousValue = groupMapping.get(element);
       groupMapping.set(element, {
-        observationId: previousValue?.observationId ?? index,
+        observationIndex: previousValue?.observationIndex ?? index,
         observationGroup: (previousValue?.observationGroup ?? []).concat(
           observationGroup,
         ),

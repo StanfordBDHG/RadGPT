@@ -22,7 +22,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
-  const openState = useStatefulOpenState<{ observationId: number }>();
+  const openState = useStatefulOpenState<{ observationIndex: number }>();
   const [selectedNumber, setSelectedNumber] = useState<number>();
 
   if (!file.text_mapping) {
@@ -76,7 +76,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
                 onMouseEnter={() => setCurrentHoveredWordIndex(key)}
                 onMouseLeave={() => setCurrentHoveredWordIndex(null)}
                 onClick={() =>
-                  openState.open({ observationId: group.observationId })
+                  openState.open({ observationIndex: group.observationIndex })
                 }
               >
                 {textSnippet}

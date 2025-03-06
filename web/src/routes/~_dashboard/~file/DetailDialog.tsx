@@ -25,7 +25,9 @@ import { useAuthenticatedUser } from "@/modules/user";
 import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
 
 interface DetailDialogProps {
-  openState: ReturnType<typeof useStatefulOpenState<{ observationId: number }>>;
+  openState: ReturnType<
+    typeof useStatefulOpenState<{ observationIndex: number }>
+  >;
   selectedNumber: number | undefined;
   setSelectedNumber: Dispatch<SetStateAction<number | undefined>>;
   selectedFileName: string;
@@ -65,9 +67,9 @@ export const DetailDialog = ({
 
   const detailedExplanationRequestQuery = useQuery(
     detailDialogQueries.onDetailedExplanationRequest(
-      openState.state?.observationId ?
+      openState.state ?
         {
-          observation_id: openState.state.observationId,
+          observation_id: openState.state.observationIndex,
           file_name: selectedFileName,
         }
       : null,
@@ -81,7 +83,7 @@ export const DetailDialog = ({
     concept_based_question = "",
   } = detailedExplanationRequestQuery.data?.data ?? {};
 
-  const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationId}`;
+  const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationIndex}`;
 
   const [feedback, setFeedback] = useState<Feedback>();
 
