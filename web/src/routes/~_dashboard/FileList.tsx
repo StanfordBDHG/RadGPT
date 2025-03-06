@@ -25,7 +25,6 @@ export const FileList = () => {
   const onDelete = async (file: (typeof files)[number]) => {
     if (!file.ref) return;
     await deleteObject(file.ref);
-    // TODO: Remove cache/artifacts?
     const isSelectedFile = fileRouteParams?.name === file.ref.name;
     if (isSelectedFile) {
       await navigate({ to: "/" });
