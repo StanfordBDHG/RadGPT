@@ -11,7 +11,7 @@ import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { ChevronDown, ChevronUp, ThumbsDown, ThumbsUp } from "lucide-react";
+import { ChevronDown, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEventHandler } from "react";
 import { z } from "zod";
 
@@ -70,11 +70,17 @@ export const QuestionAnswer = ({
 
   return (
     <>
-      <button onClick={onClick} className="interactive-opacity flex flex-row">
+      <button
+        onClick={onClick}
+        className="interactive-opacity flex flex-row text-left"
+      >
         {question}
-        {isSelected ?
-          <ChevronUp className="ml-auto min-w-8" />
-        : <ChevronDown className="ml-auto min-w-8" />}
+        <ChevronDown
+          className={cn(
+            "ml-auto min-w-8 transition",
+            isSelected && "rotate-180",
+          )}
+        />
       </button>
       <div
         ref={ref}
