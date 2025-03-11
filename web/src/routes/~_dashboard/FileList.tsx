@@ -38,7 +38,7 @@ export const FileList = ({
           <button
             onClick={() => setSelectedFile(item.ref)}
             className={cn(
-              "interactive-opacity",
+              "interactive-opacity text-left",
               item.ref?.name === selectedFile?.name && "font-bold",
             )}
           >
