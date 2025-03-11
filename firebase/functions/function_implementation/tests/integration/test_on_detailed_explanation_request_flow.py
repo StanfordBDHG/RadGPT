@@ -66,19 +66,22 @@ No other abnormalities detected in the kidneys or urinary tract."""
         return_value=mock_report_meta_data_snapshot,
     )
 
-    def get_magic_mock_with_gpt_content(value: str):
+    mock_detailed_response_answer = DetailedResponse(
+        main_explanation="GPT answer 1",
+        concept_question_1="GPT answer 2",
+        concept_answer_1="GPT answer 3",
+        concept_question_2="What is normal size shape position?",
+        concept_answer_2="GPT answer 4",
+    )
+
+    def get_magic_mock_with_gpt_content(mock_detailed_response: DetailedResponse):
         m = mocker.MagicMock()
-        m.choices[0].message.content = value
+        m.choices[0].message.parsed = mock_detailed_response
         return m
 
     mock_completions_with_backoff_function = mocker.patch(
         "function_implementation.llm_calling.chatgpt.__completions_with_backoff",
-        side_effect=[
-            get_magic_mock_with_gpt_content("GPT answer 1"),
-            get_magic_mock_with_gpt_content("GPT answer 2"),
-            get_magic_mock_with_gpt_content("GPT answer 3"),
-            get_magic_mock_with_gpt_content("GPT answer 4"),
-        ],
+        return_value=get_magic_mock_with_gpt_content(mock_detailed_response_answer),
     )
 
     mock_store_detailed_response_function = mocker.patch(
@@ -86,15 +89,7 @@ No other abnormalities detected in the kidneys or urinary tract."""
     )
 
     function_return_value = on_detailed_explanation_request_impl(mock_request)
-    detailed_response = dataclasses.asdict(
-        DetailedResponse(
-            main_explanation="GPT answer 1",
-            concept_based_question="GPT answer 2",
-            concept_based_question_answer="GPT answer 3",
-            concept_based_template_question="What is normal size shape position?",
-            concept_based_template_question_answer="GPT answer 4",
-        )
-    )
+    detailed_response = dataclasses.asdict(mock_detailed_response_answer)
     assert function_return_value == detailed_response
 
     mock_get_report_meta_data_function.assert_called_with(uid, file_name)
@@ -108,4 +103,4 @@ No other abnormalities detected in the kidneys or urinary tract."""
     )
     assert mock_store_detailed_response_function.call_count == 1
 
-    assert mock_completions_with_backoff_function.call_count == 4
+    assert mock_completions_with_backoff_function.call_count == 1

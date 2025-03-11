@@ -28,11 +28,11 @@ interface ReportTextProp {
 interface DetailedResponse {
   main_explanation: string;
 
-  concept_based_question: string | null;
-  concept_based_question_answer: string | null;
+  concept_question_1: string | null;
+  concept_answer_1: string | null;
 
-  concept_based_template_question: string | null;
-  concept_based_template_question_answer: string | null;
+  concept_question_2: string | null;
+  concept_answer_2: string | null;
 }
 
 export const ReportText = ({
@@ -46,18 +46,10 @@ export const ReportText = ({
   >(null);
   const openState = useOpenState(false);
   const [mainExplanation, setMainExplanation] = useState<null | string>(null);
-  const [conceptBasedQuestion, setConceptBasedQuestion] = useState<
-    null | string
-  >(null);
-  const [conceptBasedQuestionAnswer, setConceptBasedQuestionAnswer] = useState<
-    null | string
-  >(null);
-  const [conceptBasedTemplateQuestion, setConceptBasedTemplateQuestion] =
-    useState<null | string>(null);
-  const [
-    conceptBasedTemplateQuestionAnswer,
-    setConceptBasedTemplateQuestionAnswer,
-  ] = useState<null | string>(null);
+  const [conceptQuestion1, setQuestion1] = useState<null | string>(null);
+  const [conceptAnswer1, setAnswer1] = useState<null | string>(null);
+  const [conceptQuestion2, setQuestion2] = useState<null | string>(null);
+  const [conceptAnswer2, setAnswer2] = useState<null | string>(null);
   const [selectedNumber, setSelectedNumber] = useState<null | number>(null);
   const [selectedObservationNumber, setSelectedObservationNumber] = useState<
     null | number
@@ -79,10 +71,10 @@ export const ReportText = ({
       <DetailDialog
         answer={mainExplanation}
         openState={openState}
-        conceptBasedQuestion={conceptBasedQuestion}
-        conceptBasedQuestionAnswer={conceptBasedQuestionAnswer}
-        conceptBasedTemplateQuestion={conceptBasedTemplateQuestion}
-        conceptBasedTemplateQuestionAnswer={conceptBasedTemplateQuestionAnswer}
+        conceptQuestion1={conceptQuestion1}
+        conceptAnswer1={conceptAnswer1}
+        conceptQuestion2={conceptQuestion2}
+        conceptAnswer2={conceptAnswer2}
         selectedNumber={selectedNumber}
         setSelectedNumber={setSelectedNumber}
         selectedFileName={`${selectedFileName}/cached_answer_${selectedObservationNumber}`}
@@ -122,10 +114,10 @@ export const ReportText = ({
                 onMouseLeave={() => setCurrentHoveredWordIndex(null)}
                 onClick={async () => {
                   setMainExplanation(null);
-                  setConceptBasedQuestion(null);
-                  setConceptBasedTemplateQuestion(null);
-                  setConceptBasedQuestionAnswer(null);
-                  setConceptBasedTemplateQuestionAnswer(null);
+                  setQuestion1(null);
+                  setAnswer1(null);
+                  setQuestion2(null);
+                  setAnswer2(null);
                   setSelectedNumber(null);
                   openState.open();
                   const gptAnswer: HttpsCallable<
@@ -140,16 +132,10 @@ export const ReportText = ({
                     observation_id: group.observationId,
                   });
                   setMainExplanation(r.data.main_explanation);
-                  setConceptBasedQuestion(r.data.concept_based_question);
-                  setConceptBasedTemplateQuestion(
-                    r.data.concept_based_template_question,
-                  );
-                  setConceptBasedQuestionAnswer(
-                    r.data.concept_based_question_answer,
-                  );
-                  setConceptBasedTemplateQuestionAnswer(
-                    r.data.concept_based_template_question_answer,
-                  );
+                  setQuestion1(r.data.concept_question_1);
+                  setAnswer1(r.data.concept_answer_1);
+                  setQuestion2(r.data.concept_question_2);
+                  setAnswer2(r.data.concept_answer_2);
                   setSelectedObservationNumber(group.observationId);
                 }}
               >
