@@ -8,15 +8,24 @@
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { useState } from "react";
-import { getGroupMap } from "@/modules/files/processedAnnotations";
+import { ComponentProps, useState } from "react";
+import {
+  AnnotationProcessingError,
+  getGroupMap,
+} from "@/modules/files/processedAnnotations";
 import { type FileDetails } from "@/modules/files/queries";
 import { getTextBlocks } from "@/modules/files/textMapping";
 import { DetailDialog } from "@/routes/~_dashboard/~file/DetailDialog";
+import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
 
 interface ReportTextProp {
   file: FileDetails;
 }
+
+const errorCodeToString: Record<AnnotationProcessingError, string> = {
+  [AnnotationProcessingError.validationFailed]:
+    "This report could not be identified as a radiology report. In case you believe this is a mistake, please send a brief email to ...",
+};
 
 export const ReportText = ({ file }: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
@@ -24,11 +33,29 @@ export const ReportText = ({ file }: ReportTextProp) => {
   >(null);
   const openState = useStatefulOpenState<{ observationIndex: number }>();
 
+  const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
+    <div
+      className={cn("whitespace-pre-wrap leading-5 tracking-wide", className)}
+      {...props}
+    />
+  );
+
+  if (file.error_code) {
+    return (
+      <div className="relative flex">
+        <TextContainer>{file.user_provided_text}</TextContainer>
+        <div className="flex-center absolute size-full bg-white/95">
+          <ErrorState>{errorCodeToString[file.error_code]}</ErrorState>
+        </div>
+      </div>
+    );
+  }
+
   if (!file.text_mapping) {
     return (
-      <div className="shimmer whitespace-pre-wrap leading-5 tracking-wide">
+      <TextContainer className="shimmer">
         {file.user_provided_text}
-      </div>
+      </TextContainer>
     );
   }
 
@@ -38,7 +65,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
   return (
     <>
       <DetailDialog openState={openState} selectedFileName={file.name} />
-      <div className="whitespace-pre-wrap leading-5 tracking-wide">
+      <TextContainer>
         {textBlocks.map(
           ({
             token: key,
@@ -78,7 +105,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
             );
           },
         )}
-      </div>
+      </TextContainer>
     </>
   );
 };

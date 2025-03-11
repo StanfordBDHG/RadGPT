@@ -19,6 +19,10 @@ export interface ProcessedAnnotations {
   observation_end_ix: number[];
 }
 
+export enum AnnotationProcessingError {
+  validationFailed = 1,
+}
+
 // Source: https://github.com/JacobWeisenburger/zod_utilz/blob/4093595e5a6d95770872598ba3bc405d4e9c963b/src/stringToJSON.ts#LL4-L12C8
 const jsonStringToProcessedAnnotations = z
   .string()
@@ -65,6 +69,7 @@ export const processedAnnotationsSchema = z.object({
   user_provided_text: z.string().min(1, "User-provided text is required"),
   text_mapping: textMappingSchema.optional(),
   user_feedback: z.string().min(1).optional(),
+  error_code: z.nativeEnum(AnnotationProcessingError).optional(),
 });
 
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {

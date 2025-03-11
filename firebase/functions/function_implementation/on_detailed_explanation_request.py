@@ -75,8 +75,6 @@ def on_detailed_explanation_request_impl(req: https_fn.Request) -> https_fn.Resp
             message='The function must be called with an object containing "user_prompt".',
         )
 
-    # TODO: Security check to avoid non radiology reports and GPT injections
-
     cached_gpt_answer = __get_cached_answer(uid, file_name, observation_index)
     if cached_gpt_answer.exists:
         return cached_gpt_answer.to_dict()
