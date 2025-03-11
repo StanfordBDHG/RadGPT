@@ -7,7 +7,6 @@
 //
 /* eslint-disable @typescript-eslint/prefer-nullish-coalescing */
 
-import { type DocumentReference } from "@firebase/firestore";
 import {
   Async,
   queriesToAsyncProps,
@@ -20,12 +19,9 @@ import {
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import { type useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { useQuery } from "@tanstack/react-query";
-import { doc, onSnapshot, updateDoc } from "firebase/firestore";
-import { type Dispatch, type SetStateAction, useEffect, useState } from "react";
-import { filesQueries } from "@/modules/files/queries";
-import { firestore } from "@/modules/firebase/app";
-import { useAuthenticatedUser } from "@/modules/user";
+import { type Dispatch, type SetStateAction } from "react";
 import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
+import { filesQueries } from "@/modules/files/queries";
 
 interface DetailDialogProps {
   openState: ReturnType<
@@ -36,31 +32,28 @@ interface DetailDialogProps {
   selectedFileName: string;
 }
 
-interface Feedback {
-  feedback: {
-    like1: boolean | null;
-    like2: boolean | null;
-    dislike1: boolean | null;
-    dislike2: boolean | null;
-    textFeedback1: string | null;
-    textFeedback2: string | null;
-  };
-}
-
 export const DetailDialog = ({
   openState,
   selectedNumber,
   setSelectedNumber,
   selectedFileName,
 }: DetailDialogProps) => {
-  const currentUser = useAuthenticatedUser();
-
   const detailedExplanationQuery = useQuery(
     filesQueries.getDetailedExplanation(
       openState.state ?
         {
           observation_id: openState.state.observationIndex,
           file_name: selectedFileName,
+        }
+      : null,
+    ),
+  );
+  const feedbackQuery = useQuery(
+    filesQueries.getObservationFeedback(
+      openState.state ?
+        {
+          observationIndex: openState.state.observationIndex,
+          fileName: selectedFileName,
         }
       : null,
     ),
@@ -73,10 +66,6 @@ export const DetailDialog = ({
     concept_based_question,
   } = detailedExplanationQuery.data?.data ?? {};
 
-  const cachedFileName = `${selectedFileName}/cached_answer_${openState.state?.observationIndex}`;
-
-  const [feedback, setFeedback] = useState<Feedback>();
-
   const { like1, dislike1, textFeedback1, like2, dislike2, textFeedback2 } =
     feedback?.feedback ?? {
       like1: false,
@@ -87,64 +76,14 @@ export const DetailDialog = ({
       textFeedback2: "",
     };
 
-  const feedbackRef = doc(
-    firestore,
-    `users/${currentUser?.uid}/${cachedFileName}`,
-  ) as DocumentReference<Feedback, Feedback>;
-
-  useEffect(() => {
-    let ignore = false;
-
-    const unsubscribe = onSnapshot(feedbackRef, (documentSnapshot) => {
-      if (ignore) return;
-      setFeedback(documentSnapshot.data());
-    });
-    return () => {
-      ignore = true;
-      unsubscribe();
-    };
-  }, [currentUser, feedbackRef]);
-
-  const createOnLike = (id: number) => () =>
-    updateDoc(feedbackRef, {
-      feedback: {
-        like1: (like1 && id !== 1) || (!like1 && id === 1),
-        dislike1: !((like1 && id !== 1) || (!like1 && id === 1)) && dislike1,
-        textFeedback1: textFeedback1,
-        like2: (like2 && id !== 2) || (!like2 && id === 2),
-        dislike2: !((like2 && id !== 2) || (!like2 && id === 2)) && dislike2,
-        textFeedback2: textFeedback2,
-      },
-    });
-  const createOnDislike = (id: number) => () =>
-    updateDoc(feedbackRef, {
-      feedback: {
-        dislike1: (dislike1 && id !== 1) || (!dislike1 && id === 1),
-        like1: !((dislike1 && id !== 1) || (!dislike1 && id === 1)) && like1,
-        textFeedback1: textFeedback1,
-        dislike2: (dislike2 && id !== 2) || (!dislike2 && id === 2),
-        like2: !((dislike2 && id !== 2) || (!dislike2 && id === 2)) && like2,
-        textFeedback2: textFeedback2,
-      },
-    });
-  const createOnFeedback = (id: number) => async (feedback: string) =>
-    updateDoc(feedbackRef, {
-      feedback: {
-        dislike1: dislike1,
-        like1: like1,
-        textFeedback1: id === 1 ? feedback : textFeedback1,
-        dislike2: dislike2,
-        like2: like2,
-        textFeedback2: id === 2 ? feedback : textFeedback2,
-      },
-    });
-
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.close}>
       <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detailed Explanation</DialogTitle>
-          <Async {...queriesToAsyncProps([detailedExplanationQuery])}>
+          <Async
+            {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}
+          >
             <p>{main_explanation}</p>
             {concept_based_question && concept_based_question_answer && (
               <h3 className="text-lg font-semibold">

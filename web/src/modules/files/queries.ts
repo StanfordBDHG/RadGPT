@@ -14,11 +14,16 @@ import { useEffect, useState } from "react";
 import { type z } from "zod";
 import {
   callables,
+  docRefs,
   firestore,
   getCurrentUser,
   storage,
 } from "@/modules/firebase/app";
-import type { OnDetailedExplanationRequestInput } from "@/modules/firebase/utils";
+import {
+  type FeedbackPayload,
+  getDocDataOrThrow,
+  type OnDetailedExplanationRequestInput,
+} from "@/modules/firebase/utils";
 import { processedAnnotationsSchema } from "./processedAnnotations";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
@@ -89,6 +94,14 @@ export const filesQueries = {
       queryFn:
         payload ?
           () => callables.onDetailedExplanationRequest(payload)
+        : skipToken,
+    }),
+  getObservationFeedback: (payload: FeedbackPayload | null) =>
+    queryOptions({
+      queryKey: ["getObservationFeedback", payload],
+      queryFn:
+        payload ?
+          () => getDocDataOrThrow(docRefs.feedback(payload))
         : skipToken,
     }),
 };
