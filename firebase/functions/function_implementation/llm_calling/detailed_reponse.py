@@ -6,14 +6,14 @@
 # SPDX-License-Identifier: MIT
 #
 
-from dataclasses import dataclass
 from typing import Optional
+from pydantic.dataclasses import dataclass
 
 
 @dataclass
 class DetailedResponse:
     main_explanation: str
-    concept_based_question: Optional[str] = None
-    concept_based_question_answer: Optional[str] = None
-    concept_based_template_question: Optional[str] = None
-    concept_based_template_question_answer: Optional[str] = None
+    concept_question_1: Optional[str] = None
+    concept_answer_1: Optional[str] = None
+    concept_question_2: Optional[str] = None
+    concept_answer_2: Optional[str] = None

@@ -223,10 +223,10 @@ def test_full_uncached_flow(mocker, observation_id):
     concept = __get_concept(get_numbered_processed_annotation(observation_id))
     gpt_answer = DetailedResponse(
         main_explanation=f"main_explanation {concept}",
-        concept_based_question=f"concept_based_question {concept}",
-        concept_based_question_answer=f"concept_based_question_answer {concept}",
-        concept_based_template_question=f"concept_based_template_question {concept}",
-        concept_based_template_question_answer=f"concept_based_template_question_answer {concept}",
+        concept_question_1=f"concept_based_question {concept}",
+        concept_answer_1=f"concept_based_question_answer {concept}",
+        concept_question_2=f"concept_based_template_question {concept}",
+        concept_answer_2=f"concept_based_template_question_answer {concept}",
     )
 
     mock_request_gpt_function = mocker.patch(

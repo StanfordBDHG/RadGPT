@@ -16,26 +16,26 @@ service cloud.firestore {
 
     function notChangingCachingFields(previousData, data) {
       return previousData["main_explanation"] == data["main_explanation"]
-             && previousData["concept_based_question"] == data["concept_based_question"]
-             && previousData["concept_based_question_answer"] == data["concept_based_question_answer"]
-             && previousData["concept_based_template_question"] == data["concept_based_template_question"]
-             && previousData["concept_based_template_question_answer"] == data["concept_based_template_question_answer"];
+             && previousData["concept_question_1"] == data["concept_question_1"]
+             && previousData["concept_answer_1"] == data["concept_answer_1"]
+             && previousData["concept_question_2"] == data["concept_question_2"]
+             && previousData["concept_answer_2"] == data["concept_answer_2"];
     } 
 
     function containsOnlyAllowedCachedFields(data) {
       return data.keys().hasOnly([
           "main_explanation",
-          "concept_based_question",
-          "concept_based_question_answer",
-          "concept_based_template_question",
-          "concept_based_template_question_answer",
+          "concept_question_1",
+          "concept_answer_1",
+          "concept_question_2",
+          "concept_answer_2",
           "feedback"
         ]) && data.keys().hasAll([
           "main_explanation",
-          "concept_based_question",
-          "concept_based_question_answer",
-          "concept_based_template_question",
-          "concept_based_template_question_answer",
+          "concept_question_1",
+          "concept_answer_1",
+          "concept_question_2",
+          "concept_answer_2",
           "feedback"
         ]);
     }

@@ -29,10 +29,10 @@ interface DetailDialogProps {
     open: () => void;
     toggle: () => void;
   };
-  conceptBasedQuestion: string | null;
-  conceptBasedQuestionAnswer: string | null;
-  conceptBasedTemplateQuestion: string | null;
-  conceptBasedTemplateQuestionAnswer: string | null;
+  conceptQuestion1: string | null;
+  conceptAnswer1: string | null;
+  conceptQuestion2: string | null;
+  conceptAnswer2: string | null;
   selectedNumber: number | null;
   setSelectedNumber: Dispatch<SetStateAction<number | null>>;
   selectedFileName: string;
@@ -41,10 +41,10 @@ interface DetailDialogProps {
 export const DetailDialog = ({
   answer,
   openState,
-  conceptBasedQuestion: concept_based_question,
-  conceptBasedQuestionAnswer: concept_based_question_answer,
-  conceptBasedTemplateQuestion: concept_based_template_question,
-  conceptBasedTemplateQuestionAnswer: concept_based_template_question_answer,
+  conceptQuestion1,
+  conceptAnswer1,
+  conceptQuestion2,
+  conceptAnswer2,
   selectedNumber,
   setSelectedNumber,
   selectedFileName,
@@ -140,12 +140,12 @@ export const DetailDialog = ({
           {answer !== null ?
             <p>{answer}</p>
           : <Loader2 className="mt-2 animate-spin" />}
-          {concept_based_question && concept_based_question_answer && (
+          {conceptQuestion1 && conceptAnswer1 && (
             <h3 className="text-lg font-semibold">
               Other questions you may have
             </h3>
           )}
-          {concept_based_question && concept_based_question_answer && (
+          {conceptQuestion1 && conceptAnswer1 && (
             <QuestionAnswer
               onClick={() =>
                 selectedNumber === 1 ?
@@ -153,8 +153,8 @@ export const DetailDialog = ({
                 : setSelectedNumber(1)
               }
               isSelected={selectedNumber === 1}
-              question={concept_based_question}
-              answer={concept_based_question_answer}
+              question={conceptQuestion1}
+              answer={conceptAnswer1}
               onLike={onLikeFunctor(1)}
               onDislike={onDislikeFunctor(1)}
               like={like1}
@@ -163,25 +163,24 @@ export const DetailDialog = ({
               onFeedbackSubmit={onFeedbackFunctor(1)}
             />
           )}
-          {concept_based_template_question &&
-            concept_based_template_question_answer && (
-              <QuestionAnswer
-                onClick={() =>
-                  selectedNumber === 2 ?
-                    setSelectedNumber(null)
-                  : setSelectedNumber(2)
-                }
-                isSelected={selectedNumber === 2}
-                question={concept_based_template_question}
-                answer={concept_based_template_question_answer}
-                onLike={onLikeFunctor(2)}
-                onDislike={onDislikeFunctor(2)}
-                like={like2}
-                dislike={dislike2}
-                textFeedback={textFeedback2}
-                onFeedbackSubmit={onFeedbackFunctor(2)}
-              />
-            )}
+          {conceptQuestion2 && conceptAnswer2 && (
+            <QuestionAnswer
+              onClick={() =>
+                selectedNumber === 2 ?
+                  setSelectedNumber(null)
+                : setSelectedNumber(2)
+              }
+              isSelected={selectedNumber === 2}
+              question={conceptQuestion2}
+              answer={conceptAnswer2}
+              onLike={onLikeFunctor(2)}
+              onDislike={onDislikeFunctor(2)}
+              like={like2}
+              dislike={dislike2}
+              textFeedback={textFeedback2}
+              onFeedbackSubmit={onFeedbackFunctor(2)}
+            />
+          )}
         </DialogHeader>
       </DialogContent>
     </Dialog>
