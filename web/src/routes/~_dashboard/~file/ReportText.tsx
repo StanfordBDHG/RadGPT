@@ -25,6 +25,8 @@ interface ReportTextProp {
 const errorCodeToString: Record<AnnotationProcessingError, string> = {
   [AnnotationProcessingError.validationFailed]:
     "This report could not be identified as a radiology report. In case you believe this is a mistake, please send a brief email to ...",
+  [AnnotationProcessingError.uploadLimitReached]:
+    "You have reached your limit for radiology report uploads. In case you believe this is a mistake or if you want to file for an exemption, please send a brief email to ...",
 };
 
 export const ReportText = ({ file }: ReportTextProp) => {

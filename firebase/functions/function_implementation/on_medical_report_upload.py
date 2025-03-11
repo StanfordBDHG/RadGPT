@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: MIT
 #
 
+import datetime
 from enum import Enum
 import json
 import pathlib
@@ -23,9 +24,12 @@ from function_implementation.text_mapping.radgraph_text_mapper import (
     get_entity_mapping_in_user_entered_text,
 )
 
+MAX_REPORTS_UPLOAD = 5
+
 
 class ErrorCode(Enum):
     VALIDATION_FAILED = 1
+    UPLOAD_LIMIT_REACHED = 2
 
 
 def __get_report_from_cloud_storage(
@@ -53,7 +57,7 @@ def __update_report_meta_data(
     ref.update(document_data)
 
 
-def __get_postprocessed_annotations(user_provided_report):
+def __get_postprocessed_annotations(user_provided_report: str):
     processed_annotations = get_processed_annotation_from_radgraph(user_provided_report)
     text_mapping = get_entity_mapping_in_user_entered_text(
         user_provided_report, processed_annotations
@@ -63,6 +67,32 @@ def __get_postprocessed_annotations(user_provided_report):
         processed_annotations,
     )
     return processed_annotations, text_mapping
+
+
+def __is_upload_limiter_valid(uid: int, file_name: str) -> bool:
+    db = firestore.client()
+    transaction = db.transaction()
+    upload_limiter_file_ref = db.collection("users_limit").document(f"{uid}")
+
+    @firestore.transactional
+    def update_user_uploaded_documents(transaction):
+        snapshot = upload_limiter_file_ref.get(transaction=transaction)
+
+        limit = snapshot.get("limit") if snapshot.exists else 5
+        document_list = snapshot.get("reports") if snapshot.exists else []
+
+        if len(document_list) >= limit:
+            return False
+
+        document_list.append(
+            {"file_name": file_name, "access_date": datetime.datetime.now().timestamp()}
+        )
+        transaction.set(
+            upload_limiter_file_ref, {"limit": limit, "reports": document_list}
+        )
+        return True
+
+    return update_user_uploaded_documents(transaction)
 
 
 def on_medical_report_upload_impl(
@@ -88,6 +118,12 @@ def on_medical_report_upload_impl(
             "user_provided_text": user_provided_report,
         },
     )
+
+    if __is_upload_limiter_valid(uid, file_name) is False:
+        __update_report_meta_data(
+            uid, file_name, {"error_code": ErrorCode.UPLOAD_LIMIT_REACHED.value}
+        )
+        return
 
     if request_report_validation(user_provided_report) is False:
         __update_report_meta_data(
