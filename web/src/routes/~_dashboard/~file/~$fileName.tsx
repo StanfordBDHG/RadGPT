@@ -10,13 +10,13 @@ import { Spinner } from "@stanfordspezi/spezi-web-design-system/components/Spinn
 import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
 import { createFileRoute } from "@tanstack/react-router";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
-import { ReportText } from "@/routes/~_dashboard/~file/ReportText";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
+import { ReportText } from "./ReportText";
 
 const FileDetail = () => {
-  const { name } = Route.useParams();
-  const file = useGetFileDetailsSubscription({ name });
+  const { fileName } = Route.useParams();
+  const file = useGetFileDetailsSubscription({ fileName });
 
   return (
     <DashboardLayout>
@@ -35,6 +35,6 @@ const FileDetail = () => {
   );
 };
 
-export const Route = createFileRoute("/_dashboard/file/$name")({
+export const Route = createFileRoute("/_dashboard/file/$fileName")({
   component: FileDetail,
 });

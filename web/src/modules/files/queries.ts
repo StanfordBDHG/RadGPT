@@ -6,24 +6,20 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { queryOptions, skipToken, useQueryClient } from "@tanstack/react-query";
-import { notFound } from "@tanstack/react-router";
-import { doc, getDoc, onSnapshot, type DocumentData } from "firebase/firestore";
+import { queryOptions, skipToken } from "@tanstack/react-query";
+import { type DocumentData, onSnapshot } from "firebase/firestore";
 import { type FullMetadata, getMetadata, listAll, ref } from "firebase/storage";
 import { useEffect, useState } from "react";
 import { type z } from "zod";
 import {
   callables,
   docRefs,
-  firestore,
   getCurrentUser,
   storage,
 } from "@/modules/firebase/app";
-import {
-  type FeedbackPayload,
-  getDocDataOrThrow,
-  type OnDetailedExplanationRequestInput,
-} from "@/modules/firebase/utils";
+import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/getCallables";
+import { collections, type FeedbackPayload } from "@/modules/firebase/refs";
+import { getDocData } from "@/modules/firebase/utils";
 import { processedAnnotationsSchema } from "./processedAnnotations";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
@@ -36,10 +32,9 @@ const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
 };
 
 const listFiles = async () => {
-  const currentUser = getCurrentUser();
   const storageReportsReference = ref(
     storage,
-    `users/${currentUser.uid}/reports`,
+    collections.reports({ userId: getCurrentUser().uid }),
   );
   const listResult = await listAll(storageReportsReference);
   const fileMetadata = await Promise.all(
@@ -52,25 +47,10 @@ const listFiles = async () => {
   return fileList;
 };
 
-interface GetFileDetailsPayload {
-  name: string;
-}
-
 const parseFileDetails = (data: DocumentData, name: string) => ({
   ...processedAnnotationsSchema.parse(data),
   name,
 });
-
-const getFileDetails = async (payload: GetFileDetailsPayload) => {
-  const fileRef = doc(
-    firestore,
-    `users/${getCurrentUser().uid}/${payload.name}/report_meta_data`,
-  );
-  const fileSnapshot = await getDoc(fileRef);
-  const data = fileSnapshot.data();
-  if (!data) throw notFound();
-  return parseFileDetails(data, payload.name);
-};
 
 export type FileDetails = z.infer<typeof processedAnnotationsSchema> & {
   name: string;
@@ -82,11 +62,6 @@ export const filesQueries = {
       queryKey: ["listFiles"],
       queryFn: listFiles,
       initialData: [],
-    }),
-  getFileDetails: (payload: GetFileDetailsPayload) =>
-    queryOptions({
-      queryKey: ["getFile", payload],
-      queryFn: () => getFileDetails(payload),
     }),
   getDetailedExplanation: (payload: OnDetailedExplanationRequestInput | null) =>
     queryOptions({
@@ -100,37 +75,34 @@ export const filesQueries = {
     queryOptions({
       queryKey: ["getObservationFeedback", payload],
       queryFn:
-        payload ?
-          () => getDocDataOrThrow(docRefs.feedback(payload))
-        : skipToken,
+        payload ? () => getDocData(docRefs.feedback(payload)) : skipToken,
     }),
 };
 
-export const useGetFileDetailsSubscription = (payload: { name: string }) => {
-  const queryClient = useQueryClient();
+export const useGetFileDetailsSubscription = ({
+  fileName,
+}: {
+  fileName: string;
+}) => {
   const [file, setFile] = useState<FileDetails>();
 
   useEffect(() => {
     let ignore = false;
-    const fileRef = doc(
-      firestore,
-      `users/${getCurrentUser().uid}/${payload.name}/report_meta_data`,
-    );
+    const fileRef = docRefs.fileMetaData({
+      userId: getCurrentUser().uid,
+      fileName,
+    });
     const unsubscribe = onSnapshot(fileRef, (snapshot) => {
       const data = snapshot.data();
       if (ignore || !data) return;
-      const file = parseFileDetails(data, payload.name);
-      queryClient.setQueryData(
-        filesQueries.getFileDetails({ name: payload.name }).queryKey,
-        file,
-      );
+      const file = parseFileDetails(data, fileName);
       setFile(file);
     });
     return () => {
       ignore = true;
       unsubscribe();
     };
-  }, [payload.name]);
+  }, [fileName]);
 
   return file;
 };

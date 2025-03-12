@@ -28,7 +28,7 @@ export const Route = createFileRoute("/_dashboard")({
     }
   },
   pendingComponent: () => (
-    <DashboardLayout>
+    <DashboardLayout showSideMenu={false}>
       <StateContainer grow className="min-h-screen">
         <Spinner />
       </StateContainer>

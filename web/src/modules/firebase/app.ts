@@ -7,13 +7,14 @@
 //
 
 // Import the functions you need from the SDKs you need
-import { initializeApp, getApp, getApps } from "firebase/app";
-import { getAuth, connectAuthEmulator } from "firebase/auth";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { connectAuthEmulator, getAuth } from "firebase/auth";
 import { connectFirestoreEmulator, getFirestore } from "firebase/firestore";
 import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { env } from "@/env";
-import { getCallables, getDocumentsRefs } from "./utils";
+import { getCallables } from "./getCallables";
+import { getDocumentsRefs } from "./refs";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -34,14 +35,6 @@ if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
   connectAuthEmulator(auth, "http://localhost:9099");
 }
 
-/**
- * Use this in auth-protected routes only!
- * */
-export const getCurrentUser = () => {
-  if (!auth.currentUser) throw new Error("UNAUTHENTICATED");
-  return auth.currentUser;
-};
-
 export const storage = getStorage(app);
 if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
   connectStorageEmulator(storage, "localhost", 9199);
@@ -60,3 +53,11 @@ if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
 export const callables = getCallables(functions);
 
 export const docRefs = getDocumentsRefs(firestore);
+
+/**
+ * Use this in auth-protected routes only!
+ * */
+export const getCurrentUser = () => {
+  if (!auth.currentUser) throw new Error("UNAUTHENTICATED");
+  return auth.currentUser;
+};

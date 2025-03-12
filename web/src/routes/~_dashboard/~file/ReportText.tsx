@@ -23,7 +23,6 @@ export const ReportText = ({ file }: ReportTextProp) => {
     number | null
   >(null);
   const openState = useStatefulOpenState<{ observationIndex: number }>();
-  const [selectedNumber, setSelectedNumber] = useState<number>();
 
   if (!file.text_mapping) {
     return (
@@ -38,12 +37,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
 
   return (
     <>
-      <DetailDialog
-        openState={openState}
-        selectedNumber={selectedNumber}
-        setSelectedNumber={setSelectedNumber}
-        selectedFileName={file.name}
-      />
+      <DetailDialog openState={openState} selectedFileName={file.name} />
       <div className="whitespace-pre-wrap leading-5 tracking-wide">
         {textBlocks.map(
           ({

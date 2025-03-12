@@ -6,6 +6,10 @@
 // SPDX-License-Identifier: MIT
 //
 
+import {
+  Async,
+  queriesToAsyncProps,
+} from "@stanfordspezi/spezi-web-design-system/components/Async";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
@@ -16,16 +20,17 @@ import { filesQueries } from "@/modules/files/queries";
 export const FileList = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const { data: files } = useQuery(filesQueries.listFiles());
+  const listFilesQuery = useQuery(filesQueries.listFiles());
+  const { data: files } = listFilesQuery;
   const fileRouteParams = useParams({
-    from: "/_dashboard/file/$name",
+    from: "/_dashboard/file/$fileName",
     shouldThrow: false,
   });
 
   const onDelete = async (file: (typeof files)[number]) => {
     if (!file.ref) return;
     await deleteObject(file.ref);
-    const isSelectedFile = fileRouteParams?.name === file.ref.name;
+    const isSelectedFile = fileRouteParams?.fileName === file.ref.name;
     if (isSelectedFile) {
       await navigate({ to: "/" });
     }
@@ -34,31 +39,33 @@ export const FileList = () => {
 
   return (
     <div className="flex w-full flex-col">
-      {files.map((file) => {
-        const name = file.ref?.name;
-        if (!name) return;
-        return (
-          <div className="flex flex-row" key={name}>
-            <Link
-              to="/file/$name"
-              params={{ name }}
-              className={cn(
-                "interactive-opacity text-left",
-                name === fileRouteParams?.name && "font-bold",
-              )}
-            >
-              {file.customName}
-            </Link>
-            <button
-              className="interactive-opacity ml-auto"
-              onClick={() => onDelete(file)}
-              aria-label="Delete"
-            >
-              <Trash2 className="w-5" />
-            </button>
-          </div>
-        );
-      })}
+      <Async {...queriesToAsyncProps([listFilesQuery])}>
+        {files.map((file) => {
+          const name = file.ref?.name;
+          if (!name) return;
+          return (
+            <div className="flex flex-row" key={name}>
+              <Link
+                to="/file/$fileName"
+                params={{ fileName: name }}
+                className={cn(
+                  "interactive-opacity text-left",
+                  name === fileRouteParams?.fileName && "font-bold",
+                )}
+              >
+                {file.customName}
+              </Link>
+              <button
+                className="interactive-opacity ml-auto"
+                onClick={() => onDelete(file)}
+                aria-label="Delete"
+              >
+                <Trash2 className="w-5" />
+              </button>
+            </div>
+          );
+        })}
+      </Async>
     </div>
   );
 };

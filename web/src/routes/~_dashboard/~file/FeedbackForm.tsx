@@ -10,11 +10,10 @@ import { toast } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
-import { doc, updateDoc } from "firebase/firestore";
+import { updateDoc } from "firebase/firestore";
 import { z } from "zod";
 import { type FileDetails } from "@/modules/files/queries";
-import { firestore } from "@/modules/firebase/app";
-import { useAuthenticatedUser } from "@/modules/user";
+import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 
 const formSchema = z.object({
   feedback: z
@@ -28,7 +27,6 @@ interface FeedbackFormProps {
 }
 
 export const FeedbackForm = ({ className, file }: FeedbackFormProps) => {
-  const currentUser = useAuthenticatedUser();
   const form = useForm({
     formSchema,
     values: {
@@ -37,8 +35,11 @@ export const FeedbackForm = ({ className, file }: FeedbackFormProps) => {
   });
 
   const handleSubmit = form.handleSubmit(async ({ feedback }) => {
-    const path = `users/${currentUser?.uid}/${file.name}/report_meta_data`;
-    await updateDoc(doc(firestore, path), {
+    const fileMetaDataRef = docRefs.fileMetaData({
+      userId: getCurrentUser().uid,
+      fileName: file.name,
+    });
+    await updateDoc(fileMetaDataRef, {
       user_feedback: feedback,
     });
     toast.success("The feedback has been submitted, thank you!");

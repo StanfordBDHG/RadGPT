@@ -22,15 +22,17 @@ export interface DashboardLayoutProps {
   title?: ReactNode;
   actions?: ReactNode;
   children?: ReactNode;
+  showSideMenu?: boolean;
 }
 
 export const DashboardLayout = ({
   title,
   actions,
   children,
+  showSideMenu = true,
 }: DashboardLayoutProps) => {
   const menu = useOpenState();
-  const sideMenu = <SideMenu />;
+  const sideMenu = showSideMenu ? <SideMenu /> : null;
 
   return (
     <>
