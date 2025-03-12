@@ -71,6 +71,7 @@ export const QuestionAnswer = ({
   return (
     <>
       <button
+        data-testid="question"
         onClick={onClick}
         className="interactive-opacity flex flex-row text-left"
       >

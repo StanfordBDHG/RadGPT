@@ -25,17 +25,11 @@ test("Test Upload and GPT Detailed Information Flow", async ({ page }) => {
   await expect(page.locator("h3")).toContainText(
     "Other questions you may have",
   );
-  await page
-    .getByRole("button", { name: /How did the stone end up/ })
-    .first()
-    .click();
+  await page.getByTestId("question").nth(0).click();
 
   await page.getByPlaceholder("Feedback").first().fill("Great question!");
   await page.getByRole("button", { name: "Submit" }).first().click();
-  await page
-    .getByRole("button", { name: /What is small non/ })
-    .first()
-    .click();
+  await page.getByTestId("question").nth(1).click();
   await expect(page.getByPlaceholder("Feedback").nth(1)).not.toContainText(
     "Great question!",
   );

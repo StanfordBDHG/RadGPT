@@ -43,7 +43,7 @@ export const FileList = () => {
               to="/file/$name"
               params={{ name }}
               className={cn(
-                "interactive-opacity",
+                "interactive-opacity text-left",
                 name === fileRouteParams?.name && "font-bold",
               )}
             >
