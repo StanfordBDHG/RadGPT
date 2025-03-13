@@ -245,7 +245,9 @@ def test_full_uncached_flow(mocker, observation_index):
     mock_get_report_meta_data_function.assert_called_with(uid, file_name)
     assert mock_get_report_meta_data_function.call_count == 1
 
-    mock_get_cached_answer_function.assert_called_with(uid, file_name, observation_index)
+    mock_get_cached_answer_function.assert_called_with(
+        uid, file_name, observation_index
+    )
     assert mock_get_cached_answer_function.call_count == 1
 
     mock_request_gpt_function.assert_called_with(user_provided_text, concept)

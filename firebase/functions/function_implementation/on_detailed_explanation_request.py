@@ -32,7 +32,9 @@ def __get_cached_answer(
     db = firestore.client()
     annotations_folder_ref = db.collection(f"users/{uid}/{file_name}")
 
-    observation_ref = annotations_folder_ref.document(f"cached_answer_{observation_index}")
+    observation_ref = annotations_folder_ref.document(
+        f"cached_answer_{observation_index}"
+    )
     return observation_ref.get()
 
 
@@ -51,7 +53,9 @@ def __store_detailed_response(
     db = firestore.client()
     annotations_folder_ref = db.collection(f"users/{uid}/{file_name}")
 
-    observation_ref = annotations_folder_ref.document(f"cached_answer_{observation_index}")
+    observation_ref = annotations_folder_ref.document(
+        f"cached_answer_{observation_index}"
+    )
     observation_ref.set(detailed_response)
 
 
