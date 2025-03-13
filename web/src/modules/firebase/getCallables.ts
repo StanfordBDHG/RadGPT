@@ -10,7 +10,7 @@ import { type Functions, httpsCallable } from "@firebase/functions";
 
 export interface OnDetailedExplanationRequestInput {
   file_name: string;
-  observation_id: number;
+  observation_index: number;
 }
 
 interface OnDetailedExplanationRequestOutput {

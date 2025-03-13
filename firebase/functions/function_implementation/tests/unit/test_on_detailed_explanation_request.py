@@ -34,11 +34,11 @@ def test_invalid_auth_object(mocker):
     [
         {
             "file_name": file_name,
-            "observation_id": observation_id,
+            "observation_index": observation_index,
         }
         for file_name in ["<file_name>", None]
-        for observation_id in ["<observation_id>", None]
-        if not (file_name is not None and observation_id is not None)
+        for observation_index in ["<observation_index>", None]
+        if not (file_name is not None and observation_index is not None)
     ],
 )
 def test_invalid_request_data(mocker, request_data):
@@ -54,7 +54,7 @@ def test_return_cached_answer(mocker):
     mock_request.auth.uid = "<uid>"
     mock_request.data = {
         "file_name": "<file_name>",
-        "observation_id": "<observation_id>",
+        "observation_index": "<observation_index>",
     }
 
     cached_answer = {"main_explanation": "test main explanation"}
@@ -74,7 +74,7 @@ def test_invalid_report_meta_data_file(mocker):
     mock_request.auth.uid = "<uid>"
     mock_request.data = {
         "file_name": "<file_name>",
-        "observation_id": "<observation_id>",
+        "observation_index": "<observation_index>",
     }
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
@@ -118,7 +118,7 @@ def test_invalid_report_meta_data_content(mocker, report_meta_data):
     mock_request.auth.uid = "<uid>"
     mock_request.data = {
         "file_name": "<file_name>",
-        "observation_id": "<observation_id>",
+        "observation_index": "<observation_index>",
     }
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
@@ -141,15 +141,15 @@ def test_invalid_report_meta_data_content(mocker, report_meta_data):
 
 
 @pytest.mark.parametrize(
-    "observation_id",
+    "observation_index",
     [-1, None, 16, 50],
 )
-def test_invalid_observation_id(mocker, observation_id):
+def test_invalid_observation_index(mocker, observation_index):
     mock_request = mocker.MagicMock()
     mock_request.auth.uid = "<uid>"
     mock_request.data = {
         "file_name": "<file_name>",
-        "observation_id": observation_id,
+        "observation_index": observation_index,
     }
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
@@ -177,17 +177,17 @@ def test_invalid_observation_id(mocker, observation_id):
 
 
 @pytest.mark.parametrize(
-    "observation_id",
+    "observation_index",
     [i for i in range(16)],
 )
-def test_full_uncached_flow(mocker, observation_id):
+def test_full_uncached_flow(mocker, observation_index):
     mock_request = mocker.MagicMock()
     uid = "<uid>"
     file_name = "<file_name>"
     mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": file_name,
-        "observation_id": observation_id,
+        "observation_index": observation_index,
     }
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
@@ -220,7 +220,7 @@ def test_full_uncached_flow(mocker, observation_id):
         return_value=mock_report_meta_data_snapshot,
     )
 
-    concept = __get_concept(get_numbered_processed_annotation(observation_id))
+    concept = __get_concept(get_numbered_processed_annotation(observation_index))
     gpt_answer = DetailedResponse(
         main_explanation=f"main_explanation {concept}",
         concept_question_1=f"concept_based_question {concept}",
@@ -245,13 +245,15 @@ def test_full_uncached_flow(mocker, observation_id):
     mock_get_report_meta_data_function.assert_called_with(uid, file_name)
     assert mock_get_report_meta_data_function.call_count == 1
 
-    mock_get_cached_answer_function.assert_called_with(uid, file_name, observation_id)
+    mock_get_cached_answer_function.assert_called_with(
+        uid, file_name, observation_index
+    )
     assert mock_get_cached_answer_function.call_count == 1
 
     mock_request_gpt_function.assert_called_with(user_provided_text, concept)
     assert mock_request_gpt_function.call_count == 1
 
     mock_store_detailed_response_function.assert_called_with(
-        uid, file_name, observation_id, detailed_response
+        uid, file_name, observation_index, detailed_response
     )
     assert mock_store_detailed_response_function.call_count == 1
