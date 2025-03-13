@@ -6,13 +6,17 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { EmptyState } from "@stanfordspezi/spezi-web-design-system/components/EmptyState";
+import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { auth } from "@/modules/firebase/app";
 import { DashboardLayout } from "./DashboardLayout";
 
 const Dashboard = () => (
   <DashboardLayout>
-    <p>Please add or select a file</p>
+    <StateContainer>
+      <EmptyState>Please add or select a report</EmptyState>
+    </StateContainer>
   </DashboardLayout>
 );
 
