@@ -25,7 +25,7 @@ def test_full_upload_flow(mocker):
     mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": file_name,
-        "observation_id": 0,
+        "observation_index": 0,
     }
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()

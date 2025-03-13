@@ -43,7 +43,7 @@ export const DetailDialog = ({
     filesQueries.getDetailedExplanation(
       openState.state ?
         {
-          observation_id: openState.state.observationIndex,
+          observation_index: openState.state.observationIndex,
           file_name: selectedFileName,
         }
       : null,
