@@ -47,7 +47,7 @@ const listFiles = async () => {
   return fileList;
 };
 
-export type Report = Awaited<ReturnType<typeof listFiles>>[number];
+export type FileListItem = Awaited<ReturnType<typeof listFiles>>[number];
 
 const parseFileDetails = (data: DocumentData, name: string) => ({
   ...processedAnnotationsSchema.parse(data),
