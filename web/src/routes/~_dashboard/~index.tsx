@@ -8,8 +8,7 @@
 
 import { EmptyState } from "@stanfordspezi/spezi-web-design-system/components/EmptyState";
 import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import { auth } from "@/modules/firebase/app";
+import { createFileRoute } from "@tanstack/react-router";
 import { DashboardLayout } from "./DashboardLayout";
 
 const Dashboard = () => (
@@ -22,15 +21,4 @@ const Dashboard = () => (
 
 export const Route = createFileRoute("/_dashboard/")({
   component: Dashboard,
-  beforeLoad: async ({ location }) => {
-    await auth.authStateReady();
-    if (!auth.currentUser) {
-      throw redirect({
-        to: "/signin",
-        search: {
-          redirect: location.href,
-        },
-      });
-    }
-  },
 });
