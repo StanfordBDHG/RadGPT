@@ -69,7 +69,7 @@ export const FileList = () => {
                 {file.customName}
               </Link>
               <button
-                className="interactive-opacity ml-auto h-full px-2 text-foreground transition hover:text-destructive"
+                className="ml-auto h-full px-2 text-muted-foreground transition hover:text-destructive"
                 onClick={() => onDelete(file)}
                 aria-label="Delete"
               >
