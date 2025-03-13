@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { deleteObject } from "firebase/storage";
 import { Trash2 } from "lucide-react";
-import { filesQueries } from "@/modules/files/queries";
+import { filesQueries, type Report } from "@/modules/files/queries";
 
 export const FileList = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export const FileList = () => {
     shouldThrow: false,
   });
 
-  const onDelete = async (file: (typeof files)[number]) => {
+  const onDelete = async (file: Report) => {
     if (!file.ref) return;
     await deleteObject(file.ref);
     const isSelectedFile = fileRouteParams?.fileName === file.ref.name;
@@ -39,8 +39,12 @@ export const FileList = () => {
 
   return (
     <div className="flex w-full flex-col">
-      <Async {...queriesToAsyncProps([listFilesQuery])}>
-        {files.map((file) => {
+      <Async
+        {...queriesToAsyncProps([listFilesQuery])}
+        entityName="reports"
+        empty={files?.length === 0}
+      >
+        {files?.map((file) => {
           const name = file.ref?.name;
           if (!name) return;
           const isActive = name === fileRouteParams?.fileName;
