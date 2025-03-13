@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { type DocumentData } from "firebase/firestore";
 import { z } from "zod";
 
 export interface ProcessedAnnotations {
@@ -34,7 +33,17 @@ const jsonStringToProcessedAnnotations = z
     }
   });
 
-const schema = z.object({
+const textMappingSchema = z.record(
+  z.string(),
+  z.object({
+    user_provided_text_start: z.number(),
+    user_provided_text_end: z.number(),
+  }),
+);
+
+export type TextMapping = z.infer<typeof textMappingSchema>;
+
+export const processedAnnotationsSchema = z.object({
   processed_annotations: jsonStringToProcessedAnnotations.pipe(
     z
       .object({
@@ -54,22 +63,18 @@ const schema = z.object({
       .optional(),
   ),
   user_provided_text: z.string().min(1, "User-provided text is required"),
-  text_mapping: z
-    .record(
-      z.string(),
-      z.object({
-        user_provided_text_start: z.number(),
-        user_provided_text_end: z.number(),
-      }),
-    )
-    .optional(),
+  text_mapping: textMappingSchema.optional(),
   user_feedback: z.string().min(1).optional(),
 });
 
 export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
   const groupMapping = new Map<
     number,
-    { observationId: number; observationGroup: number[]; isLocatedAt: boolean }
+    {
+      observationIndex: number;
+      observationGroup: number[];
+      isLocatedAt: boolean;
+    }
   >();
   processedAnnotations.forEach((observation, index) => {
     const observationGroup: number[] = [];
@@ -107,7 +112,7 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
     for (const element of observationGroup) {
       const previousValue = groupMapping.get(element);
       groupMapping.set(element, {
-        observationId: previousValue?.observationId ?? index,
+        observationIndex: previousValue?.observationIndex ?? index,
         observationGroup: (previousValue?.observationGroup ?? []).concat(
           observationGroup,
         ),
@@ -118,10 +123,4 @@ export const getGroupMap = (processedAnnotations: ProcessedAnnotations[]) => {
   });
 
   return groupMapping;
-};
-
-export const getProcessedAnnotationsFromJSONString = (
-  documentData: DocumentData | undefined,
-) => {
-  if (documentData) return schema.parse(documentData);
 };

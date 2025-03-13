@@ -9,7 +9,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { type User } from "firebase/auth";
 import { createContext, useContext, useState } from "react";
-import { auth } from "@/utils/firebase";
+import { auth } from "@/modules/firebase/app";
 
 export const useAuthenticatedUserContextProvider = () => {
   const [currentUser, setCurrentUser] = useState<null | User>(auth.currentUser);

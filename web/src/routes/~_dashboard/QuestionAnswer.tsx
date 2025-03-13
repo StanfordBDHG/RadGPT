@@ -20,12 +20,12 @@ interface QuestionAnswerProps {
   question: string;
   answer: string;
   onClick: MouseEventHandler;
-  like: boolean;
-  dislike: boolean;
+  like: boolean | null;
+  dislike: boolean | null;
   onLike: MouseEventHandler;
   onDislike: MouseEventHandler;
   onFeedbackSubmit: (feedback: string) => Promise<void>;
-  textFeedback: string;
+  textFeedback: string | null;
 }
 
 const formSchema = z.object({
@@ -50,7 +50,7 @@ export const QuestionAnswer = ({
   const form = useForm({
     formSchema,
     defaultValues: {
-      feedback: textFeedback,
+      feedback: textFeedback ?? "",
     },
   });
 

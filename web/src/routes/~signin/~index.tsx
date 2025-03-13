@@ -16,7 +16,7 @@ import {
   OAuthProvider,
 } from "firebase/auth";
 import { Helmet } from "react-helmet";
-import { auth } from "@/utils/firebase";
+import { auth } from "@/modules/firebase/app";
 
 const appleProvider = new OAuthProvider("apple.com");
 const googleProvider = new GoogleAuthProvider();

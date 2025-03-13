@@ -6,22 +6,11 @@
 // SPDX-License-Identifier: MIT
 //
 
-const numberCompare = (
-  [a]: [
-    string,
-    {
-      user_provided_text_start: number;
-      user_provided_text_end: number;
-    },
-  ],
-  [b]: [
-    string,
-    {
-      user_provided_text_start: number;
-      user_provided_text_end: number;
-    },
-  ],
-) => {
+import { type TextMapping } from "./processedAnnotations";
+
+type TextMappingEntry = [string, TextMapping[string]];
+
+const compareKeys = ([a]: TextMappingEntry, [b]: TextMappingEntry) => {
   const numberA = Number(a);
   const numberB = Number(b);
   if (isNaN(numberA) || isNaN(numberB)) {
@@ -31,14 +20,6 @@ const numberCompare = (
   if (numberA < numberB) return -1;
   return 1;
 };
-
-export type TextMapping = Record<
-  string,
-  {
-    user_provided_text_start: number;
-    user_provided_text_end: number;
-  }
->;
 
 export enum TextBlockPosition {
   LEFT = "keyword-highlight-left",
@@ -61,7 +42,7 @@ export const getTextBlocks = (
   const textArray: TextBlock[] = [];
 
   // Sorting the Map according to its keys
-  const sortedMap = new Map(Object.entries(textMapping).sort(numberCompare));
+  const sortedMap = new Map(Object.entries(textMapping).sort(compareKeys));
 
   let lastIndex = 0;
   let isPreviousTokenRadGraphRelevant = false;
