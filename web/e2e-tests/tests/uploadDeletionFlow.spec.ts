@@ -44,7 +44,7 @@ test("Test Upload and Deletion Flow", async ({ page }) => {
   await expect(
     page.locator("div").filter({ hasText: /^Hypodense Lesion$/ }),
   ).toHaveCount(0);
-  await expect(
-    page.locator("div").filter({ hasText: "Sign out" }).nth(2),
-  ).toBeVisible();
+  await expect(page.getByText("No reports found.").first()).toBeVisible();
+  await page.getByTestId("user-menu").first().click();
+  await expect(page.getByText("Sign Out")).toBeVisible();
 });

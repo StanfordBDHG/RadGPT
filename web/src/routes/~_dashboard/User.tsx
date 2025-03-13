@@ -24,7 +24,11 @@ export const User = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <UserMenuItem img={user.photoURL} name={getUserName(user)} />
+        <UserMenuItem
+          img={user.photoURL}
+          name={getUserName(user)}
+          data-testid="user-menu"
+        />
       </DropdownMenuTrigger>
       <DropdownMenuContent>
         <DropdownMenuItem
