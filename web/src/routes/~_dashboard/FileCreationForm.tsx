@@ -44,7 +44,7 @@ export const FileCreationForm = ({
 
   const handleSubmit = form.handleSubmit(async (medicalReport) => {
     const contentHash = await calculateSHA256Hash(medicalReport.content);
-    const existingFile = files.find((file) => file.ref?.name === contentHash);
+    const existingFile = files?.find((file) => file.ref?.name === contentHash);
 
     if (existingFile) {
       if (existingFile.ref) {
