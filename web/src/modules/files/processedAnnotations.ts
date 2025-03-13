@@ -21,6 +21,7 @@ export interface ProcessedAnnotations {
 
 export enum AnnotationProcessingError {
   validationFailed = 1,
+  uploadLimitReached = 2,
 }
 
 // Source: https://github.com/JacobWeisenburger/zod_utilz/blob/4093595e5a6d95770872598ba3bc405d4e9c963b/src/stringToJSON.ts#LL4-L12C8
