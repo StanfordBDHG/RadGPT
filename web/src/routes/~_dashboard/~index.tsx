@@ -14,7 +14,7 @@ import { DashboardLayout } from "./DashboardLayout";
 const Dashboard = () => (
   <DashboardLayout>
     <StateContainer>
-      <EmptyState>Please add or select a report</EmptyState>
+      <EmptyState>Please add or select a report.</EmptyState>
     </StateContainer>
   </DashboardLayout>
 );

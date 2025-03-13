@@ -11,7 +11,7 @@ import { addNewReport, authenticateWithGoogle } from "../utils";
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
-  await expect(page.getByText(/Please add or select a report/)).toBeVisible();
+  await expect(page.getByText(/Please add or select a report./)).toBeVisible();
   await addNewReport(page, {
     name: "Abdomen CT",
     content:
