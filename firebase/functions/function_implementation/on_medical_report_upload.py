@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: MIT
 #
 
+from enum import Enum
 import json
 import pathlib
 import re
@@ -13,6 +14,7 @@ import re
 from firebase_admin import storage, firestore
 from firebase_functions import storage_fn
 
+from function_implementation.llm_calling.chatgpt import request_report_validation
 from function_implementation.radgraph.radgraph_calling import (
     get_processed_annotation_from_radgraph,
 )
@@ -20,6 +22,10 @@ from function_implementation.text_mapping.radgraph_text_mapper import (
     add_end_ix_to_processed_annotations,
     get_entity_mapping_in_user_entered_text,
 )
+
+
+class ErrorCode(Enum):
+    VALIDATION_FAILED = 1
 
 
 def __get_report_from_cloud_storage(
@@ -82,6 +88,12 @@ def on_medical_report_upload_impl(
             "user_provided_text": user_provided_report,
         },
     )
+
+    if request_report_validation(user_provided_report) is False:
+        __update_report_meta_data(
+            uid, file_name, {"error_code": ErrorCode.VALIDATION_FAILED.value}
+        )
+        return
 
     processed_annotations, text_mapping = __get_postprocessed_annotations(
         user_provided_report

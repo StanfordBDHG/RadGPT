@@ -6,7 +6,10 @@
 # SPDX-License-Identifier: MIT
 #
 
-from function_implementation.llm_calling.chatgpt import SYSTEM_PROMPT, request_gpt
+from function_implementation.llm_calling.chatgpt import (
+    SYSTEM_PROMPT_DETAILED_ANSWER,
+    request_gpt,
+)
 from function_implementation.llm_calling.detailed_reponse import (
     DetailedResponse,
 )
@@ -35,7 +38,7 @@ def test(mocker):
 
     expected_prompt_parameters = {
         "messages": [
-            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "system", "content": SYSTEM_PROMPT_DETAILED_ANSWER},
             {
                 "role": "user",
                 "content": f'''medical report: """{user_provided_report}"""
