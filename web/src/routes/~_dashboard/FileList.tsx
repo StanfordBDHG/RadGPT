@@ -43,20 +43,29 @@ export const FileList = () => {
         {files.map((file) => {
           const name = file.ref?.name;
           if (!name) return;
+          const isActive = name === fileRouteParams?.fileName;
           return (
-            <div className="flex flex-row" key={name}>
+            <div
+              className={cn(
+                "focus-ring group relative flex cursor-pointer items-center rounded-lg font-medium no-underline transition xl:w-full xl:self-start",
+                isActive ?
+                  "bg-accent/50 text-primary"
+                : "text-foreground/60 hover:bg-accent hover:text-foreground",
+              )}
+              key={name}
+            >
               <Link
                 to="/file/$fileName"
                 params={{ fileName: name }}
                 className={cn(
-                  "interactive-opacity text-left",
-                  name === fileRouteParams?.fileName && "font-bold",
+                  "interactive-opacity w-full p-2 text-left",
+                  isActive ? "font-bold" : "group-hover:opacity-80",
                 )}
               >
                 {file.customName}
               </Link>
               <button
-                className="interactive-opacity ml-auto"
+                className="interactive-opacity ml-auto h-full px-2 text-foreground transition hover:text-destructive"
                 onClick={() => onDelete(file)}
                 aria-label="Delete"
               >
