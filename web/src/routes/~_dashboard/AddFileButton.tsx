@@ -45,7 +45,7 @@ export const AddFileButton = () => {
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="mx-auto" onClick={openState.open}>
+        <Button className="mx-auto mt-4 lg:mt-0" onClick={openState.open}>
           <FilePlus />
           Add New Report
         </Button>

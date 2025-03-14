@@ -15,7 +15,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { deleteObject } from "firebase/storage";
 import { Trash2 } from "lucide-react";
-import { filesQueries } from "@/modules/files/queries";
+import { filesQueries, type FileListItem } from "@/modules/files/queries";
 
 export const FileList = () => {
   const navigate = useNavigate();
@@ -27,7 +27,7 @@ export const FileList = () => {
     shouldThrow: false,
   });
 
-  const onDelete = async (file: (typeof files)[number]) => {
+  const onDelete = async (file: FileListItem) => {
     if (!file.ref) return;
     await deleteObject(file.ref);
     const isSelectedFile = fileRouteParams?.fileName === file.ref.name;
@@ -39,24 +39,37 @@ export const FileList = () => {
 
   return (
     <div className="flex w-full flex-col">
-      <Async {...queriesToAsyncProps([listFilesQuery])}>
-        {files.map((file) => {
+      <Async
+        {...queriesToAsyncProps([listFilesQuery])}
+        entityName="reports"
+        empty={files?.length === 0}
+      >
+        {files?.map((file) => {
           const name = file.ref?.name;
           if (!name) return;
+          const isActive = name === fileRouteParams?.fileName;
           return (
-            <div className="flex flex-row" key={name}>
+            <div
+              className={cn(
+                "focus-ring group relative flex cursor-pointer items-center rounded-lg font-medium no-underline transition xl:w-full xl:self-start",
+                isActive ?
+                  "bg-accent/50 text-primary"
+                : "text-foreground/60 hover:bg-accent hover:text-foreground",
+              )}
+              key={name}
+            >
               <Link
                 to="/file/$fileName"
                 params={{ fileName: name }}
                 className={cn(
-                  "interactive-opacity text-left",
-                  name === fileRouteParams?.fileName && "font-bold",
+                  "interactive-opacity w-full p-2 text-left",
+                  isActive ? "font-bold" : "group-hover:opacity-80",
                 )}
               >
                 {file.customName}
               </Link>
               <button
-                className="interactive-opacity ml-auto"
+                className="ml-auto h-full px-2 text-muted-foreground transition hover:text-destructive"
                 onClick={() => onDelete(file)}
                 aria-label="Delete"
               >

@@ -11,7 +11,7 @@ import { addNewReport, authenticateWithGoogle } from "../utils";
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
-  await expect(page.getByText(/Please add or select a file/)).toBeVisible();
+  await expect(page.getByText(/Please add or select a report./)).toBeVisible();
   await addNewReport(page, {
     name: "Abdomen CT",
     content:
@@ -44,7 +44,7 @@ test("Test Upload and Deletion Flow", async ({ page }) => {
   await expect(
     page.locator("div").filter({ hasText: /^Hypodense Lesion$/ }),
   ).toHaveCount(0);
-  await expect(
-    page.locator("div").filter({ hasText: "Sign out" }).nth(2),
-  ).toBeVisible();
+  await expect(page.getByText("No reports found.").first()).toBeVisible();
+  await page.getByTestId("user-menu").first().click();
+  await expect(page.getByText("Sign Out")).toBeVisible();
 });

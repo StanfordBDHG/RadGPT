@@ -47,6 +47,8 @@ const listFiles = async () => {
   return fileList;
 };
 
+export type FileListItem = Awaited<ReturnType<typeof listFiles>>[number];
+
 const parseFileDetails = (data: DocumentData, name: string) => ({
   ...processedAnnotationsSchema.parse(data),
   name,
@@ -61,7 +63,6 @@ export const filesQueries = {
     queryOptions({
       queryKey: ["listFiles"],
       queryFn: listFiles,
-      initialData: [],
     }),
   getDetailedExplanation: (payload: OnDetailedExplanationRequestInput | null) =>
     queryOptions({
