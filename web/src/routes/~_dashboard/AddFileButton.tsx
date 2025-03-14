@@ -11,6 +11,7 @@ import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -53,6 +54,9 @@ export const AddFileButton = () => {
       <DialogContent className="max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Medical Report</DialogTitle>
+          <DialogDescription>
+            Please insert your radiology report below.
+          </DialogDescription>
         </DialogHeader>
         <FileCreationForm
           onUploadSuccess={onUploadSuccessDialogClose}
