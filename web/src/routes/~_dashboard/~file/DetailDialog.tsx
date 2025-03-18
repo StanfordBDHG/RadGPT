@@ -14,6 +14,7 @@ import {
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
@@ -137,53 +138,56 @@ export const DetailDialog = ({
       <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Detailed Explanation</DialogTitle>
-          <Async
-            {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}
-          >
-            <p>{main_explanation}</p>
-            {concept_question_1 && concept_answer_1 && (
-              <h3 className="text-lg font-semibold">
-                Other questions you may have
-              </h3>
-            )}
-            {concept_question_1 && concept_answer_1 && (
-              <QuestionAnswer
-                onClick={() =>
-                  selectedNumber === 1 ?
-                    setSelectedNumber(undefined)
-                  : setSelectedNumber(1)
-                }
-                isSelected={selectedNumber === 1}
-                question={concept_question_1}
-                answer={concept_answer_1}
-                onLike={createOnLike(1)}
-                onDislike={createOnDislike(1)}
-                like={like1}
-                dislike={dislike1}
-                textFeedback={textFeedback1}
-                onFeedbackSubmit={createOnFeedback(1)}
-              />
-            )}
-            {concept_question_2 && concept_answer_2 && (
-              <QuestionAnswer
-                onClick={() =>
-                  selectedNumber === 2 ?
-                    setSelectedNumber(undefined)
-                  : setSelectedNumber(2)
-                }
-                isSelected={selectedNumber === 2}
-                question={concept_question_2}
-                answer={concept_answer_2}
-                onLike={createOnLike(2)}
-                onDislike={createOnDislike(2)}
-                like={like2}
-                dislike={dislike2}
-                textFeedback={textFeedback2}
-                onFeedbackSubmit={createOnFeedback(2)}
-              />
-            )}
-          </Async>
+          <DialogDescription>
+            You can find a detailed explanation of the selected concept.
+          </DialogDescription>
         </DialogHeader>
+        <Async
+          {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}
+        >
+          <p>{main_explanation}</p>
+          {concept_question_1 && concept_answer_1 && (
+            <h3 className="text-lg font-semibold">
+              Other questions you may have
+            </h3>
+          )}
+          {concept_question_1 && concept_answer_1 && (
+            <QuestionAnswer
+              onClick={() =>
+                selectedNumber === 1 ?
+                  setSelectedNumber(undefined)
+                : setSelectedNumber(1)
+              }
+              isSelected={selectedNumber === 1}
+              question={concept_question_1}
+              answer={concept_answer_1}
+              onLike={createOnLike(1)}
+              onDislike={createOnDislike(1)}
+              like={like1}
+              dislike={dislike1}
+              textFeedback={textFeedback1}
+              onFeedbackSubmit={createOnFeedback(1)}
+            />
+          )}
+          {concept_question_2 && concept_answer_2 && (
+            <QuestionAnswer
+              onClick={() =>
+                selectedNumber === 2 ?
+                  setSelectedNumber(undefined)
+                : setSelectedNumber(2)
+              }
+              isSelected={selectedNumber === 2}
+              question={concept_question_2}
+              answer={concept_answer_2}
+              onLike={createOnLike(2)}
+              onDislike={createOnDislike(2)}
+              like={like2}
+              dislike={dislike2}
+              textFeedback={textFeedback2}
+              onFeedbackSubmit={createOnFeedback(2)}
+            />
+          )}
+        </Async>
       </DialogContent>
     </Dialog>
   );

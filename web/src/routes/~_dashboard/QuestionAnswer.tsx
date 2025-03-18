@@ -87,6 +87,7 @@ export const QuestionAnswer = ({
         ref={ref}
         style={{ height }}
         className="overflow-hidden border-b border-slate-200 duration-200"
+        hidden={!isSelected}
       >
         <div className="text-md text-gray-700">
           {answer}

@@ -8,7 +8,7 @@
 
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { ComponentProps, useState } from "react";
+import { ComponentProps, useMemo, useState } from "react";
 import {
   AnnotationProcessingError,
   getGroupMap,
@@ -29,18 +29,32 @@ const errorCodeToString: Record<AnnotationProcessingError, string> = {
     "You have reached your limit for radiology report uploads. In case you believe this is a mistake or if you want to file for an exemption, please send a brief email to ...",
 };
 
+const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
+  <div
+    className={cn("whitespace-pre-wrap leading-5 tracking-wide", className)}
+    {...props}
+  />
+);
+
 export const ReportText = ({ file }: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
   const openState = useStatefulOpenState<{ observationIndex: number }>();
 
-  const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
-    <div
-      className={cn("whitespace-pre-wrap leading-5 tracking-wide", className)}
-      {...props}
-    />
-  );
+  const memoTextMapping = useMemo(() => {
+    if (file.error_code || !file.text_mapping) {
+      return undefined;
+    }
+
+    const textBlocks = getTextBlocks(
+      file.text_mapping,
+      file.user_provided_text,
+    );
+    const groupMap = getGroupMap(file.processed_annotations ?? []);
+
+    return { textBlocks, groupMap };
+  }, [file]);
 
   if (file.error_code) {
     return (
@@ -61,8 +75,11 @@ export const ReportText = ({ file }: ReportTextProp) => {
     );
   }
 
-  const textBlocks = getTextBlocks(file.text_mapping, file.user_provided_text);
-  const groupMap = getGroupMap(file.processed_annotations ?? []);
+  if (!memoTextMapping) {
+    throw new Error("Invalid state in ReportText.");
+  }
+
+  const { textBlocks, groupMap } = memoTextMapping;
 
   return (
     <>
@@ -98,6 +115,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
                 )}
                 onMouseEnter={() => setCurrentHoveredWordIndex(key)}
                 onMouseLeave={() => setCurrentHoveredWordIndex(null)}
+                onFocus={() => setCurrentHoveredWordIndex(key)}
                 onClick={() =>
                   openState.open({ observationIndex: group.observationIndex })
                 }
