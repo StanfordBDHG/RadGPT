@@ -7,7 +7,6 @@
 //
 
 import { type Page, expect } from "@playwright/test";
-import { createHash } from "crypto";
 
 export const authenticateWithGoogle = async (page: Page) => {
   await page.goto("/signin?redirect=%2F");
@@ -24,9 +23,6 @@ export const authenticateWithGoogle = async (page: Page) => {
   await page.waitForURL("/");
 };
 
-export const calculateSHA256Hash = (content: string) =>
-  createHash("sha256").update(content).digest("hex");
-
 export const addNewReport = async (
   page: Page,
   content: { name: string; content: string },
@@ -36,7 +32,8 @@ export const addNewReport = async (
   await page.getByLabel("Medical Report Content").fill(content.content);
   await page.getByRole("button", { name: "Submit" }).click();
   await expect(page.getByLabel("Medical Report Content")).not.toBeVisible();
-  await page.waitForURL(`/file/${calculateSHA256Hash(content.content)}`);
+  await page.waitForURL(/file\//);
+  return page.url();
 };
 
 export const checkForTextAnnotationCompletion = async (

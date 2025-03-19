@@ -43,6 +43,7 @@ const listFiles = async () => {
   const fileList = fileMetadata.sort(metaDataCompare).map((fullMetaData) => ({
     ref: fullMetaData.ref,
     customName: fullMetaData.customMetadata?.medicalReportName ?? "undefined",
+    hash: fullMetaData.customMetadata?.hash ?? "undefined",
   }));
   return fileList;
 };

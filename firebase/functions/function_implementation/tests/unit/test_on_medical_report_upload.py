@@ -17,20 +17,20 @@ from function_implementation.on_medical_report_upload import (
 
 
 @pytest.mark.parametrize(
-    "uid,report_hash",
+    "uid,report_uuid",
     [
-        (uid, report_hash)
+        (uid, report_uuid)
         for uid in ["<uid>", "", None]
-        for report_hash in ["<report_hash>", None]
-        if not (uid == "<uid>" and report_hash == "<report_hash>")
+        for report_uuid in ["<report_uuid>", None]
+        if not (uid == "<uid>" and report_uuid == "<report_uuid>")
     ],
 )
-def test_invalid_path(mocker, uid, report_hash):
+def test_invalid_path(mocker, uid, report_uuid):
     bucket = "<bucket>"
     mock_event = mocker.MagicMock()
     uid_segement = f"{uid}/" if uid is not None else ""
-    report_hash_segment = report_hash if report_hash is not None else ""
-    mock_event.data.name = f"users/{uid_segement}reports/{report_hash_segment}"
+    report_uuid_segment = report_uuid if report_uuid is not None else ""
+    mock_event.data.name = f"users/{uid_segement}reports/{report_uuid_segment}"
     mock_event.data.bucket = bucket
 
     mocked_function = mocker.patch(
@@ -48,10 +48,10 @@ def test_invalid_path(mocker, uid, report_hash):
 def test_upload_limiter_failed(mocker, is_report_gpt_valid):
     bucket = "<bucket>"
     uid = "<uid>"
-    report_hash = "<report_hash>"
+    report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
     mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_hash}"
+    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -92,7 +92,7 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {
             "user_provided_text": user_provided_report,
         },
@@ -100,13 +100,13 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 
     mocked_get_postprocessed_annotation.assert_not_called()
 
-    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_hash)
+    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_uuid)
 
     mocked_request_report_validation_function.assert_not_called()
 
     mocked_update_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {"error_code": ErrorCode.UPLOAD_LIMIT_REACHED.value},
     )
 
@@ -114,10 +114,10 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 def test_gpt_validation_failed(mocker):
     bucket = "<bucket>"
     uid = "<uid>"
-    report_hash = "<report_hash>"
+    report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
     mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_hash}"
+    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -158,7 +158,7 @@ def test_gpt_validation_failed(mocker):
 
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {
             "user_provided_text": user_provided_report,
         },
@@ -166,7 +166,7 @@ def test_gpt_validation_failed(mocker):
 
     mocked_get_postprocessed_annotation.assert_not_called()
 
-    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_hash)
+    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_uuid)
 
     mocked_request_report_validation_function.assert_called_once_with(
         user_provided_report
@@ -174,7 +174,7 @@ def test_gpt_validation_failed(mocker):
 
     mocked_update_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {"error_code": ErrorCode.VALIDATION_FAILED.value},
     )
 
@@ -182,10 +182,10 @@ def test_gpt_validation_failed(mocker):
 def test_mocked_flow(mocker):
     bucket = "<bucket>"
     uid = "<uid>"
-    report_hash = "<report_hash>"
+    report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
     mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_hash}"
+    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -226,7 +226,7 @@ def test_mocked_flow(mocker):
 
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {
             "user_provided_text": user_provided_report,
         },
@@ -238,11 +238,11 @@ def test_mocked_flow(mocker):
         user_provided_report
     )
 
-    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_hash)
+    mocked__is_upload_limiter_valid_function.assert_called_once_with(uid, report_uuid)
 
     mocked_update_report_meta_data_function.assert_called_once_with(
         uid,
-        report_hash,
+        report_uuid,
         {
             "processed_annotations": json.dumps(processed_annotation),
             "text_mapping": text_mapping,
