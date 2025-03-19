@@ -10,6 +10,6 @@ dirs:
   - .
 useGitIgnore: true
 ignorePatterns:
-  - pattern: '^doc:.*$'
-  - pattern: '^http://localhost.*$'
-  - pattern: '^https://.*openai\.com'
+  - pattern: "doc:/"
+  - pattern: "http://localhost"
+  - pattern: "openai.com"

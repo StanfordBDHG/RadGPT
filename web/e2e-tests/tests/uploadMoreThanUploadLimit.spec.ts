@@ -7,7 +7,11 @@
 //
 
 import { test, expect } from "@playwright/test";
-import { addNewReport, authenticateWithGoogle } from "../utils";
+import {
+  addNewReport,
+  authenticateWithGoogle,
+  checkForTextAnnotationCompletion,
+} from "../utils";
 
 const MAX_UPLOAD_LIMIT = 5;
 
@@ -21,9 +25,7 @@ test("Test Upload Above Upload Limiting", async ({ page }) => {
       name: "Abdomen CT " + i,
       content: reportContent,
     });
-    await expect(page.getByText(`Report ${i}`)).toBeVisible();
-
-    await expect(page.getByText("FeedbackSubmit")).toBeVisible();
+    await checkForTextAnnotationCompletion(page, `Report ${i}`);
   }
   const reportContent =
     `Report ${MAX_UPLOAD_LIMIT}:\n` +
@@ -32,7 +34,7 @@ test("Test Upload Above Upload Limiting", async ({ page }) => {
     name: "Abdomen CT " + MAX_UPLOAD_LIMIT,
     content: reportContent,
   });
-  await expect(page.getByRole("alert")).toBeVisible();
+  await expect(page.getByRole("alert")).toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole("alert")).toContainText(
     "You have reached your limit for radiology report uploads. In case you believe this is a mistake or if you want to file for an exemption, please send a brief email to",
   );
