@@ -17,7 +17,7 @@ import { z } from "zod";
 import { filesQueries } from "@/modules/files/queries";
 import { storage } from "@/modules/firebase/app";
 import { useAuthenticatedUser } from "@/modules/user";
-import { calculateSHA256Hash } from "@/utils/crypto";
+import { calculateSHA256Hash, randomUUID } from "@/utils/crypto";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name of medical report is required"),
@@ -44,8 +44,9 @@ export const FileCreationForm = ({
   });
 
   const handleSubmit = form.handleSubmit(async (medicalReport) => {
+    const contentUUID = randomUUID();
     const contentHash = await calculateSHA256Hash(medicalReport.content);
-    const existingFile = files?.find((file) => file.ref?.name === contentHash);
+    const existingFile = files?.find((file) => file.hash === contentHash);
 
     if (existingFile) {
       if (existingFile.ref) {
@@ -55,7 +56,7 @@ export const FileCreationForm = ({
     }
     const storageReference = ref(
       storage,
-      `users/${currentUser?.uid}/reports/${contentHash}`,
+      `users/${currentUser?.uid}/reports/${contentUUID}`,
     );
     const result = await uploadString(
       storageReference,
@@ -63,7 +64,10 @@ export const FileCreationForm = ({
       "raw",
       {
         contentType: "text/plain",
-        customMetadata: { medicalReportName: medicalReport.name },
+        customMetadata: {
+          medicalReportName: medicalReport.name,
+          hash: contentHash,
+        },
       },
     );
     onUploadSuccess(result.ref, medicalReport.content);

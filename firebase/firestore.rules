@@ -71,7 +71,7 @@ service cloud.firestore {
               && containsOnlyAllowedCachedFields(data);
     } 
 
-    match /users/{userId}/{documentHash}/{documentName} {
+    match /users/{userId}/{documentUUID}/{documentName} {
       allow read: if isAuthenticatedUserID(userId);
       allow update: if isAuthenticatedUserID(userId)
                     && (

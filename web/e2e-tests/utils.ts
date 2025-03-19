@@ -6,7 +6,6 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { createHash } from "crypto";
 import { type Page, expect } from "@playwright/test";
 
 export const authenticateWithGoogle = async (page: Page) => {
@@ -28,9 +27,6 @@ export const expectNoReports = async (page: Page) => {
   await expect(page.getByText(/No reports found./).first()).toBeVisible();
 };
 
-export const calculateSHA256Hash = (content: string) =>
-  createHash("sha256").update(content).digest("hex");
-
 export const addNewReport = async (
   page: Page,
   content: { name: string; content: string },
@@ -44,7 +40,8 @@ export const addNewReport = async (
   await dialog.getByLabel("Medical Report Content").fill(content.content);
   await dialog.getByRole("button", { name: "Add report" }).click();
   await expect(page.getByLabel("Medical Report Content")).not.toBeVisible();
-  await page.waitForURL(`/file/${calculateSHA256Hash(content.content)}`);
+  await page.waitForURL(/file\//);
+  return page.url();
 };
 
 export const checkForTextAnnotationCompletion = async (
