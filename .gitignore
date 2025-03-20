@@ -164,3 +164,5 @@ cython_debug/
 
 # Jetbrains IDE
 .idea/
+
+node_modules/
