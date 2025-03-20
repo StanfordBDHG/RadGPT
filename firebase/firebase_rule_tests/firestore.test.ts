@@ -12,13 +12,22 @@ import {
   assertSucceeds,
   initializeTestEnvironment,
 } from "@firebase/rules-unit-testing";
-import { deleteDoc, doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+import {
+  addDoc,
+  collection,
+  deleteDoc,
+  doc,
+  getDoc,
+  getDocs,
+  setDoc,
+  updateDoc,
+} from "firebase/firestore";
 
 const PROJECT_ID = "demo-radgpt";
 
 const db = await initializeTestEnvironment({ projectId: PROJECT_ID });
 
-describe("Unauthenticated", () => {
+describe("Unauthenticated Annotations Access", () => {
   let testDoc;
   beforeAll(async () => {
     const unauthenticatedDb = db.unauthenticatedContext().firestore();
@@ -261,5 +270,114 @@ describe("Authenticated Cached Answer Access", () => {
         concept_answer_2: "Answer 2",
       })
     );
+  });
+});
+
+describe("Unauthenticated User Issue Access", () => {
+  let unauthenticatedUser;
+  let existingDocRef;
+  beforeAll(async () => {
+    unauthenticatedUser = db.unauthenticatedContext().firestore();
+    existingDocRef = doc(unauthenticatedUser, "user_reported_issue/newDoc");
+    const issueContent = { test: "test" };
+
+    db.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "user_reported_issue/newDoc"),
+        issueContent
+      );
+    });
+    return async () => {
+      await db.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), "user_reported_issue/newDoc"));
+      });
+    };
+  });
+  test("Blocking New File Read Access", async () => {
+    await assertFails(getDoc(existingDocRef));
+  });
+  test("Blocking New File List Access", async () => {
+    await assertFails(
+      getDocs(collection(unauthenticatedUser, "user_reported_issues"))
+    );
+  });
+  test("Blocking New File Write Access", async () => {
+    await assertFails(
+      setDoc(doc(unauthenticatedUser, "users_reported_issues/test"), {})
+    );
+  });
+  test("Blocking New File Update Access", async () => {
+    await assertFails(updateDoc(existingDocRef, {}));
+  });
+  test("Blocking New File Deletion Access", async () => {
+    await assertFails(deleteDoc(existingDocRef));
+  });
+});
+
+describe("Authenticated User Issue Access", () => {
+  let user1;
+  let user2;
+  const issueContent = {
+    pre_defined_issues: ["preIssue1", "preIssue2"],
+    user_inputed_issue: "other",
+    context: {},
+  };
+  beforeEach(async () => {
+    user1 = db.authenticatedContext("user1").firestore();
+    user2 = db.authenticatedContext("user2").firestore();
+    await db.withSecurityRulesDisabled(async (context) => {
+      await setDoc(
+        doc(context.firestore(), "users_reported_issues/test"),
+        issueContent
+      );
+    });
+    return async () => {
+      await db.withSecurityRulesDisabled(async (context) => {
+        await deleteDoc(doc(context.firestore(), "users_reported_issues/test"));
+      });
+    };
+  });
+
+  test("Test Allowed User1 Create Access", async () => {
+    await assertSucceeds(
+      addDoc(collection(user1, "users_reported_issues"), {
+        ...issueContent,
+        user_id: "user1",
+      })
+    );
+  });
+  test("Test Block User2 Create Access with Other UID", async () => {
+    await assertFails(
+      addDoc(collection(user2, "users_reported_issues"), {
+        ...issueContent,
+        user_id: "user1",
+      })
+    );
+  });
+  test("Test Block Read Access", async () => {
+    await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
+    await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
+  });
+  test("Test Block List Access", async () => {
+    await assertFails(getDocs(collection(user1, "users_reported_issues")));
+    await assertFails(getDocs(collection(user2, "users_reported_issues")));
+  });
+  test("Test Block Update Access", async () => {
+    await assertFails(
+      updateDoc(doc(user1, "user_reported_issues/test"), {
+        ...issueContent,
+        user_id: "user1",
+      })
+    );
+    await assertFails(
+      updateDoc(doc(user1, "user_reported_issues/test"), {
+        ...issueContent,
+        user_id: "user2",
+      })
+    );
+  });
+  test("Test Block Delete Access", async () => {
+    await assertFails(deleteDoc(doc(user1, "user_reported_issues/test")));
+    await assertFails(deleteDoc(doc(user1, "user_reported_issues/test")));
   });
 });

@@ -13,6 +13,7 @@ import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
 import { ReportText } from "./ReportText";
+import { ReportIssueButton } from "../ReportIssueButton";
 
 const FileDetail = () => {
   const { fileName } = Route.useParams();
@@ -24,7 +25,15 @@ const FileDetail = () => {
         <div className="flex flex-col justify-between">
           <ReportText file={file} />
           {!!file.processed_annotations?.length && (
-            <FeedbackForm className="mt-4" file={file} />
+            <>
+              <ReportIssueButton
+                className="mt-4 self-start"
+                context={{
+                  reportID: fileName,
+                }}
+              />
+              <FeedbackForm file={file} />
+            </>
           )}
         </div>
       : <StateContainer grow className="min-h-screen">

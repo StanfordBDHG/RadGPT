@@ -26,6 +26,7 @@ import { filesQueries } from "@/modules/files/queries";
 import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 import { queryClient } from "@/modules/query/queryClient";
 import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
+import { ReportIssueButton } from "../ReportIssueButton";
 
 interface DetailDialogProps {
   openState: ReturnType<
@@ -69,6 +70,7 @@ export const DetailDialog = ({
   const feedbackQueryOption =
     filesQueries.getObservationFeedback(feedbackPayload);
   const feedbackQuery = useQuery(feedbackQueryOption);
+
   const { like1, dislike1, textFeedback1, like2, dislike2, textFeedback2 } =
     feedbackQuery.data?.feedback ?? {
       like1: false,
@@ -84,15 +86,17 @@ export const DetailDialog = ({
   const invalidateFeedbackQuery = () =>
     queryClient.invalidateQueries(feedbackQueryOption);
 
-  const createOnLike = (id: number) => async () => {
+  const createOnLike = (index: number) => async () => {
     if (!feedbackRef) return;
     await updateDoc(feedbackRef, {
       feedback: {
-        like1: (like1 && id !== 1) || (!like1 && id === 1),
-        dislike1: !((like1 && id !== 1) || (!like1 && id === 1)) && dislike1,
+        like1: (like1 && index !== 1) || (!like1 && index === 1),
+        dislike1:
+          !((like1 && index !== 1) || (!like1 && index === 1)) && dislike1,
         textFeedback1: textFeedback1,
-        like2: (like2 && id !== 2) || (!like2 && id === 2),
-        dislike2: !((like2 && id !== 2) || (!like2 && id === 2)) && dislike2,
+        like2: (like2 && index !== 2) || (!like2 && index === 2),
+        dislike2:
+          !((like2 && index !== 2) || (!like2 && index === 2)) && dislike2,
         textFeedback2: textFeedback2,
       },
     });
@@ -114,20 +118,22 @@ export const DetailDialog = ({
     await invalidateFeedbackQuery();
   };
 
-  const createOnFeedback = (id: number) => async (feedback: string) => {
+  const createOnFeedback = (index: number) => async (feedback: string) => {
     if (!feedbackRef) return;
     await updateDoc(feedbackRef, {
       feedback: {
         dislike1: dislike1,
         like1: like1,
-        textFeedback1: id === 1 ? feedback : textFeedback1,
+        textFeedback1: index === 1 ? feedback : textFeedback1,
         dislike2: dislike2,
         like2: like2,
-        textFeedback2: id === 2 ? feedback : textFeedback2,
+        textFeedback2: index === 2 ? feedback : textFeedback2,
       },
     });
     await invalidateFeedbackQuery();
   };
+
+  const observationIndex = openState.state?.observationIndex;
 
   return (
     <Dialog
@@ -146,6 +152,14 @@ export const DetailDialog = ({
           {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}
         >
           <p>{main_explanation}</p>
+          <ReportIssueButton
+            className="mb-4 w-fit"
+            context={{
+              reportID: selectedFileName,
+              observationIndex: observationIndex,
+              explanation: true,
+            }}
+          />
           {concept_question_1 && concept_answer_1 && (
             <h3 className="text-lg font-semibold">
               Other questions you may have
@@ -167,6 +181,9 @@ export const DetailDialog = ({
               dislike={dislike1}
               textFeedback={textFeedback1}
               onFeedbackSubmit={createOnFeedback(1)}
+              reportID={selectedFileName}
+              observationIndex={observationIndex}
+              questionIndex={1}
             />
           )}
           {concept_question_2 && concept_answer_2 && (
@@ -185,6 +202,9 @@ export const DetailDialog = ({
               dislike={dislike2}
               textFeedback={textFeedback2}
               onFeedbackSubmit={createOnFeedback(2)}
+              reportID={selectedFileName}
+              observationIndex={observationIndex}
+              questionIndex={2}
             />
           )}
         </Async>
