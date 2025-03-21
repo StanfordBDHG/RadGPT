@@ -19,13 +19,11 @@ import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { SideLabel } from "@stanfordspezi/spezi-web-design-system/components/SideLabel";
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
-import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc } from "firebase/firestore";
 import { Flag } from "lucide-react";
-import { useState } from "react";
 import { z } from "zod";
-import { firestore, getCurrentUser } from "@/modules/firebase/app";
+import { collectionRefs, getCurrentUser } from "@/modules/firebase/app";
 
 const issueStrings = [
   "The content is dangerous or harmful",
@@ -71,69 +69,55 @@ export const ReportIssueButton = ({
   context,
 }: ReportIssueButtonProps) => {
   const openState = useOpenState(false);
-  const defaultValues = {
-    issueSelection: new Array(issueStrings.length).fill(false),
-    isOtherSelected: false,
-    userInputedIssue: "",
-  };
 
   const form = useForm({
     formSchema,
-    defaultValues: defaultValues,
+    defaultValues: {
+      issueSelection: issueStrings.map(() => false),
+      isOtherSelected: false,
+      userInputedIssue: "",
+    },
   });
-  const [otherExpanded, setOtherExpanded] = useState(false);
+  const [isOtherSelected] = form.getValues(["isOtherSelected"]);
+
+  const handleClose = () => {
+    openState.close();
+    form.reset();
+  };
 
   const handleSubmit = form.handleSubmit(async (medicalReport) => {
     const selectedIssueStrings = medicalReport.issueSelection
       .map((isUserSelected, index) =>
-        isUserSelected ? issueStrings[index] : null,
+        isUserSelected ? issueStrings.at(index) : null,
       )
-      .filter((val) => val !== null);
+      .filter(Boolean);
 
-    if (
-      selectedIssueStrings ||
-      (medicalReport.isOtherSelected && medicalReport.userInputedIssue)
-    ) {
-      let issueContent = {};
-      if (selectedIssueStrings) {
-        issueContent = {
-          ...issueContent,
-          pre_defined_issues: selectedIssueStrings,
-        };
-      }
-      if (medicalReport.isOtherSelected) {
-        issueContent = {
-          ...issueContent,
-          user_inputed_issue: medicalReport.userInputedIssue,
-        };
-      }
+    const issueContent =
+      selectedIssueStrings.length ? { pre_defined_issues: selectedIssueStrings }
+      : medicalReport.isOtherSelected ?
+        { user_inputed_issue: medicalReport.userInputedIssue }
+      : {};
 
-      const collectionReference = collection(
-        firestore,
-        "users_reported_issues",
+    try {
+      await addDoc(collectionRefs.usersReportedIssues(), {
+        ...issueContent,
+        pre_defined_issues: selectedIssueStrings,
+        user_id: getCurrentUser().uid,
+        context,
+      });
+      toast.success("The issue report has been submitted!");
+    } catch {
+      toast.error(
+        "An error occurred while submitting the issue report! Please try again later.",
       );
-      try {
-        await addDoc(collectionReference, {
-          ...issueContent,
-          user_id: getCurrentUser().uid,
-          context: context,
-        });
-        toast.success("The issue report has been submitted!");
-      } catch {
-        toast.error(
-          "An error occurred while submitting the issue report! Please try again later.",
-        );
-      }
     }
 
-    openState.close();
-    form.reset(defaultValues);
-    setOtherExpanded(false);
+    handleClose();
   });
 
   return (
     <>
-      <Dialog open={openState.isOpen} onOpenChange={openState.close}>
+      <Dialog open={openState.isOpen} onOpenChange={handleClose}>
         <DialogContent className="max-h-screen min-w-[25%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Issue Report</DialogTitle>
@@ -143,51 +127,50 @@ export const ReportIssueButton = ({
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
-            {issueStrings.map((item, index) => (
-              <Field
-                control={form.control}
-                key={`issueSelection.${index}`}
-                name={`issueSelection.${index}`}
-                checkEmptyError={true}
-                render={({ field: { value, onChange, ...field } }) => (
-                  <SideLabel>
-                    <Checkbox
-                      checked={value}
-                      onCheckedChange={onChange}
-                      {...field}
-                    />
-                    {item}
-                  </SideLabel>
-                )}
-              />
-            ))}
+            {issueStrings.map((issue, index) => {
+              const name = `issueSelection.${index}` as const;
+              return (
+                <Field
+                  control={form.control}
+                  key={name}
+                  name={name}
+                  checkEmptyError
+                  render={({ field: { value, onChange, ...field } }) => (
+                    <SideLabel>
+                      <Checkbox
+                        checked={value}
+                        onCheckedChange={onChange}
+                        {...field}
+                      />
+                      {issue}
+                    </SideLabel>
+                  )}
+                />
+              );
+            })}
             <Field
               control={form.control}
               name="isOtherSelected"
-              checkEmptyError={true}
+              checkEmptyError
               render={({ field: { value, onChange, ...field } }) => (
                 <SideLabel>
                   <Checkbox
-                    checked={otherExpanded}
-                    onCheckedChange={(event) => {
-                      setOtherExpanded(event === true);
-                      onChange(event);
-                    }}
+                    checked={value}
+                    onCheckedChange={onChange}
                     {...field}
                   />
                   Other (please specify):
                 </SideLabel>
               )}
             />
-
             <Field
               control={form.control}
               name="userInputedIssue"
+              error={form.formState.errors.issueSelection?.root}
               render={({ field }) => (
-                <Input disabled={!otherExpanded} {...field} />
+                <Input disabled={!isOtherSelected} {...field} />
               )}
             />
-
             <Button type="submit" isPending={form.formState.isSubmitting}>
               Submit
             </Button>
@@ -197,9 +180,9 @@ export const ReportIssueButton = ({
       <Button
         variant="secondary"
         className={className}
-        onClick={() => openState.open()}
+        onClick={openState.open}
       >
-        <Flag className={cn("h-5 transition")} />
+        <Flag className="h-5" />
         Report issue
       </Button>
     </>
