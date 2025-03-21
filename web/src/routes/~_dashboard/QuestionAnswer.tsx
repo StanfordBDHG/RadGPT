@@ -14,6 +14,7 @@ import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { ChevronDown, ThumbsDown, ThumbsUp } from "lucide-react";
 import { useEffect, useRef, useState, type MouseEventHandler } from "react";
 import { z } from "zod";
+import { ReportIssueButton } from "./ReportIssueButton";
 
 interface QuestionAnswerProps {
   isSelected: boolean;
@@ -26,6 +27,9 @@ interface QuestionAnswerProps {
   onDislike: MouseEventHandler;
   onFeedbackSubmit: (feedback: string) => Promise<void>;
   textFeedback: string | null;
+  reportID: string;
+  observationIndex: number | undefined;
+  questionIndex: number;
 }
 
 const formSchema = z.object({
@@ -43,6 +47,9 @@ export const QuestionAnswer = ({
   onDislike,
   onFeedbackSubmit,
   textFeedback,
+  reportID,
+  observationIndex,
+  questionIndex,
 }: QuestionAnswerProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
@@ -118,6 +125,15 @@ export const QuestionAnswer = ({
                 )}
               />
             </button>
+            <ReportIssueButton
+              className="ml-2"
+              context={{
+                reportID: reportID,
+                questionIndex: questionIndex,
+                explanation: false,
+                observationIndex: observationIndex,
+              }}
+            />
             <form
               className="ml-2 flex w-full flex-row items-center"
               onSubmit={handleSubmit}

@@ -22,7 +22,7 @@ const formSchema = z.object({
 });
 
 interface FeedbackFormProps {
-  className: string;
+  className?: string;
   file: FileDetails;
 }
 

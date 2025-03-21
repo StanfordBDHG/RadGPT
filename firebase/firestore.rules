@@ -79,5 +79,24 @@ service cloud.firestore {
                       isValidCachedAnswerUpdate(resource.data, request.resource.data, documentName)
                     );
     }
+
+    function isValidUserIssueCreation(data) {
+      return data.keys().hasOnly([ 
+          "pre_defined_issues",
+          "context",
+          "user_id",
+          "user_inputed_issue"
+        ]) && data.keys().hasAll([
+          "pre_defined_issues",
+          "context",
+          "user_id"
+        ]);
+    }
+
+    match /users_reported_issues/{documentHash} {
+      allow create: if "user_id" in request.resource.data 
+                    && isAuthenticatedUserID(request.resource.data["user_id"])
+                    && isValidUserIssueCreation(request.resource.data);
+    }
   }
 }

@@ -42,7 +42,7 @@ export const ReportText = ({ file }: ReportTextProp) => {
   >(null);
   const openState = useStatefulOpenState<{ observationIndex: number }>();
 
-  const memoTextMapping = useMemo(() => {
+  const textMapping = useMemo(() => {
     if (file.error_code || !file.text_mapping) {
       return undefined;
     }
@@ -75,11 +75,11 @@ export const ReportText = ({ file }: ReportTextProp) => {
     );
   }
 
-  if (!memoTextMapping) {
+  if (!textMapping) {
     throw new Error("Invalid state in ReportText.");
   }
 
-  const { textBlocks, groupMap } = memoTextMapping;
+  const { textBlocks, groupMap } = textMapping;
 
   return (
     <>
