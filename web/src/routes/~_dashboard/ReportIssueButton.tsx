@@ -8,7 +8,6 @@
 
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Checkbox } from "@stanfordspezi/spezi-web-design-system/components/Checkbox";
-import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import {
   Dialog,
   DialogContent,
@@ -16,16 +15,17 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
-import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
+import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { SideLabel } from "@stanfordspezi/spezi-web-design-system/components/SideLabel";
+import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
+import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { Flag } from "lucide-react";
-import { z } from "zod";
-import { useState } from "react";
 import { addDoc, collection } from "firebase/firestore";
+import { Flag } from "lucide-react";
+import { useState } from "react";
+import { z } from "zod";
 import { firestore, getCurrentUser } from "@/modules/firebase/app";
-import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
 
 const issueStrings = [
   "The content is dangerous or harmful",
@@ -38,7 +38,7 @@ const justPredefinedIssuesSchema = z.object({
   issueSelection: z
     .array(z.boolean())
     .length(issueStrings.length)
-    .refine((userSelection) => userSelection.some((value) => value === true), {
+    .refine((userSelection) => userSelection.some((value) => value), {
       message: "At least one issue has to be selected",
     }),
   isOtherSelected: z.literal(false),
@@ -66,10 +66,10 @@ interface ReportIssueButtonProps {
   context: UserIssueContext;
 }
 
-export function ReportIssueButton({
+export const ReportIssueButton = ({
   className,
   context,
-}: ReportIssueButtonProps) {
+}: ReportIssueButtonProps) => {
   const openState = useOpenState(false);
   const defaultValues = {
     issueSelection: new Array(issueStrings.length).fill(false),
@@ -195,7 +195,7 @@ export function ReportIssueButton({
         </DialogContent>
       </Dialog>
       <Button
-        variant={"secondary"}
+        variant="secondary"
         className={className}
         onClick={() => openState.open()}
       >
@@ -204,4 +204,4 @@ export function ReportIssueButton({
       </Button>
     </>
   );
-}
+};
