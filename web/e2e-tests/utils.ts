@@ -6,8 +6,8 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { type Page, expect } from "@playwright/test";
 import { createHash } from "crypto";
+import { type Page, expect } from "@playwright/test";
 
 export const authenticateWithGoogle = async (page: Page) => {
   await page.goto("/signin?redirect=%2F");

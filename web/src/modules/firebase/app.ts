@@ -14,7 +14,7 @@ import { connectFunctionsEmulator, getFunctions } from "firebase/functions";
 import { connectStorageEmulator, getStorage } from "firebase/storage";
 import { env } from "@/env";
 import { getCallables } from "./getCallables";
-import { getDocumentsRefs } from "./refs";
+import { getCollectionRefs, getDocumentsRefs } from "./refs";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -53,6 +53,8 @@ if (env.VITE_PUBLIC_FIREBASE_EMULATED) {
 export const callables = getCallables(functions);
 
 export const docRefs = getDocumentsRefs(firestore);
+
+export const collectionRefs = getCollectionRefs(firestore);
 
 /**
  * Use this in auth-protected routes only!

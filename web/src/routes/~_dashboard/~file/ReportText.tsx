@@ -6,9 +6,10 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { ComponentProps, useMemo, useState } from "react";
+import { type ComponentProps, useMemo, useState } from "react";
 import {
   AnnotationProcessingError,
   getGroupMap,
@@ -16,7 +17,6 @@ import {
 import { type FileDetails } from "@/modules/files/queries";
 import { getTextBlocks } from "@/modules/files/textMapping";
 import { DetailDialog } from "@/routes/~_dashboard/~file/DetailDialog";
-import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
 
 interface ReportTextProp {
   file: FileDetails;
