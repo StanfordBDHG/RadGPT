@@ -14,7 +14,7 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    match /users/{userId}/reports/{reportHash} {
+    match /users/{userId}/reports/{reportUUID} {
       allow read: if isAuthenticatedUserID(userId);
       allow create: if isAuthenticatedUserID(userId)
                     && request.resource.contentType.matches("text/plain")
