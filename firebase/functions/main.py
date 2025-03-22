@@ -21,7 +21,7 @@ from function_implementation.on_report_meta_data_delete import (
 initialize_app()
 
 
-@storage_fn.on_object_finalized()
+@storage_fn.on_object_finalized(secrets=["OPENAI_API_KEY"])
 def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
