@@ -6,10 +6,12 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { DashboardLayout as DashboardLayoutBase } from "@stanfordspezi/spezi-web-design-system/molecules/DashboardLayout";
+import { FilePlus } from "lucide-react";
 import { type ComponentProps } from "react";
 import { Helmet } from "react-helmet";
-import { AddFileButton } from "./AddFileButton";
+import { AddFileDialog } from "./AddFileDialog";
 import { FileList } from "./FileList";
 import { User } from "./User";
 
@@ -25,8 +27,13 @@ export const DashboardLayout = ({
   const sideMenu =
     showSideMenu ?
       <>
-        <AddFileButton />
-        <div className="mt-4 flex grow flex-col gap-1 lg:w-full">
+        <AddFileDialog>
+          <Button className="mx-auto mt-4 lg:mt-2">
+            <FilePlus />
+            Add New Report
+          </Button>
+        </AddFileDialog>
+        <div className="mt-8 flex grow flex-col gap-1 lg:w-full">
           <FileList />
         </div>
         <User />

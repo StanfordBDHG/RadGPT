@@ -7,6 +7,7 @@
 //
 
 import {
+  collection,
   doc,
   type DocumentReference,
   type Firestore,
@@ -26,6 +27,7 @@ export interface FeedbackPayload extends FilePayload {
 
 export const collections = {
   user: (payload: UserPayload) => `users/${payload.userId}`,
+  usersReportedIssues: () => `users_reported_issues`,
   file: (payload: FilePayload) =>
     `${collections.user(payload)}/${payload.fileName}`,
   feedback: (payload: FeedbackPayload) =>
@@ -54,4 +56,8 @@ export const getDocumentsRefs = (db: Firestore) => ({
     >,
   fileMetaData: (payload: FilePayload) =>
     doc(db, collections.fileMetaData(payload)),
+});
+
+export const getCollectionRefs = (db: Firestore) => ({
+  usersReportedIssues: () => collection(db, collections.usersReportedIssues()),
 });

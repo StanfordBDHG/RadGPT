@@ -6,8 +6,8 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { type Page, expect } from "@playwright/test";
 import { createHash } from "crypto";
+import { type Page, expect } from "@playwright/test";
 
 export const authenticateWithGoogle = async (page: Page) => {
   await page.goto("/signin?redirect=%2F");
@@ -24,6 +24,10 @@ export const authenticateWithGoogle = async (page: Page) => {
   await page.waitForURL("/");
 };
 
+export const expectNoReports = async (page: Page) => {
+  await expect(page.getByText(/No reports found./).first()).toBeVisible();
+};
+
 export const calculateSHA256Hash = (content: string) =>
   createHash("sha256").update(content).digest("hex");
 
@@ -31,7 +35,10 @@ export const addNewReport = async (
   page: Page,
   content: { name: string; content: string },
 ) => {
-  await page.getByRole("button", { name: /Add New Report/ }).click();
+  await page
+    .getByRole("button", { name: /Add New Report/ })
+    .first()
+    .click();
   await page.getByLabel("Name").fill(content.name);
   await page.getByLabel("Medical Report Content").fill(content.content);
   await page.getByRole("button", { name: "Submit" }).click();
@@ -45,7 +52,7 @@ export const checkForTextAnnotationCompletion = async (
 ) => {
   await expect(page.getByText(title)).toBeVisible();
 
-  await expect(page.getByRole("heading", { name: "Feedback" })).toBeVisible({
+  await expect(page.getByPlaceholder("Send us feedback")).toBeVisible({
     timeout: 10_000,
   });
   await expect(page.locator("form")).toBeVisible();

@@ -6,9 +6,23 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { queryOptions, skipToken } from "@tanstack/react-query";
+import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
+import {
+  queryOptions,
+  skipToken,
+  useMutation,
+  useQuery,
+  useQueryClient,
+} from "@tanstack/react-query";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { type DocumentData, onSnapshot } from "firebase/firestore";
-import { type FullMetadata, getMetadata, listAll, ref } from "firebase/storage";
+import {
+  deleteObject,
+  type FullMetadata,
+  getMetadata,
+  listAll,
+  ref,
+} from "firebase/storage";
 import { useEffect, useState } from "react";
 import { type z } from "zod";
 import {
@@ -80,12 +94,41 @@ export const filesQueries = {
     }),
 };
 
+export const useDeleteFileMutation = () => {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const fileRouteParams = useParams({
+    from: "/_dashboard/file/$fileName",
+    shouldThrow: false,
+  });
+
+  return useMutation({
+    mutationFn: async (file: FileListItem) => {
+      if (!file.ref) return;
+      await deleteObject(file.ref);
+    },
+    onSuccess: async (_data, file) => {
+      const isSelectedFile = fileRouteParams?.fileName === file.ref?.name;
+      if (isSelectedFile) {
+        await navigate({ to: "/" });
+      }
+      void queryClient.invalidateQueries(filesQueries.listFiles());
+    },
+    onError: () => toast.error("Deleting file failed. Please try again later"),
+  });
+};
+
 export const useGetFileDetailsSubscription = ({
   fileName,
 }: {
   fileName: string;
 }) => {
   const [file, setFile] = useState<FileDetails>();
+  const { data: customFileName } = useQuery({
+    ...filesQueries.listFiles(),
+    select: (files) =>
+      files.find((listFile) => listFile.ref?.name === file?.name)?.customName,
+  });
 
   useEffect(() => {
     let ignore = false;
@@ -105,5 +148,5 @@ export const useGetFileDetailsSubscription = ({
     };
   }, [fileName]);
 
-  return file;
+  return { file, customFileName };
 };

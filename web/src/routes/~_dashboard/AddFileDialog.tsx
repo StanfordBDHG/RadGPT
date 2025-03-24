@@ -7,7 +7,6 @@
 //
 
 import { toast } from "@stanfordspezi/spezi-web-design-system";
-import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import {
   Dialog,
   DialogContent,
@@ -20,11 +19,15 @@ import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOp
 import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { type StorageReference } from "firebase/storage";
-import { FilePlus } from "lucide-react";
+import { type ReactNode } from "react";
 import { filesQueries } from "@/modules/files/queries";
 import { FileCreationForm } from "./FileCreationForm";
 
-export const AddFileButton = () => {
+interface AddFileDialogProps {
+  children: ReactNode;
+}
+
+export const AddFileDialog = ({ children }: AddFileDialogProps) => {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
   const openState = useOpenState(false);
@@ -45,13 +48,10 @@ export const AddFileButton = () => {
 
   return (
     <Dialog open={openState.isOpen} onOpenChange={openState.setIsOpen}>
-      <DialogTrigger asChild>
-        <Button className="mx-auto mt-4 lg:mt-0" onClick={openState.open}>
-          <FilePlus />
-          Add New Report
-        </Button>
+      <DialogTrigger asChild onClick={openState.open}>
+        {children}
       </DialogTrigger>
-      <DialogContent className="max-h-screen overflow-y-auto">
+      <DialogContent size="3xl" className="max-h-screen overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Medical Report</DialogTitle>
           <DialogDescription>

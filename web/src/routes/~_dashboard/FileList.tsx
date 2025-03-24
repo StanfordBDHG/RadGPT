@@ -11,31 +11,19 @@ import {
   queriesToAsyncProps,
 } from "@stanfordspezi/spezi-web-design-system/components/Async";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { deleteObject } from "firebase/storage";
+import { useQuery } from "@tanstack/react-query";
+import { Link, useParams } from "@tanstack/react-router";
 import { Trash2 } from "lucide-react";
-import { filesQueries, type FileListItem } from "@/modules/files/queries";
+import { filesQueries, useDeleteFileMutation } from "@/modules/files/queries";
 
 export const FileList = () => {
-  const navigate = useNavigate();
-  const queryClient = useQueryClient();
+  const deleteFileMutation = useDeleteFileMutation();
   const listFilesQuery = useQuery(filesQueries.listFiles());
   const { data: files } = listFilesQuery;
   const fileRouteParams = useParams({
     from: "/_dashboard/file/$fileName",
     shouldThrow: false,
   });
-
-  const onDelete = async (file: FileListItem) => {
-    if (!file.ref) return;
-    await deleteObject(file.ref);
-    const isSelectedFile = fileRouteParams?.fileName === file.ref.name;
-    if (isSelectedFile) {
-      await navigate({ to: "/" });
-    }
-    void queryClient.invalidateQueries(filesQueries.listFiles());
-  };
 
   return (
     <div className="flex w-full flex-col">
@@ -70,7 +58,7 @@ export const FileList = () => {
               </Link>
               <button
                 className="ml-auto h-full px-2 text-muted-foreground transition hover:text-destructive"
-                onClick={() => onDelete(file)}
+                onClick={() => deleteFileMutation.mutate(file)}
                 aria-label="Delete"
               >
                 <Trash2 className="w-5" />

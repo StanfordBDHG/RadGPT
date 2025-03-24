@@ -25,19 +25,21 @@ test("Test Upload and GPT Detailed Information Flow", async ({ page }) => {
   await checkForTextAnnotationCompletion(page, /Study Type: CT Abdomen and/);
 
   await page.getByText("Small", { exact: true }).click({ timeout: 60_000 });
-  await expect(page.getByRole("heading")).toContainText("Detailed Explanation");
+  const popover = page.getByRole("dialog");
   await expect(
-    page.getByRole("heading", { name: "Other questions you may have" }),
+    popover.getByRole("heading", { name: "Detailed Explanation" }),
+  ).toBeVisible();
+  await expect(
+    popover.getByRole("heading", { name: "Other questions you may have" }),
   ).toBeVisible({ timeout: 30_000 });
-  await expect(page.locator("h3")).toContainText(
-    "Other questions you may have",
-  );
-  await page.getByTestId("question").nth(0).click();
-
-  await page.getByPlaceholder("Feedback").first().fill("Great question!");
-  await page.getByRole("button", { name: "Submit" }).first().click();
-  await page.getByTestId("question").nth(1).click();
-  await expect(page.getByPlaceholder("Feedback").nth(1)).not.toContainText(
+  await popover.getByTestId("question").nth(0).click();
+  await popover.getByPlaceholder("Feedback").first().fill("Great question!");
+  await popover
+    .getByRole("button", { name: "Submit feedback" })
+    .first()
+    .click();
+  await popover.getByTestId("question").nth(1).click();
+  await expect(popover.getByPlaceholder("Feedback").nth(1)).not.toContainText(
     "Great question!",
   );
 });
