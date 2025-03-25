@@ -10,7 +10,6 @@ import {
   PopoverArrow,
   PopoverCloseX,
   PopoverContent,
-  PopoverDescription,
   PopoverHeader,
   PopoverTitle,
 } from "@stanfordspezi/spezi-web-design-system/components/Popover";
@@ -28,9 +27,6 @@ export const DetailPopoverContent = ({
     <PopoverCloseX />
     <PopoverHeader>
       <PopoverTitle>Detailed Explanation</PopoverTitle>
-      <PopoverDescription>
-        You can find a detailed explanation of the selected concept.
-      </PopoverDescription>
     </PopoverHeader>
     {children}
   </PopoverContent>
