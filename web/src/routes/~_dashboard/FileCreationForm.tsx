@@ -6,6 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { DialogFooter } from "@stanfordspezi/spezi-web-design-system";
 import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { Textarea } from "@stanfordspezi/spezi-web-design-system/components/Textarea";
@@ -80,11 +81,13 @@ export const FileCreationForm = ({
         control={form.control}
         name="content"
         label="Medical Report Content"
-        render={({ field }) => <Textarea {...field} rows={10} />}
+        render={({ field }) => <Textarea {...field} rows={12} />}
       />
-      <Button type="submit" isPending={form.formState.isSubmitting}>
-        Submit
-      </Button>
+      <DialogFooter>
+        <Button type="submit" isPending={form.formState.isSubmitting}>
+          Add report
+        </Button>
+      </DialogFooter>
     </form>
   );
 };

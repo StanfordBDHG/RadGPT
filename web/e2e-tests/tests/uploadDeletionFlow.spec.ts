@@ -11,11 +11,12 @@ import {
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
+  expectNoReports,
 } from "../utils";
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
-  await expect(page.getByText(/Please add or select a report./)).toBeVisible();
+  await expectNoReports(page);
 
   await addNewReport(page, {
     name: "Abdomen CT",

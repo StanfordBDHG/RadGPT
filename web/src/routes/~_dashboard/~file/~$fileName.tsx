@@ -6,28 +6,43 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { Skeleton } from "@stanfordspezi/spezi-web-design-system/components/Skeleton";
 import { Spinner } from "@stanfordspezi/spezi-web-design-system/components/Spinner";
 import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
+import { PageTitle } from "@stanfordspezi/spezi-web-design-system/molecules/DashboardLayout";
 import { createFileRoute } from "@tanstack/react-router";
+import { FileText } from "lucide-react";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
+import { Legend } from "./Legend";
+import { ReportIssueButton } from "./ReportIssueButton";
 import { ReportText } from "./ReportText";
-import { ReportIssueButton } from "../ReportIssueButton";
 
 const FileDetail = () => {
   const { fileName } = Route.useParams();
-  const file = useGetFileDetailsSubscription({ fileName });
+  const { file, customFileName } = useGetFileDetailsSubscription({ fileName });
 
+  const hasAnnotations = !!file?.processed_annotations?.length;
   return (
-    <DashboardLayout>
+    <DashboardLayout
+      title={
+        <PageTitle
+          title="Reports"
+          subTitle={customFileName ?? <Skeleton className="h-5 w-8" />}
+          icon={<FileText />}
+        />
+      }
+    >
       {file ?
-        <div className="flex flex-col justify-between">
+        <div className="relative mx-auto flex max-w-5xl grow flex-col">
+          <Legend />
+          <h2 className="mb-4 text-xl font-bold text-gray-800">Report</h2>
           <ReportText file={file} />
-          {!!file.processed_annotations?.length && (
+          {hasAnnotations && (
             <>
               <ReportIssueButton
-                className="mt-4 self-start"
+                className="mt-6 self-start"
                 context={{
                   reportID: fileName,
                 }}

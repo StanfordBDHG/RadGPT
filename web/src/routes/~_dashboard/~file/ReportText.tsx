@@ -6,17 +6,23 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { Card } from "@stanfordspezi/spezi-web-design-system";
+import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
+import {
+  PopoverRoot,
+  PopoverTrigger,
+} from "@stanfordspezi/spezi-web-design-system/components/Popover";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { ComponentProps, useMemo, useState } from "react";
+import { type ComponentProps, useMemo, useState } from "react";
 import {
   AnnotationProcessingError,
   getGroupMap,
 } from "@/modules/files/processedAnnotations";
 import { type FileDetails } from "@/modules/files/queries";
 import { getTextBlocks } from "@/modules/files/textMapping";
-import { DetailDialog } from "@/routes/~_dashboard/~file/DetailDialog";
-import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
+import { DetailContent } from "./DetailContent";
+import { DetailPopoverContent } from "./DetailPopover";
 
 interface ReportTextProp {
   file: FileDetails;
@@ -30,17 +36,22 @@ const errorCodeToString: Record<AnnotationProcessingError, string> = {
 };
 
 const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
-  <div
-    className={cn("whitespace-pre-wrap leading-5 tracking-wide", className)}
+  <Card
+    className={cn("whitespace-pre-wrap p-5 leading-5 tracking-wide", className)}
     {...props}
   />
 );
+
+export interface DetailOpenState {
+  observationIndex: number;
+  key: number | null;
+}
 
 export const ReportText = ({ file }: ReportTextProp) => {
   const [currentHoveredWordIndex, setCurrentHoveredWordIndex] = useState<
     number | null
   >(null);
-  const openState = useStatefulOpenState<{ observationIndex: number }>();
+  const openState = useStatefulOpenState<DetailOpenState>();
 
   const textMapping = useMemo(() => {
     if (file.error_code || !file.text_mapping) {
@@ -82,50 +93,70 @@ export const ReportText = ({ file }: ReportTextProp) => {
   const { textBlocks, groupMap } = textMapping;
 
   return (
-    <>
-      <DetailDialog openState={openState} selectedFileName={file.name} />
-      <TextContainer>
-        {textBlocks.map(
-          ({
-            token: key,
-            textString: textSnippet,
-            startPosition: id,
-            textBlockPosition: position,
-          }) => {
-            const group = key !== null ? groupMap.get(key) : undefined;
+    <TextContainer>
+      {textBlocks.map(
+        ({
+          token: key,
+          textString: textSnippet,
+          startPosition: id,
+          textBlockPosition: position,
+        }) => {
+          const group = key !== null ? groupMap.get(key) : undefined;
 
-            if (!group)
-              return <span key={`${file.name} ${id}`}>{textSnippet}</span>;
+          if (!group)
+            return <span key={`${file.name} ${id}`}>{textSnippet}</span>;
 
-            const isHovered = group.observationGroup.includes(
-              currentHoveredWordIndex ?? -1,
-            );
+          const isHovered = group.observationGroup.includes(
+            currentHoveredWordIndex ??
+              (openState.isOpen ? openState.state?.key : null) ??
+              -1,
+          );
 
-            return (
-              <button
-                key={`${file.name} ${id}`}
-                className={cn(
-                  "focus-ring transition-all",
-                  isHovered ?
-                    [
-                      position,
-                      group.isLocatedAt ? "bg-yellow-300" : "bg-green-300",
-                    ]
-                  : "text-blue-700 underline",
-                )}
-                onMouseEnter={() => setCurrentHoveredWordIndex(key)}
-                onMouseLeave={() => setCurrentHoveredWordIndex(null)}
-                onFocus={() => setCurrentHoveredWordIndex(key)}
-                onClick={() =>
-                  openState.open({ observationIndex: group.observationIndex })
+          return (
+            <PopoverRoot
+              key={`${file.name} ${id}`}
+              open={openState.isOpen && openState.state?.key === key}
+              onOpenChange={(isOpen) => {
+                if (!isOpen) {
+                  openState.close();
+                  setCurrentHoveredWordIndex(null);
                 }
-              >
-                {textSnippet}
-              </button>
-            );
-          },
-        )}
-      </TextContainer>
-    </>
+              }}
+            >
+              <PopoverTrigger asChild>
+                <button
+                  className={cn(
+                    "focus-ring transition-all",
+                    isHovered ?
+                      [
+                        position,
+                        group.isLocatedAt ? "bg-yellow-300" : "bg-green-300",
+                      ]
+                    : "text-blue-700 underline underline-offset-2",
+                  )}
+                  onMouseEnter={() => setCurrentHoveredWordIndex(key)}
+                  onMouseLeave={() => setCurrentHoveredWordIndex(null)}
+                  onFocus={() => setCurrentHoveredWordIndex(key)}
+                  onClick={() =>
+                    openState.open({
+                      observationIndex: group.observationIndex,
+                      key,
+                    })
+                  }
+                >
+                  {textSnippet}
+                </button>
+              </PopoverTrigger>
+              <DetailPopoverContent>
+                <DetailContent
+                  openState={openState}
+                  selectedFileName={file.name}
+                />
+              </DetailPopoverContent>
+            </PopoverRoot>
+          );
+        },
+      )}
+    </TextContainer>
   );
 };

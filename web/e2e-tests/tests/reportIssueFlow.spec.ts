@@ -11,11 +11,12 @@ import {
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
+  expectNoReports,
 } from "../utils";
 
-test("Test Upload and Deletion Flow", async ({ page }) => {
+test("Test Reporting Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
-  await expect(page.getByText(/Please add or select a report./)).toBeVisible();
+  await expectNoReports(page);
 
   await addNewReport(page, {
     name: "Abdomen CT",
@@ -33,7 +34,7 @@ test("Test Upload and Deletion Flow", async ({ page }) => {
   await page.getByRole("button", { name: "Report issue" }).click();
   await page.getByText("The content is dangerous or").click();
   await page.getByText("The content is inaccurate or").click();
-  await page.getByRole("button", { name: "Submit" }).click();
+  await page.getByRole("button", { name: "Report" }).click();
   await expect(page.getByText("The issue report has been")).toBeVisible();
   await page.getByRole("button", { name: "normal" }).first().click();
   await expect(page.getByRole("button", { name: "Report issue" })).toBeVisible({
@@ -42,13 +43,15 @@ test("Test Upload and Deletion Flow", async ({ page }) => {
   await page.getByRole("button", { name: "Report issue" }).click();
   await page.getByText("The content is dangerous or").click();
   await page.getByText("The explanations or follow-up").click();
-  await page.getByRole("button", { name: "Submit" }).click();
+  await page.getByRole("button", { name: "Report" }).click();
   await expect(page.getByText("The issue report has been")).toBeVisible();
-  await page.getByTestId("question").nth(0).click();
-  await page.getByRole("button", { name: "Report issue" }).nth(1).click();
-  await page.getByText("Other (please specify):").click();
-  await page.locator("#userInputedIssue").click();
-  await page.locator("#userInputedIssue").fill("Other");
-  await page.getByRole("button", { name: "Submit" }).click();
+  await page.getByRole("button", { name: "normal" }).first().click();
+  const popover = page.getByRole("dialog");
+  await popover.getByTestId("question").nth(0).click();
+  await popover.getByRole("button", { name: "Report issue" }).nth(0).click();
+  await popover.getByText("Other:").click();
+  await popover.locator("#userInputedIssue").click();
+  await popover.locator("#userInputedIssue").fill("Other");
+  await popover.getByRole("button", { name: "Report" }).click();
   await expect(page.getByText("The issue report has been")).toBeVisible();
 });

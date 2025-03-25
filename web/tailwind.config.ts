@@ -8,6 +8,7 @@
 
 import { tailwindColors } from "@stanfordspezi/spezi-web-design-system";
 import { type Config } from "tailwindcss";
+import tailwindCssAnimate from "tailwindcss-animate";
 
 const tailwindConfig: Config = {
   content: [
@@ -19,7 +20,7 @@ const tailwindConfig: Config = {
       colors: tailwindColors,
     },
   },
-  plugins: [],
+  plugins: [tailwindCssAnimate],
 };
 
 export default tailwindConfig;

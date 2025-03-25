@@ -11,13 +11,6 @@ import {
   Async,
   queriesToAsyncProps,
 } from "@stanfordspezi/spezi-web-design-system/components/Async";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import { type useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
 import { useQuery } from "@tanstack/react-query";
 import { updateDoc } from "firebase/firestore";
@@ -25,20 +18,19 @@ import { useState } from "react";
 import { filesQueries } from "@/modules/files/queries";
 import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 import { queryClient } from "@/modules/query/queryClient";
-import { QuestionAnswer } from "@/routes/~_dashboard/QuestionAnswer";
-import { ReportIssueButton } from "../ReportIssueButton";
+import { QuestionAnswer } from "./QuestionAnswer/QuestionAnswer";
+import { ReportIssueButton } from "./ReportIssueButton";
+import type { DetailOpenState } from "./ReportText";
 
-interface DetailDialogProps {
-  openState: ReturnType<
-    typeof useStatefulOpenState<{ observationIndex: number }>
-  >;
+interface DetailContentProps {
+  openState: ReturnType<typeof useStatefulOpenState<DetailOpenState>>;
   selectedFileName: string;
 }
 
-export const DetailDialog = ({
+export const DetailContent = ({
   openState,
   selectedFileName,
-}: DetailDialogProps) => {
+}: DetailContentProps) => {
   const [selectedNumber, setSelectedNumber] = useState<number>();
 
   const detailedExplanationQuery = useQuery(
@@ -136,79 +128,63 @@ export const DetailDialog = ({
   const observationIndex = openState.state?.observationIndex;
 
   return (
-    <Dialog
-      open={openState.isOpen}
-      onOpenChange={openState.close}
-      key={openState.state?.observationIndex}
-    >
-      <DialogContent className="max-h-screen min-w-[50%] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Detailed Explanation</DialogTitle>
-          <DialogDescription>
-            You can find a detailed explanation of the selected concept.
-          </DialogDescription>
-        </DialogHeader>
-        <Async
-          {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}
-        >
-          <p>{main_explanation}</p>
-          <ReportIssueButton
-            className="mb-4 w-fit"
-            context={{
-              reportID: selectedFileName,
-              observationIndex: observationIndex,
-              explanation: true,
-            }}
+    <Async {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}>
+      <p>{main_explanation}</p>
+      <ReportIssueButton
+        className="mb-4 w-fit"
+        context={{
+          reportID: selectedFileName,
+          observationIndex: observationIndex,
+          explanation: true,
+        }}
+      />
+      {concept_question_1 && concept_answer_1 && (
+        <h3 className="font-medium">Other questions you may have</h3>
+      )}
+      <div className="flex flex-col">
+        {concept_question_1 && concept_answer_1 && (
+          <QuestionAnswer
+            onClick={() =>
+              selectedNumber === 1 ?
+                setSelectedNumber(undefined)
+              : setSelectedNumber(1)
+            }
+            isSelected={selectedNumber === 1}
+            question={concept_question_1}
+            answer={concept_answer_1}
+            onLike={createOnLike(1)}
+            onDislike={createOnDislike(1)}
+            like={like1}
+            dislike={dislike1}
+            textFeedback={textFeedback1}
+            onFeedbackSubmit={createOnFeedback(1)}
+            reportID={selectedFileName}
+            observationIndex={observationIndex}
+            questionIndex={1}
           />
-          {concept_question_1 && concept_answer_1 && (
-            <h3 className="text-lg font-semibold">
-              Other questions you may have
-            </h3>
-          )}
-          {concept_question_1 && concept_answer_1 && (
-            <QuestionAnswer
-              onClick={() =>
-                selectedNumber === 1 ?
-                  setSelectedNumber(undefined)
-                : setSelectedNumber(1)
-              }
-              isSelected={selectedNumber === 1}
-              question={concept_question_1}
-              answer={concept_answer_1}
-              onLike={createOnLike(1)}
-              onDislike={createOnDislike(1)}
-              like={like1}
-              dislike={dislike1}
-              textFeedback={textFeedback1}
-              onFeedbackSubmit={createOnFeedback(1)}
-              reportID={selectedFileName}
-              observationIndex={observationIndex}
-              questionIndex={1}
-            />
-          )}
-          {concept_question_2 && concept_answer_2 && (
-            <QuestionAnswer
-              onClick={() =>
-                selectedNumber === 2 ?
-                  setSelectedNumber(undefined)
-                : setSelectedNumber(2)
-              }
-              isSelected={selectedNumber === 2}
-              question={concept_question_2}
-              answer={concept_answer_2}
-              onLike={createOnLike(2)}
-              onDislike={createOnDislike(2)}
-              like={like2}
-              dislike={dislike2}
-              textFeedback={textFeedback2}
-              onFeedbackSubmit={createOnFeedback(2)}
-              reportID={selectedFileName}
-              observationIndex={observationIndex}
-              questionIndex={2}
-            />
-          )}
-        </Async>
-      </DialogContent>
-    </Dialog>
+        )}
+        {concept_question_2 && concept_answer_2 && (
+          <QuestionAnswer
+            onClick={() =>
+              selectedNumber === 2 ?
+                setSelectedNumber(undefined)
+              : setSelectedNumber(2)
+            }
+            isSelected={selectedNumber === 2}
+            question={concept_question_2}
+            answer={concept_answer_2}
+            onLike={createOnLike(2)}
+            onDislike={createOnDislike(2)}
+            like={like2}
+            dislike={dislike2}
+            textFeedback={textFeedback2}
+            onFeedbackSubmit={createOnFeedback(2)}
+            reportID={selectedFileName}
+            observationIndex={observationIndex}
+            questionIndex={2}
+          />
+        )}
+      </div>
+    </Async>
   );
 };
