@@ -14,6 +14,7 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@stanfordspezi/spezi-web-design-system/components/Dialog";
 import { Input } from "@stanfordspezi/spezi-web-design-system/components/Input";
 import { SideLabel } from "@stanfordspezi/spezi-web-design-system/components/SideLabel";
@@ -177,9 +178,11 @@ export const ReportIssueButton = ({
                 />
               )}
             />
-            <Button type="submit" isPending={form.formState.isSubmitting}>
-              Report
-            </Button>
+            <DialogFooter>
+              <Button type="submit" isPending={form.formState.isSubmitting}>
+                Report
+              </Button>
+            </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
