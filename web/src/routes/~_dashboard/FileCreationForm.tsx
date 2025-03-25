@@ -85,7 +85,7 @@ export const FileCreationForm = ({
       />
       <DialogFooter>
         <Button type="submit" isPending={form.formState.isSubmitting}>
-          Submit
+          Add report
         </Button>
       </DialogFooter>
     </form>

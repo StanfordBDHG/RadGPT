@@ -39,9 +39,10 @@ export const addNewReport = async (
     .getByRole("button", { name: /Add New Report/ })
     .first()
     .click();
-  await page.getByLabel("Name").fill(content.name);
-  await page.getByLabel("Medical Report Content").fill(content.content);
-  await page.getByRole("button", { name: "Submit" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Name").fill(content.name);
+  await dialog.getByLabel("Medical Report Content").fill(content.content);
+  await dialog.getByRole("button", { name: "Add report" }).click();
   await expect(page.getByLabel("Medical Report Content")).not.toBeVisible();
   await page.waitForURL(`/file/${calculateSHA256Hash(content.content)}`);
 };
