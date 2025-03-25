@@ -27,17 +27,6 @@ export const LegendItem = ({ color, content }: LegendItemProps) => (
 );
 
 export const Legend = () => (
-  <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5">
-    <LegendItem color="bg-blue-700" content="Identified Medical Concept" />
-    <LegendItem color="bg-green-300" content="Medical Observation" />
-    <LegendItem
-      color="bg-yellow-300"
-      content="Location of Medical Observation"
-    />
-  </ul>
-);
-
-export const HelpHeader = () => (
   <Card className="mb-8 flex flex-col pb-4">
     <CardHeader className="!mb-2 flex-col items-stretch sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <CardTitle>Legend</CardTitle>
@@ -45,6 +34,13 @@ export const HelpHeader = () => (
         Click on highlighted terms for detailed explanation
       </p>
     </CardHeader>
-    <Legend />
+    <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5">
+      <LegendItem color="bg-blue-700" content="Identified Medical Concept" />
+      <LegendItem color="bg-green-300" content="Medical Observation" />
+      <LegendItem
+        color="bg-yellow-300"
+        content="Location of Medical Observation"
+      />
+    </ul>
   </Card>
 );

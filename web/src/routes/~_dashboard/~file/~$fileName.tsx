@@ -15,7 +15,7 @@ import { FileText } from "lucide-react";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
-import { HelpHeader } from "./HelpDialog";
+import { Legend } from "./Legend";
 import { ReportIssueButton } from "./ReportIssueButton";
 import { ReportText } from "./ReportText";
 
@@ -36,7 +36,7 @@ const FileDetail = () => {
     >
       {file ?
         <div className="relative mx-auto flex max-w-5xl grow flex-col">
-          <HelpHeader />
+          <Legend />
           <h2 className="mb-4 text-xl font-bold text-gray-800">Report</h2>
           <ReportText file={file} />
           {hasAnnotations && (
