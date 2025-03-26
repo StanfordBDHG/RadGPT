@@ -23,6 +23,7 @@ const FileDetail = () => {
   const { fileName } = Route.useParams();
   const { file, customFileName } = useGetFileDetailsSubscription({ fileName });
 
+  const isFileDetailsLoading = !(file && file.name === fileName);
   const hasAnnotations = !!file?.processed_annotations?.length;
   return (
     <DashboardLayout
@@ -34,7 +35,7 @@ const FileDetail = () => {
         />
       }
     >
-      {file ?
+      {!isFileDetailsLoading ?
         <div className="relative mx-auto flex max-w-5xl grow flex-col">
           <Legend />
           <h2 className="mb-4 text-xl font-bold text-gray-800">Report</h2>
