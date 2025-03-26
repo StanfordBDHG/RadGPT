@@ -16,3 +16,5 @@ export const calculateSHA256Hash = async (data: string) => {
     .join("");
   return hashHex;
 };
+
+export const randomUUID = () => window.crypto.randomUUID();
