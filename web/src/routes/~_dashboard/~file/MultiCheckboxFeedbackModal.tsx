@@ -21,62 +21,68 @@ import { SideLabel } from "@stanfordspezi/spezi-web-design-system/components/Sid
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { addDoc } from "firebase/firestore";
-import { Flag } from "lucide-react";
+import { addDoc, CollectionReference } from "firebase/firestore";
 import { z } from "zod";
-import { collectionRefs, getCurrentUser } from "@/modules/firebase/app";
+import { getCurrentUser } from "@/modules/firebase/app";
+import { cloneElement, type ReactElement } from "react";
+import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
+import { UserFeedbackContext } from "@/modules/firebase/refs";
 
-const issueStrings = [
-  "The content is dangerous or harmful",
-  "The content is inaccurate or misleading",
-  "Important details or key words are missing",
-  "The explanations or follow-up questions are unclear",
-  "I'm experiencing technical issues",
-];
-const justPredefinedIssuesSchema = z.object({
-  issueSelection: z
-    .array(z.boolean())
-    .length(issueStrings.length)
-    .refine((userSelection) => userSelection.some((value) => value), {
-      message: "At least one issue has to be selected",
-    }),
-  isOtherSelected: z.literal(false),
-  userInputedIssue: z.string(),
-});
-const otherSelectedSchema = z.object({
-  issueSelection: z.array(z.boolean()).length(issueStrings.length),
-  isOtherSelected: z.literal(true),
-  userInputedIssue: z
-    .string()
-    .min(1, { message: "Please specify the issue in more detail" }),
-});
-
-const formSchema = z.union([justPredefinedIssuesSchema, otherSelectedSchema]);
-
-interface UserIssueContext {
-  reportID: string;
-  observationIndex?: number;
-  explanation?: boolean;
-  questionIndex?: number;
-}
-
-interface ReportIssueButtonProps {
+interface MultiCheckboxFeedbackModalProps {
   className?: string;
-  context: UserIssueContext;
+  context: UserFeedbackContext;
+  children: ReactElement<React.ButtonHTMLAttributes<HTMLButtonElement>>;
+  checkboxLabels: string[];
+  collectionReference: CollectionReference;
+  title: string;
+  description: string;
+  submitButtonText: string;
+  toastSuccessText: string;
+  toastFailureText: string;
 }
 
-export const ReportIssueButton = ({
+export const MultiCheckboxFeedbackModal = ({
   className,
   context,
-}: ReportIssueButtonProps) => {
+  children,
+  checkboxLabels,
+  collectionReference,
+  title,
+  description,
+  submitButtonText,
+  toastSuccessText,
+  toastFailureText,
+}: MultiCheckboxFeedbackModalProps) => {
+  const justPredefinedAnswersSchema = z.object({
+    answerSelection: z
+      .array(z.boolean())
+      .length(checkboxLabels.length)
+      .refine((userSelection) => userSelection.some((value) => value), {
+        message: "At least one option has to be selected",
+      }),
+    isOtherSelected: z.literal(false),
+    userInputedAnswer: z.string(),
+  });
+  const otherSelectedSchema = z.object({
+    answerSelection: z.array(z.boolean()).length(checkboxLabels.length),
+    isOtherSelected: z.literal(true),
+    userInputedAnswer: z
+      .string()
+      .min(1, { message: "Please specify the answer in more detail" }),
+  });
+
+  const formSchema = z.union([
+    justPredefinedAnswersSchema,
+    otherSelectedSchema,
+  ]);
   const openState = useOpenState(false);
 
   const form = useForm({
     formSchema,
     defaultValues: {
-      issueSelection: issueStrings.map(() => false),
+      answerSelection: checkboxLabels.map(() => false),
       isOtherSelected: false,
-      userInputedIssue: "",
+      userInputedAnswer: "",
     },
   });
 
@@ -86,31 +92,46 @@ export const ReportIssueButton = ({
   };
 
   const handleSubmit = form.handleSubmit(async (medicalReport) => {
-    const selectedIssueStrings = medicalReport.issueSelection
+    const selectedAnswersStrings = medicalReport.answerSelection
       .map((isUserSelected, index) =>
-        isUserSelected ? issueStrings.at(index) : null,
+        isUserSelected ? checkboxLabels.at(index) : null,
       )
       .filter(Boolean);
 
     try {
-      await addDoc(collectionRefs.usersReportedIssues(), {
-        pre_defined_issues:
-          selectedIssueStrings.length ? selectedIssueStrings : null,
-        user_inputed_issue:
-          medicalReport.userInputedIssue ?
-            medicalReport.userInputedIssue
+      await addDoc(collectionReference, {
+        pre_defined_answers:
+          selectedAnswersStrings.length ? selectedAnswersStrings : null,
+        user_inputed_answer:
+          medicalReport.userInputedAnswer ?
+            medicalReport.userInputedAnswer
           : null,
         user_id: getCurrentUser().uid,
-        context,
+        ...context,
       });
-      toast.success("The issue report has been submitted!");
+      toast.success(toastSuccessText);
     } catch {
-      toast.error(
-        "An error occurred while submitting the issue report! Please try again later.",
-      );
+      toast.error(toastFailureText);
     }
 
     handleClose();
+  });
+
+  const mergedOnClick = (
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
+    if (children.props.onClick) {
+      children.props.onClick(event);
+    }
+    openState.open();
+  };
+  const mergedClassName =
+    children.props.className ?
+      cn(children.props.className, className)
+    : className;
+  const triggerElement = cloneElement(children, {
+    onClick: mergedOnClick,
+    className: mergedClassName,
   });
 
   return (
@@ -118,15 +139,12 @@ export const ReportIssueButton = ({
       <Dialog open={openState.isOpen} onOpenChange={handleClose}>
         <DialogContent className="max-h-screen min-w-[25%] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Issue Report</DialogTitle>
-            <DialogDescription>
-              Please share additional details to help us better understand your
-              issue.
-            </DialogDescription>
+            <DialogTitle>{title}</DialogTitle>
+            <DialogDescription>{description}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handleSubmit}>
-            {issueStrings.map((issue, index) => {
-              const name = `issueSelection.${index}` as const;
+            {checkboxLabels.map((label, index) => {
+              const name = `answerSelection.${index}` as const;
               return (
                 <Field
                   control={form.control}
@@ -140,7 +158,7 @@ export const ReportIssueButton = ({
                         onCheckedChange={onChange}
                         {...field}
                       />
-                      {issue}
+                      {label}
                     </SideLabel>
                   )}
                 />
@@ -163,12 +181,12 @@ export const ReportIssueButton = ({
             />
             <Field
               control={form.control}
-              name="userInputedIssue"
+              name="userInputedAnswer"
               className="mt-2"
-              error={form.formState.errors.issueSelection?.root}
+              error={form.formState.errors.answerSelection?.root}
               render={({ field }) => (
                 <Input
-                  placeholder="specify other issues"
+                  placeholder="Please specify"
                   {...field}
                   onChange={(event) => {
                     const value = event.target.value;
@@ -180,20 +198,14 @@ export const ReportIssueButton = ({
             />
             <DialogFooter>
               <Button type="submit" isPending={form.formState.isSubmitting}>
-                Report
+                {submitButtonText}
               </Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-      <Button
-        variant="secondary"
-        className={className}
-        onClick={openState.open}
-      >
-        <Flag className="h-5" />
-        Report issue
-      </Button>
+
+      {triggerElement}
     </>
   );
 };

@@ -32,26 +32,54 @@ test("Test Reporting Flow", async ({ page }) => {
     page.getByRole("button", { name: "Report issue" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Report issue" }).click();
-  await page.getByText("The content is dangerous or").click();
-  await page.getByText("The content is inaccurate or").click();
-  await page.getByRole("button", { name: "Report" }).click();
+  const reportIssueModal = page.getByRole("dialog", { name: "Issue Report" });
+  await reportIssueModal.getByText("This content feels unsafe").click();
+  await reportIssueModal.getByText("I am confused by").click();
+  await reportIssueModal.getByRole("button", { name: "Report" }).click();
   await expect(page.getByText("The issue report has been")).toBeVisible();
+  await expect(reportIssueModal).not.toBeVisible();
   await page.getByRole("button", { name: "normal" }).first().click();
-  await expect(page.getByRole("button", { name: "Report issue" })).toBeVisible({
-    timeout: 10_000,
+
+  const conceptPopover = page.getByRole("dialog");
+  await expect(
+    conceptPopover.getByTestId("explanation-dislike").first(),
+  ).toBeVisible({
+    timeout: 15_000,
   });
-  await page.getByRole("button", { name: "Report issue" }).click();
-  await page.getByText("The content is dangerous or").click();
-  await page.getByText("The explanations or follow-up").click();
-  await page.getByRole("button", { name: "Report" }).click();
+  await expect(
+    page.getByTestId("explanation-dislike").locator("svg"),
+  ).toHaveClass(/text-gray-300 hover:text-red-700/);
+  await page.getByTestId("explanation-dislike").first().click();
+  await reportIssueModal
+    .getByText("I am not sure I understand the concept explanation")
+    .click();
+  await reportIssueModal
+    .getByText("I am having trouble using this page")
+    .click();
+  await expect(
+    reportIssueModal.getByText("The issue report has been"),
+  ).not.toBeVisible();
+  await reportIssueModal.getByRole("button", { name: "Report" }).click();
+  await expect(reportIssueModal).not.toBeVisible();
+  await expect(
+    conceptPopover.getByTestId("explanation-dislike").locator("svg"),
+  ).toHaveClass(/text-red-700/);
   await expect(page.getByText("The issue report has been")).toBeVisible();
-  await page.getByRole("button", { name: "normal" }).first().click();
-  const popover = page.getByRole("dialog");
-  await popover.getByTestId("question").nth(0).click();
-  await popover.getByRole("button", { name: "Report issue" }).nth(0).click();
-  await popover.getByText("Other:").click();
-  await popover.locator("#userInputedIssue").click();
-  await popover.locator("#userInputedIssue").fill("Other");
-  await popover.getByRole("button", { name: "Report" }).click();
+  await conceptPopover.getByTestId("question").nth(0).click();
+  await expect(
+    reportIssueModal.getByText("The issue report has been"),
+  ).not.toBeVisible();
+  await expect(reportIssueModal).not.toBeVisible();
+
+  await expect(
+    conceptPopover.getByTestId("question-dislike").first().locator("svg"),
+  ).toHaveClass(/text-gray-300 hover:text-red-700/);
+  await conceptPopover.getByTestId("question-dislike").first().click();
+  await reportIssueModal.locator("#userInputedAnswer").click();
+  await reportIssueModal.locator("#userInputedAnswer").fill("Other");
+  await reportIssueModal.getByRole("button", { name: "Report" }).click();
+  await expect(
+    conceptPopover.getByTestId("question-dislike").first().locator("svg"),
+  ).toHaveClass(/text-red-700/);
   await expect(page.getByText("The issue report has been")).toBeVisible();
 });

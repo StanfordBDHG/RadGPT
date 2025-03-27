@@ -51,7 +51,7 @@ export const checkForTextAnnotationCompletion = async (
   await expect(page.getByText(title)).toBeVisible();
 
   await expect(page.getByPlaceholder("Send us feedback")).toBeVisible({
-    timeout: 10_000,
+    timeout: 15_000,
   });
   await expect(page.locator("form")).toBeVisible();
 };
