@@ -11,6 +11,7 @@ import {
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
+  GPT_TIMEOUT,
 } from "../utils";
 
 const MAX_UPLOAD_LIMIT = 5;
@@ -34,7 +35,7 @@ test("Test Upload Above Upload Limiting", async ({ page }) => {
     name: `Abdomen CT ${MAX_UPLOAD_LIMIT}`,
     content: reportContent,
   });
-  await expect(page.getByRole("alert")).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole("alert")).toBeVisible({ timeout: GPT_TIMEOUT });
   await expect(page.getByRole("alert")).toContainText(
     "You have reached your limit for radiology report uploads. In case you believe this is a mistake or if you want to file for an exemption, please send a brief email to",
   );

@@ -27,7 +27,8 @@ export interface FeedbackPayload extends FilePayload {
 
 export const collections = {
   user: (payload: UserPayload) => `users/${payload.userId}`,
-  usersReportedIssues: () => `users_reported_issues`,
+  usersReportedIssues: () => "users_reported_issues",
+  usersPositiveFeedback: () => "users_positive_feedback",
   file: (payload: FilePayload) =>
     `${collections.user(payload)}/${payload.fileName}`,
   feedback: (payload: FeedbackPayload) =>
@@ -39,13 +40,20 @@ export const collections = {
 
 interface Feedback {
   feedback: {
-    like1: boolean | null;
-    like2: boolean | null;
-    dislike1: boolean | null;
-    dislike2: boolean | null;
-    textFeedback1: string | null;
-    textFeedback2: string | null;
+    like_explanation: boolean | null;
+    like_question_1: boolean | null;
+    like_question_2: boolean | null;
+    dislike_explanation: boolean | null;
+    dislike_question_1: boolean | null;
+    dislike_question_2: boolean | null;
   };
+}
+
+export interface UserFeedbackContext {
+  report_id: string;
+  observation_index?: number;
+  explanation?: boolean;
+  question_index?: number;
 }
 
 export const getDocumentsRefs = (db: Firestore) => ({
@@ -60,4 +68,6 @@ export const getDocumentsRefs = (db: Firestore) => ({
 
 export const getCollectionRefs = (db: Firestore) => ({
   usersReportedIssues: () => collection(db, collections.usersReportedIssues()),
+  usersPositiveFeedback: () =>
+    collection(db, collections.usersPositiveFeedback()),
 });

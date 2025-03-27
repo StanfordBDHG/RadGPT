@@ -32,14 +32,13 @@ test("Test Upload and GPT Detailed Information Flow", async ({ page }) => {
   await expect(
     popover.getByRole("heading", { name: "Other questions you may have" }),
   ).toBeVisible({ timeout: 30_000 });
-  await popover.getByTestId("question").nth(0).click();
-  await popover.getByPlaceholder("Feedback").first().fill("Great question!");
-  await popover
-    .getByRole("button", { name: "Submit feedback" })
-    .first()
-    .click();
   await popover.getByTestId("question").nth(1).click();
-  await expect(popover.getByPlaceholder("Feedback").nth(1)).not.toContainText(
-    "Great question!",
-  );
+  await expect(
+    popover.getByTestId("question-like").nth(1),
+  ).toHaveAccessibleName(/Like answer/);
+  await popover.getByTestId("question-like").nth(1).click();
+  await page.getByRole("button", { name: "Close" }).click();
+  await expect(
+    popover.getByTestId("question-like").nth(1),
+  ).toHaveAccessibleName(/Liked answer/);
 });

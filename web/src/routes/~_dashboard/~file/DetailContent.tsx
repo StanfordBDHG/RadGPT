@@ -18,9 +18,11 @@ import { useState } from "react";
 import { filesQueries } from "@/modules/files/queries";
 import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 import { queryClient } from "@/modules/query/queryClient";
+import { DislikeButton, LikeButton } from "./QuestionAnswer/FeedbackButtons";
 import { QuestionAnswer } from "./QuestionAnswer/QuestionAnswer";
-import { ReportIssueButton } from "./ReportIssueButton";
 import type { DetailOpenState } from "./ReportText";
+import { UserIssueDialog } from "./UserIssueDialog";
+import { UserPositiveFeedbackDialog } from "./UserPositiveFeedbackDialog";
 
 interface DetailContentProps {
   openState: ReturnType<typeof useStatefulOpenState<DetailOpenState>>;
@@ -63,15 +65,21 @@ export const DetailContent = ({
     filesQueries.getObservationFeedback(feedbackPayload);
   const feedbackQuery = useQuery(feedbackQueryOption);
 
-  const { like1, dislike1, textFeedback1, like2, dislike2, textFeedback2 } =
-    feedbackQuery.data?.feedback ?? {
-      like1: false,
-      dislike1: false,
-      textFeedback1: "",
-      like2: false,
-      dislike2: false,
-      textFeedback2: "",
-    };
+  const {
+    like_explanation,
+    dislike_explanation,
+    like_question_1,
+    dislike_question_1,
+    like_question_2,
+    dislike_question_2,
+  } = feedbackQuery.data?.feedback ?? {
+    like_explanation: false,
+    dislike_explanation: false,
+    like_question_1: false,
+    dislike_question_1: false,
+    like_question_2: false,
+    dislike_question_2: false,
+  };
   const feedbackRef =
     feedbackPayload ? docRefs.feedback(feedbackPayload) : null;
 
@@ -82,14 +90,22 @@ export const DetailContent = ({
     if (!feedbackRef) return;
     await updateDoc(feedbackRef, {
       feedback: {
-        like1: (like1 && index !== 1) || (!like1 && index === 1),
-        dislike1:
-          !((like1 && index !== 1) || (!like1 && index === 1)) && dislike1,
-        textFeedback1: textFeedback1,
-        like2: (like2 && index !== 2) || (!like2 && index === 2),
-        dislike2:
-          !((like2 && index !== 2) || (!like2 && index === 2)) && dislike2,
-        textFeedback2: textFeedback2,
+        like_explanation: like_explanation,
+        dislike_explanation: dislike_explanation,
+        like_question_1:
+          (like_question_1 && index !== 1) || (!like_question_1 && index === 1),
+        dislike_question_1:
+          !(
+            (like_question_1 && index !== 1) ||
+            (!like_question_1 && index === 1)
+          ) && dislike_question_1,
+        like_question_2:
+          (like_question_2 && index !== 2) || (!like_question_2 && index === 2),
+        dislike_question_2:
+          !(
+            (like_question_2 && index !== 2) ||
+            (!like_question_2 && index === 2)
+          ) && dislike_question_2,
       },
     });
     await invalidateFeedbackQuery();
@@ -99,27 +115,22 @@ export const DetailContent = ({
     if (!feedbackRef) return;
     await updateDoc(feedbackRef, {
       feedback: {
-        dislike1: (dislike1 && id !== 1) || (!dislike1 && id === 1),
-        like1: !((dislike1 && id !== 1) || (!dislike1 && id === 1)) && like1,
-        textFeedback1: textFeedback1,
-        dislike2: (dislike2 && id !== 2) || (!dislike2 && id === 2),
-        like2: !((dislike2 && id !== 2) || (!dislike2 && id === 2)) && like2,
-        textFeedback2: textFeedback2,
-      },
-    });
-    await invalidateFeedbackQuery();
-  };
-
-  const createOnFeedback = (index: number) => async (feedback: string) => {
-    if (!feedbackRef) return;
-    await updateDoc(feedbackRef, {
-      feedback: {
-        dislike1: dislike1,
-        like1: like1,
-        textFeedback1: index === 1 ? feedback : textFeedback1,
-        dislike2: dislike2,
-        like2: like2,
-        textFeedback2: index === 2 ? feedback : textFeedback2,
+        dislike_explanation: dislike_explanation,
+        like_explanation: like_explanation,
+        dislike_question_1:
+          (dislike_question_1 && id !== 1) || (!dislike_question_1 && id === 1),
+        like_question_1:
+          !(
+            (dislike_question_1 && id !== 1) ||
+            (!dislike_question_1 && id === 1)
+          ) && like_question_1,
+        dislike_question_2:
+          (dislike_question_2 && id !== 2) || (!dislike_question_2 && id === 2),
+        like_question_2:
+          !(
+            (dislike_question_2 && id !== 2) ||
+            (!dislike_question_2 && id === 2)
+          ) && like_question_2,
       },
     });
     await invalidateFeedbackQuery();
@@ -127,17 +138,66 @@ export const DetailContent = ({
 
   const observationIndex = openState.state?.observationIndex;
 
+  const onLike = async () => {
+    if (!feedbackRef) return;
+    await updateDoc(feedbackRef, {
+      feedback: {
+        dislike_explanation: false,
+        like_explanation: true,
+        dislike_question_1: dislike_question_1,
+        like_question_1: like_question_1,
+        dislike_question_2: dislike_question_2,
+        like_question_2: like_question_2,
+      },
+    });
+    await invalidateFeedbackQuery();
+  };
+  const onDislike = async () => {
+    if (!feedbackRef) return;
+    await updateDoc(feedbackRef, {
+      feedback: {
+        dislike_explanation: true,
+        like_explanation: false,
+        dislike_question_1: dislike_question_1,
+        like_question_1: like_question_1,
+        dislike_question_2: dislike_question_2,
+        like_question_2: like_question_2,
+      },
+    });
+    await invalidateFeedbackQuery();
+  };
+
   return (
     <Async {...queriesToAsyncProps([detailedExplanationQuery, feedbackQuery])}>
       <p>{main_explanation}</p>
-      <ReportIssueButton
-        className="mb-4 w-fit"
-        context={{
-          reportID: selectedFileName,
-          observationIndex: observationIndex,
-          explanation: true,
-        }}
-      />
+      <div className="flex flex-row items-center gap-2 pb-6">
+        <UserPositiveFeedbackDialog
+          context={{
+            report_id: selectedFileName,
+            observation_index: observationIndex,
+            explanation: true,
+          }}
+        >
+          <LikeButton
+            onClick={onLike}
+            like={like_explanation}
+            data-testid="explanation-like"
+          />
+        </UserPositiveFeedbackDialog>
+        <UserIssueDialog
+          context={{
+            report_id: selectedFileName,
+            observation_index: observationIndex,
+            explanation: true,
+          }}
+        >
+          <DislikeButton
+            onClick={onDislike}
+            dislike={dislike_explanation}
+            data-testid="explanation-dislike"
+          />
+        </UserIssueDialog>
+      </div>
       {concept_question_1 && concept_answer_1 && (
         <h3 className="font-medium">Other questions you may have</h3>
       )}
@@ -154,10 +214,8 @@ export const DetailContent = ({
             answer={concept_answer_1}
             onLike={createOnLike(1)}
             onDislike={createOnDislike(1)}
-            like={like1}
-            dislike={dislike1}
-            textFeedback={textFeedback1}
-            onFeedbackSubmit={createOnFeedback(1)}
+            like={like_question_1}
+            dislike={dislike_question_1}
             reportID={selectedFileName}
             observationIndex={observationIndex}
             questionIndex={1}
@@ -175,10 +233,8 @@ export const DetailContent = ({
             answer={concept_answer_2}
             onLike={createOnLike(2)}
             onDislike={createOnDislike(2)}
-            like={like2}
-            dislike={dislike2}
-            textFeedback={textFeedback2}
-            onFeedbackSubmit={createOnFeedback(2)}
+            like={like_question_2}
+            dislike={dislike_question_2}
             reportID={selectedFileName}
             observationIndex={observationIndex}
             questionIndex={2}
