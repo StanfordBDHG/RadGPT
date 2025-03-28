@@ -11,13 +11,14 @@ import { Spinner } from "@stanfordspezi/spezi-web-design-system/components/Spinn
 import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
 import { PageTitle } from "@stanfordspezi/spezi-web-design-system/molecules/DashboardLayout";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
+import { FileText, Flag } from "lucide-react";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
 import { Legend } from "./Legend";
-import { ReportIssueButton } from "./ReportIssueButton";
 import { ReportText } from "./ReportText";
+import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
+import { UserIssueModal } from "./UserIssueModal";
 
 const FileDetail = () => {
   const { fileName } = Route.useParams();
@@ -42,12 +43,17 @@ const FileDetail = () => {
           <ReportText file={file} />
           {hasAnnotations && (
             <>
-              <ReportIssueButton
+              <UserIssueModal
                 className="mt-6 self-start"
                 context={{
-                  reportID: fileName,
+                  report_id: fileName,
                 }}
-              />
+              >
+                <Button variant="secondary">
+                  <Flag className="h-5" />
+                  Report issue
+                </Button>
+              </UserIssueModal>
               <FeedbackForm file={file} />
             </>
           )}
