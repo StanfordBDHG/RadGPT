@@ -139,7 +139,11 @@ export const useGetFileDetailsSubscription = ({
     });
     const unsubscribe = onSnapshot(fileRef, (snapshot) => {
       const data = snapshot.data();
-      if (ignore || !data) return;
+      if (ignore) return;
+      if (!data) {
+        setFile(undefined);
+        return;
+      }
       const file = parseFileDetails(data, fileName);
       setFile(file);
     });
