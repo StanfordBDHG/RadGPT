@@ -22,10 +22,10 @@ const compareKeys = ([a]: TextMappingEntry, [b]: TextMappingEntry) => {
 };
 
 export enum TextBlockPosition {
-  LEFT = "keyword-highlight-left",
-  CENTER = "keyword-highlight-center",
-  RIGHT = "keyword-highlight-right",
-  STAND_ALONE = "keyword-highlight",
+  Left = "keyword-highlight-left",
+  Center = "keyword-highlight-center",
+  Right = "keyword-highlight-right",
+  StandAlone = "keyword-highlight",
 }
 
 export interface TextBlock {
@@ -55,7 +55,7 @@ export const getTextBlocks = (
         token: Number(key),
         textString: userProvidedText.substring(start, end),
         startPosition: lastIndex,
-        textBlockPosition: TextBlockPosition.STAND_ALONE,
+        textBlockPosition: TextBlockPosition.StandAlone,
       });
       isPreviousTokenRadGraphRelevant = true;
       lastIndex = end;
@@ -71,7 +71,7 @@ export const getTextBlocks = (
         token: null,
         textString: stringInBetweenRadgraphRelevantTokens,
         startPosition: lastIndex,
-        textBlockPosition: TextBlockPosition.STAND_ALONE,
+        textBlockPosition: TextBlockPosition.StandAlone,
       });
       isPreviousTokenRadGraphRelevant = false;
     } else {
@@ -88,8 +88,8 @@ export const getTextBlocks = (
           startPosition: prevKey,
           textBlockPosition:
             isPreviousTokenRadGraphRelevant ?
-              TextBlockPosition.CENTER
-            : TextBlockPosition.LEFT,
+              TextBlockPosition.Center
+            : TextBlockPosition.Left,
         });
       }
       isPreviousTokenRadGraphRelevant = true;
@@ -100,8 +100,8 @@ export const getTextBlocks = (
       startPosition: start,
       textBlockPosition:
         isPreviousTokenRadGraphRelevant ?
-          TextBlockPosition.RIGHT
-        : TextBlockPosition.STAND_ALONE,
+          TextBlockPosition.Right
+        : TextBlockPosition.StandAlone,
     });
     lastIndex = end;
   }
@@ -109,7 +109,7 @@ export const getTextBlocks = (
     token: null,
     textString: userProvidedText.substring(lastIndex),
     startPosition: lastIndex,
-    textBlockPosition: TextBlockPosition.STAND_ALONE,
+    textBlockPosition: TextBlockPosition.StandAlone,
   });
   return textArray;
 };

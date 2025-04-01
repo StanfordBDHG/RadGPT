@@ -18,11 +18,12 @@ import { useState } from "react";
 import { filesQueries } from "@/modules/files/queries";
 import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 import { queryClient } from "@/modules/query/queryClient";
+import { UserFeedbackOrigin } from "./FeedbackDialog/MultiCheckboxFeedbackDialog";
+import { UserIssueDialog } from "./FeedbackDialog/UserIssueDialog";
+import { UserPositiveFeedbackDialog } from "./FeedbackDialog/UserPositiveFeedbackDialog";
 import { DislikeButton, LikeButton } from "./QuestionAnswer/FeedbackButtons";
 import { QuestionAnswer } from "./QuestionAnswer/QuestionAnswer";
 import type { DetailOpenState } from "./ReportText";
-import { UserIssueDialog } from "./UserIssueDialog";
-import { UserPositiveFeedbackDialog } from "./UserPositiveFeedbackDialog";
 
 interface DetailContentProps {
   openState: ReturnType<typeof useStatefulOpenState<DetailOpenState>>;
@@ -174,8 +175,8 @@ export const DetailContent = ({
         <UserPositiveFeedbackDialog
           context={{
             report_id: selectedFileName,
+            origin: UserFeedbackOrigin.ExplanationLevel,
             observation_index: observationIndex,
-            explanation: true,
           }}
         >
           <LikeButton
@@ -187,8 +188,8 @@ export const DetailContent = ({
         <UserIssueDialog
           context={{
             report_id: selectedFileName,
+            origin: UserFeedbackOrigin.ExplanationLevel,
             observation_index: observationIndex,
-            explanation: true,
           }}
         >
           <DislikeButton

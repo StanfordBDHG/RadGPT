@@ -26,7 +26,19 @@ import { addDoc, type CollectionReference } from "firebase/firestore";
 import { type ReactElement, type ComponentProps, type ReactNode } from "react";
 import { z } from "zod";
 import { getCurrentUser } from "@/modules/firebase/app";
-import { type UserFeedbackContext } from "@/modules/firebase/refs";
+
+export enum UserFeedbackOrigin {
+  ReportLevel = "ReportLevel",
+  ExplanationLevel = "ExplanationLevel",
+  QuestionAnswerLevel = "QuestionAnswerLevel",
+}
+
+interface UserFeedbackContext {
+  report_id: string;
+  origin: UserFeedbackOrigin;
+  observation_index?: number;
+  question_index?: number;
+}
 
 interface MultiCheckboxFeedbackDialogProps {
   context: UserFeedbackContext;
@@ -141,6 +153,7 @@ export const MultiCheckboxFeedbackDialog = ({
                       <Checkbox
                         checked={value}
                         onCheckedChange={onChange}
+                        data-testid={name}
                         {...field}
                       />
                       {label}

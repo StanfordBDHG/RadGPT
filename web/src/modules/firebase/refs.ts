@@ -49,13 +49,6 @@ interface Feedback {
   };
 }
 
-export interface UserFeedbackContext {
-  report_id: string;
-  observation_index?: number;
-  explanation?: boolean;
-  question_index?: number;
-}
-
 export const getDocumentsRefs = (db: Firestore) => ({
   feedback: (payload: FeedbackPayload) =>
     doc(db, collections.feedback(payload)) as DocumentReference<
