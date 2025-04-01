@@ -82,18 +82,27 @@ service cloud.firestore {
 
     function isValidUserIssueCreation(data) {
       return data.keys().hasOnly([ 
-          "pre_defined_issues",
-          "context",
+          "pre_defined_answers",
           "user_id",
-          "user_inputed_issue"
+          "user_inputed_answer",
+          "report_id",
+          "question_index",
+          "explanation",
+          "observation_index", 
         ]) && data.keys().hasAll([
-          "pre_defined_issues",
-          "context",
+          "pre_defined_answers",
+          "report_id",
           "user_id"
         ]);
     }
 
     match /users_reported_issues/{documentHash} {
+      allow create: if "user_id" in request.resource.data 
+                    && isAuthenticatedUserID(request.resource.data["user_id"])
+                    && isValidUserIssueCreation(request.resource.data);
+    }
+
+    match /users_positive_feedback/{documentHash} {
       allow create: if "user_id" in request.resource.data 
                     && isAuthenticatedUserID(request.resource.data["user_id"])
                     && isValidUserIssueCreation(request.resource.data);

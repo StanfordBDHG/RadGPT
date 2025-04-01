@@ -9,9 +9,9 @@
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { ChevronDown } from "lucide-react";
 import { type MouseEventHandler } from "react";
-import { ReportIssueButton } from "../ReportIssueButton";
 import { DislikeButton, LikeButton } from "./FeedbackButtons";
-import { FeedbackForm } from "./FeedbackForm";
+import { UserIssueDialog } from "../UserIssueDialog";
+import { UserPositiveFeedbackDialog } from "../UserPositiveFeedbackDialog";
 
 interface QuestionAnswerProps {
   isSelected: boolean;
@@ -22,8 +22,6 @@ interface QuestionAnswerProps {
   dislike: boolean | null;
   onLike: MouseEventHandler;
   onDislike: MouseEventHandler;
-  onFeedbackSubmit: (feedback: string) => Promise<void>;
-  textFeedback: string | null;
   reportID: string;
   observationIndex: number | undefined;
   questionIndex: number;
@@ -38,8 +36,6 @@ export const QuestionAnswer = ({
   dislike,
   onLike,
   onDislike,
-  onFeedbackSubmit,
-  textFeedback,
   reportID,
   observationIndex,
   questionIndex,
@@ -68,21 +64,34 @@ export const QuestionAnswer = ({
       <div className="overflow-hidden">
         <span className="text-gray-600">{answer}</span>
         <div className="mt-4 flex flex-row items-center gap-2 pb-6">
-          <ReportIssueButton
-            className="mr-4"
+          <UserPositiveFeedbackDialog
             context={{
-              reportID: reportID,
-              questionIndex: questionIndex,
+              report_id: reportID,
+              question_index: questionIndex,
               explanation: false,
-              observationIndex: observationIndex,
+              observation_index: observationIndex,
             }}
-          />
-          <LikeButton onClick={onLike} like={like} />
-          <DislikeButton onClick={onDislike} dislike={dislike} />
-          <FeedbackForm
-            textFeedback={textFeedback}
-            onFeedbackSubmit={onFeedbackSubmit}
-          />
+          >
+            <LikeButton
+              onClick={onLike}
+              like={like}
+              data-testid="question-like"
+            />
+          </UserPositiveFeedbackDialog>
+          <UserIssueDialog
+            context={{
+              report_id: reportID,
+              question_index: questionIndex,
+              explanation: false,
+              observation_index: observationIndex,
+            }}
+          >
+            <DislikeButton
+              onClick={onDislike}
+              dislike={dislike}
+              data-testid="question-dislike"
+            />
+          </UserIssueDialog>
         </div>
       </div>
     </div>

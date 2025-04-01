@@ -17,7 +17,11 @@ type LikeButtonProps = Pick<ComponentProps<"button">, "onClick"> & {
 
 export const LikeButton = ({ like, ...props }: LikeButtonProps) => (
   <Tooltip tooltip="Like answer" delayDuration={500}>
-    <button aria-label="Like answer" className="focus-ring" {...props}>
+    <button
+      aria-label={like ? "Liked answer" : "Like answer"}
+      className="focus-ring"
+      {...props}
+    >
       <ThumbsUp
         className={cn(
           "h-6 transition",
@@ -34,7 +38,11 @@ type DislikeButtonProps = Pick<ComponentProps<"button">, "onClick"> & {
 
 export const DislikeButton = ({ dislike, ...props }: DislikeButtonProps) => (
   <Tooltip tooltip="Dislike answer" delayDuration={500}>
-    <button aria-label="Dislike answer" className="focus-ring" {...props}>
+    <button
+      aria-label={dislike ? "Disliked answer" : "Dislike answer"}
+      className="focus-ring"
+      {...props}
+    >
       <ThumbsDown
         className={cn(
           "h-6 transition",

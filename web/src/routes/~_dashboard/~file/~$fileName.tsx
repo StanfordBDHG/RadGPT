@@ -6,18 +6,19 @@
 // SPDX-License-Identifier: MIT
 //
 
+import { Button } from "@stanfordspezi/spezi-web-design-system/components/Button";
 import { Skeleton } from "@stanfordspezi/spezi-web-design-system/components/Skeleton";
 import { Spinner } from "@stanfordspezi/spezi-web-design-system/components/Spinner";
 import { StateContainer } from "@stanfordspezi/spezi-web-design-system/components/StateContainer";
 import { PageTitle } from "@stanfordspezi/spezi-web-design-system/molecules/DashboardLayout";
 import { createFileRoute } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
+import { FileText, Flag } from "lucide-react";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { DashboardLayout } from "../DashboardLayout";
 import { FeedbackForm } from "./FeedbackForm";
 import { Legend } from "./Legend";
-import { ReportIssueButton } from "./ReportIssueButton";
 import { ReportText } from "./ReportText";
+import { UserIssueDialog } from "./UserIssueDialog";
 
 const FileDetail = () => {
   const { fileName } = Route.useParams();
@@ -41,12 +42,16 @@ const FileDetail = () => {
           <ReportText file={file} />
           {hasAnnotations && (
             <>
-              <ReportIssueButton
-                className="mt-6 self-start"
+              <UserIssueDialog
                 context={{
-                  reportID: fileName,
+                  report_id: fileName,
                 }}
-              />
+              >
+                <Button variant="secondary" className="mt-6 self-start">
+                  <Flag className="h-5" />
+                  Report issue
+                </Button>
+              </UserIssueDialog>
               <FeedbackForm file={file} />
             </>
           )}

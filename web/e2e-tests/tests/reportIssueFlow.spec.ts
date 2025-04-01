@@ -12,6 +12,7 @@ import {
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
   expectNoReports,
+  GPT_TIMEOUT,
 } from "../utils";
 
 test("Test Reporting Flow", async ({ page }) => {
@@ -32,26 +33,53 @@ test("Test Reporting Flow", async ({ page }) => {
     page.getByRole("button", { name: "Report issue" }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Report issue" }).click();
-  await page.getByText("The content is dangerous or").click();
-  await page.getByText("The content is inaccurate or").click();
-  await page.getByRole("button", { name: "Report" }).click();
+  const reportIssueDialog = page.getByRole("dialog", { name: "Issue Report" });
+  await reportIssueDialog.getByText("This content feels unsafe").click();
+  await reportIssueDialog.getByText("I am confused by").click();
+  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
   await expect(page.getByText("The issue report has been")).toBeVisible();
+  await expect(reportIssueDialog).not.toBeVisible();
   await page.getByRole("button", { name: "normal" }).first().click();
-  await expect(page.getByRole("button", { name: "Report issue" })).toBeVisible({
-    timeout: 10_000,
+
+  const conceptPopover = page.getByRole("dialog");
+  await expect(
+    conceptPopover.getByTestId("explanation-dislike").first(),
+  ).toBeVisible({
+    timeout: GPT_TIMEOUT,
   });
-  await page.getByRole("button", { name: "Report issue" }).click();
-  await page.getByText("The content is dangerous or").click();
-  await page.getByText("The explanations or follow-up").click();
-  await page.getByRole("button", { name: "Report" }).click();
+  await expect(page.getByTestId("explanation-dislike")).toHaveAccessibleName(
+    "Dislike answer",
+  );
+  await page.getByTestId("explanation-dislike").first().click();
+  await reportIssueDialog
+    .getByText("I am not sure I understand the concept explanation")
+    .click();
+  await reportIssueDialog
+    .getByText("I am having trouble using this page")
+    .click();
+  await expect(
+    reportIssueDialog.getByText("The issue report has been"),
+  ).not.toBeVisible();
+  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
+  await expect(reportIssueDialog).not.toBeVisible();
+  await expect(
+    conceptPopover.getByTestId("explanation-dislike"),
+  ).toHaveAccessibleName("Disliked answer");
   await expect(page.getByText("The issue report has been")).toBeVisible();
-  await page.getByRole("button", { name: "normal" }).first().click();
-  const popover = page.getByRole("dialog");
-  await popover.getByTestId("question").nth(0).click();
-  await popover.getByRole("button", { name: "Report issue" }).nth(0).click();
-  await popover.getByText("Other:").click();
-  await popover.locator("#userInputedIssue").click();
-  await popover.locator("#userInputedIssue").fill("Other");
-  await popover.getByRole("button", { name: "Report" }).click();
+  await conceptPopover.getByTestId("question").nth(0).click();
+  await expect(
+    reportIssueDialog.getByText("The issue report has been"),
+  ).not.toBeVisible();
+  await expect(reportIssueDialog).not.toBeVisible();
+  await expect(
+    conceptPopover.getByTestId("question-dislike").first(),
+  ).toHaveAccessibleName("Dislike answer");
+  await conceptPopover.getByTestId("question-dislike").first().click();
+  await reportIssueDialog.locator("#userInputedAnswer").click();
+  await reportIssueDialog.locator("#userInputedAnswer").fill("Other");
+  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
+  await expect(
+    conceptPopover.getByTestId("question-dislike").first(),
+  ).toHaveAccessibleName("Disliked answer");
   await expect(page.getByText("The issue report has been")).toBeVisible();
 });

@@ -8,6 +8,8 @@
 
 import { type Page, expect } from "@playwright/test";
 
+export const GPT_TIMEOUT = 15_000;
+
 export const authenticateWithGoogle = async (page: Page) => {
   await page.goto("/signin?redirect=%2F");
   const page1Promise = page.waitForEvent("popup");
@@ -51,7 +53,7 @@ export const checkForTextAnnotationCompletion = async (
   await expect(page.getByText(title)).toBeVisible();
 
   await expect(page.getByPlaceholder("Send us feedback")).toBeVisible({
-    timeout: 10_000,
+    timeout: GPT_TIMEOUT,
   });
   await expect(page.locator("form")).toBeVisible();
 };
