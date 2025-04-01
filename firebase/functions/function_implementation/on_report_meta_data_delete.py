@@ -10,6 +10,7 @@ import re
 
 from firebase_admin import firestore
 from firebase_functions import storage_fn
+from google.cloud.firestore_v1.base_query import FieldFilter
 
 
 def on_report_meta_data_delete_impl(
@@ -24,6 +25,29 @@ def on_report_meta_data_delete_impl(
     file_name = match.group("file_name")
 
     db = firestore.client()
-    docs = db.collection(f"users/{uid}/{file_name}").list_documents()
-    for doc in docs:
-        doc.delete()
+    medical_report_docs_query = db.collection(f"users/{uid}/{file_name}")
+    issue_report_query = (
+        db.collection("users_reported_issues")
+        .where(filter=FieldFilter("user_id", "==", uid))
+        .where(filter=FieldFilter("report_id", "==", file_name))
+    )
+    positive_feedback_query = (
+        db.collection("users_positive_feedback")
+        .where(filter=FieldFilter("user_id", "==", uid))
+        .where(filter=FieldFilter("report_id", "==", file_name))
+    )
+
+    @firestore.transactional
+    def delete_documents(transaction):
+        issue_reports = issue_report_query.get(transaction=transaction)
+        positive_feedback = positive_feedback_query.get(transaction=transaction)
+        medical_report_docs = medical_report_docs_query.get(transaction=transaction)
+
+        for doc in medical_report_docs:
+            transaction.delete(doc.reference)
+        for doc in issue_reports:
+            transaction.delete(doc.reference)
+        for doc in positive_feedback:
+            transaction.delete(doc.reference)
+
+    delete_documents(db.transaction())
