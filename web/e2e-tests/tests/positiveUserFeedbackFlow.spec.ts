@@ -15,7 +15,7 @@ import {
   GPT_TIMEOUT,
 } from "../utils";
 
-test("Test Reporting Flow", async ({ page }) => {
+test("Test User Reporting Positive Feedback", async ({ page }) => {
   await authenticateWithGoogle(page);
   await expectNoReports(page);
 
@@ -29,57 +29,57 @@ test("Test Reporting Flow", async ({ page }) => {
   const getUpload = (hasText: RegExp) =>
     page.locator("div").filter({ hasText }).nth(0);
   await expect(getUpload(/^Abdomen CT$/)).toBeVisible();
-  await expect(
-    page.getByRole("button", { name: "Report issue" }),
-  ).toBeVisible();
-  await page.getByRole("button", { name: "Report issue" }).click();
-  const reportIssueDialog = page.getByRole("dialog", { name: "Issue Report" });
-  await reportIssueDialog.getByText("This content feels unsafe").click();
-  await reportIssueDialog.getByText("I am confused by").click();
-  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
-  await expect(page.getByText("The issue report has been")).toBeVisible();
-  await expect(reportIssueDialog).not.toBeVisible();
+  await page.getByTestId("report-like").click();
+  const positiveFeedbackDialog = page.getByRole("dialog", {
+    name: "Feedback",
+  });
+  await positiveFeedbackDialog.getByText("This content feels safe and").click();
+  await positiveFeedbackDialog.getByText("I understand everything").click();
+  await positiveFeedbackDialog.getByRole("button", { name: "Submit" }).click();
+  await expect(page.getByText("The feedback has been")).toBeVisible();
+  await expect(positiveFeedbackDialog).not.toBeVisible();
+  await expect(page.getByTestId("report-like")).toHaveAccessibleName(
+    "Liked answer",
+  );
   await page.getByRole("button", { name: "normal" }).first().click();
 
   const conceptPopover = page.getByRole("dialog");
   await expect(
-    conceptPopover.getByTestId("explanation-dislike").first(),
+    conceptPopover.getByTestId("explanation-like").first(),
   ).toBeVisible({
     timeout: GPT_TIMEOUT,
   });
-  await expect(page.getByTestId("explanation-dislike")).toHaveAccessibleName(
-    "Dislike answer",
+  await expect(page.getByTestId("explanation-like")).toHaveAccessibleName(
+    "Like answer",
   );
-  await page.getByTestId("explanation-dislike").first().click();
-  await reportIssueDialog
-    .getByText("I am not sure I understand the concept explanation")
+  await page.getByTestId("explanation-like").first().click();
+  await positiveFeedbackDialog
+    .getByText("The explanation is clear and engaging")
     .click();
-  await reportIssueDialog
-    .getByText("I am having trouble using this page")
-    .click();
+  await positiveFeedbackDialog.getByText("This page is so easy to use").click();
   await expect(
-    reportIssueDialog.getByText("The issue report has been"),
+    positiveFeedbackDialog.getByText("The feedback has been"),
   ).not.toBeVisible();
-  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
-  await expect(reportIssueDialog).not.toBeVisible();
+  await positiveFeedbackDialog.getByRole("button", { name: "Submit" }).click();
+  await expect(positiveFeedbackDialog).not.toBeVisible();
   await expect(
-    conceptPopover.getByTestId("explanation-dislike"),
-  ).toHaveAccessibleName("Disliked answer");
-  await expect(page.getByText("The issue report has been")).toBeVisible();
+    conceptPopover.getByTestId("explanation-like"),
+  ).toHaveAccessibleName("Liked answer");
+  await expect(page.getByText("The feedback has been")).toBeVisible();
   await conceptPopover.getByTestId("question").nth(0).click();
   await expect(
-    reportIssueDialog.getByText("The issue report has been"),
+    positiveFeedbackDialog.getByText("The feedback has been"),
   ).not.toBeVisible();
-  await expect(reportIssueDialog).not.toBeVisible();
+  await expect(positiveFeedbackDialog).not.toBeVisible();
   await expect(
-    conceptPopover.getByTestId("question-dislike").first(),
-  ).toHaveAccessibleName("Dislike answer");
-  await conceptPopover.getByTestId("question-dislike").first().click();
-  await reportIssueDialog.locator("#userInputedAnswer").click();
-  await reportIssueDialog.locator("#userInputedAnswer").fill("Other");
-  await reportIssueDialog.getByRole("button", { name: "Report" }).click();
+    conceptPopover.getByTestId("question-like").first(),
+  ).toHaveAccessibleName("Like answer");
+  await conceptPopover.getByTestId("question-like").first().click();
+  await positiveFeedbackDialog.locator("#userInputedAnswer").click();
+  await positiveFeedbackDialog.locator("#userInputedAnswer").fill("Other");
+  await positiveFeedbackDialog.getByRole("button", { name: "Submit" }).click();
   await expect(
-    conceptPopover.getByTestId("question-dislike").first(),
-  ).toHaveAccessibleName("Disliked answer");
-  await expect(page.getByText("The issue report has been")).toBeVisible();
+    conceptPopover.getByTestId("question-like").first(),
+  ).toHaveAccessibleName("Liked answer");
+  await expect(page.getByText("The feedback has been")).toBeVisible();
 });

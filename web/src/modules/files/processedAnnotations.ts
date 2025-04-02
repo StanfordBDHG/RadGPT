@@ -69,7 +69,12 @@ export const processedAnnotationsSchema = z.object({
   ),
   user_provided_text: z.string().min(1, "User-provided text is required"),
   text_mapping: textMappingSchema.optional(),
-  user_feedback: z.string().min(1).optional(),
+  user_feedback: z
+    .object({
+      like: z.boolean(),
+      dislike: z.boolean(),
+    })
+    .optional(),
   error_code: z.nativeEnum(AnnotationProcessingError).optional(),
 });
 

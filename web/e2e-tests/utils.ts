@@ -51,9 +51,14 @@ export const checkForTextAnnotationCompletion = async (
   title: string | RegExp,
 ) => {
   await expect(page.getByText(title)).toBeVisible();
-
-  await expect(page.getByPlaceholder("Send us feedback")).toBeVisible({
+  await expect(page.getByTestId("report-like")).toBeVisible({
     timeout: GPT_TIMEOUT,
   });
-  await expect(page.locator("form")).toBeVisible();
+  await expect(page.getByTestId("report-like")).toHaveAccessibleName(
+    "Like answer",
+  );
+  await expect(page.getByTestId("report-dislike")).toBeVisible();
+  await expect(page.getByTestId("report-dislike")).toHaveAccessibleName(
+    "Dislike answer",
+  );
 };
