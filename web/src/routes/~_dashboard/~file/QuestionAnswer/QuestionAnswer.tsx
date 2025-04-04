@@ -10,8 +10,9 @@ import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { ChevronDown } from "lucide-react";
 import { type MouseEventHandler } from "react";
 import { DislikeButton, LikeButton } from "./FeedbackButtons";
-import { UserIssueDialog } from "../UserIssueDialog";
-import { UserPositiveFeedbackDialog } from "../UserPositiveFeedbackDialog";
+import { UserFeedbackOrigin } from "../FeedbackDialog/MultiCheckboxFeedbackDialog";
+import { UserIssueDialog } from "../FeedbackDialog/UserIssueDialog";
+import { UserPositiveFeedbackDialog } from "../FeedbackDialog/UserPositiveFeedbackDialog";
 
 interface QuestionAnswerProps {
   isSelected: boolean;
@@ -67,8 +68,8 @@ export const QuestionAnswer = ({
           <UserPositiveFeedbackDialog
             context={{
               report_id: reportID,
+              origin: UserFeedbackOrigin.QuestionAnswerLevel,
               question_index: questionIndex,
-              explanation: false,
               observation_index: observationIndex,
             }}
           >
@@ -81,8 +82,8 @@ export const QuestionAnswer = ({
           <UserIssueDialog
             context={{
               report_id: reportID,
+              origin: UserFeedbackOrigin.QuestionAnswerLevel,
               question_index: questionIndex,
-              explanation: false,
               observation_index: observationIndex,
             }}
           >

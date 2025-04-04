@@ -321,6 +321,7 @@ describe("Authenticated User Issue Access", () => {
     pre_defined_answers: ["preIssue1", "preIssue2"],
     user_inputed_answer: "other",
     report_id: "report id",
+    origin: "report-level",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
@@ -430,6 +431,7 @@ describe("Authenticated User Positive Feedback Access", () => {
     pre_defined_answers: ["feedback1", "feedback2"],
     user_inputed_answer: "other",
     report_id: "report id",
+    origin: "report-level",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();

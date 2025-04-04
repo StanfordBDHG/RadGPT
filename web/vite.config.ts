@@ -6,16 +6,16 @@
 // SPDX-License-Identifier: MIT
 //
 
-import path from "path";
+import { resolve } from "path";
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
-import { defineConfig } from "vite";
+import { defineConfig } from "vitest/config";
 
 // https://vitejs.dev/config/
 export default defineConfig({
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": resolve(__dirname, "./src"),
     },
   },
   plugins: [
@@ -37,4 +37,10 @@ export default defineConfig({
     }),
     react(),
   ],
+  test: {
+    globals: true,
+    environment: "jsdom",
+    setupFiles: ["./testSetup.ts"],
+    exclude: ["e2e-tests/**", "node_modules/**"],
+  },
 });

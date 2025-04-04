@@ -16,8 +16,9 @@ import { FileText } from "lucide-react";
 import { useGetFileDetailsSubscription } from "@/modules/files/queries";
 import { docRefs, getCurrentUser } from "@/modules/firebase/app";
 import { DashboardLayout } from "../DashboardLayout";
-import { UserIssueDialog } from "./UserIssueDialog";
-import { UserPositiveFeedbackDialog } from "./UserPositiveFeedbackDialog";
+import { UserFeedbackOrigin } from "./FeedbackDialog/MultiCheckboxFeedbackDialog";
+import { UserIssueDialog } from "./FeedbackDialog/UserIssueDialog";
+import { UserPositiveFeedbackDialog } from "./FeedbackDialog/UserPositiveFeedbackDialog";
 import { Legend } from "./Legend";
 import { DislikeButton, LikeButton } from "./QuestionAnswer/FeedbackButtons";
 import { ReportText } from "./ReportText";
@@ -82,6 +83,7 @@ const FileDetail = () => {
             <UserPositiveFeedbackDialog
               context={{
                 report_id: fileName,
+                origin: UserFeedbackOrigin.ReportLevel,
               }}
             >
               <LikeButton
@@ -93,6 +95,7 @@ const FileDetail = () => {
             <UserIssueDialog
               context={{
                 report_id: fileName,
+                origin: UserFeedbackOrigin.ReportLevel,
               }}
             >
               <DislikeButton
