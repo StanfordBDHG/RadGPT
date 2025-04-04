@@ -51,17 +51,18 @@ service cloud.firestore {
           "processed_annotations", 
           "text_mapping", 
           "user_feedback", 
-          "user_provided_text" 
+          "user_provided_text"
         ]) && data.keys().hasAll([
           "processed_annotations",
           "text_mapping",
-          "user_feedback",
+          "user_feedback", 
           "user_provided_text"
         ]);
     }
 
     function isValidAnnotationUpdate(previousData, data) {
-      return notChangingAnnotationFields(previousData, data) 
+      return !("error_code" in previousData.keys())
+              && notChangingAnnotationFields(previousData, data) 
               && containsOnlyAllowedAnnotationFields(data);
     }
 
