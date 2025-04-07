@@ -13,4 +13,7 @@ gcloud functions deploy radgraph-http-function \
     --entry-point=get_radgraph \
     --trigger-http \
     --memory=16GB \
+    --concurrency 80 \
+    --max-instances 15 \
+    --min-instances 0 \
     --no-allow-unauthenticated
