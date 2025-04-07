@@ -56,7 +56,7 @@ test("Test User Reporting Positive Feedback", async ({ page }) => {
   await positiveFeedbackDialog
     .getByText("The explanation is clear and engaging")
     .click();
-  await positiveFeedbackDialog.getByText("This page is so easy to use").click();
+  await positiveFeedbackDialog.getByText("This page is easy to use").click();
   await expect(
     positiveFeedbackDialog.getByText("The feedback has been"),
   ).not.toBeVisible();
