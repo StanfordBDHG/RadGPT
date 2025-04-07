@@ -12,11 +12,11 @@ import { MultiCheckboxFeedbackDialog } from "./MultiCheckboxFeedbackDialog";
 
 const positiveFeedbackLabels = [
   "This content feels safe and reassuring",
-  "I understand everything really well",
-  "All the important details are right here",
+  "I understand everything well",
+  "All the important details are here",
   "The explanation is clear and engaging",
-  "The questions make perfect sense",
-  "This page is so easy to use",
+  "The questions make sense",
+  "This page is easy to use",
   "Everything is working smoothly",
 ];
 

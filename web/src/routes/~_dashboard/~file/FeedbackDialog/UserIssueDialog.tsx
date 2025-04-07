@@ -13,7 +13,7 @@ import { MultiCheckboxFeedbackDialog } from "./MultiCheckboxFeedbackDialog";
 const issueStrings = [
   "This content feels unsafe or upsetting",
   "I am confused by the information",
-  "I feel like something important is missing",
+  "Something important is missing",
   "I am not sure I understand the concept explanation",
   "I am not sure I understand the question explanation",
   "I am having trouble using this page",
