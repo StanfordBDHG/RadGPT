@@ -12,7 +12,9 @@ from google.oauth2 import id_token
 from google.auth.transport.requests import Request
 
 EMULATED_FUNCTION_URL = "http://localhost:5002"
-RADGRAPH_FUNCTION_URL = "https://us-central1-radgpt-development-setup.cloudfunctions.net/radgraph-http-function"
+RADGRAPH_FUNCTION_URL = (
+    "https://us-central1-gcp-mcqa-eval.cloudfunctions.net/radgraph-http-function"
+)
 
 
 def get_processed_annotation_from_radgraph(user_report: str):
