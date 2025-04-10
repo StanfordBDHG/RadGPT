@@ -22,7 +22,11 @@ import { SideLabel } from "@stanfordspezi/spezi-web-design-system/components/Sid
 import { toast } from "@stanfordspezi/spezi-web-design-system/components/Toaster";
 import { Field, useForm } from "@stanfordspezi/spezi-web-design-system/forms";
 import { useOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { addDoc, type CollectionReference } from "firebase/firestore";
+import {
+  addDoc,
+  serverTimestamp,
+  type CollectionReference,
+} from "firebase/firestore";
 import { type ReactElement, type ComponentProps, type ReactNode } from "react";
 import { z } from "zod";
 import { getCurrentUser } from "@/modules/firebase/app";
@@ -115,6 +119,7 @@ export const MultiCheckboxFeedbackDialog = ({
             selectedAnswersStrings.length ? selectedAnswersStrings : null,
           user_inputed_answer: userInputedAnswer ? userInputedAnswer : null,
           user_id: getCurrentUser().uid,
+          create_time: serverTimestamp(),
           ...context,
         });
         toast.success(toastSuccessText);

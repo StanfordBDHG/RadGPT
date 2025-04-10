@@ -50,6 +50,7 @@ describe("Authenticated Processed Annotations Access", () => {
     processed_annotations: {},
     text_mapping: {},
     user_provided_text: {},
+    create_time: "",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
@@ -163,6 +164,7 @@ describe("Authenticated Cached Answer Access", () => {
     concept_answer_1: "",
     concept_question_2: "",
     concept_answer_2: "",
+    create_time: "",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
@@ -322,6 +324,7 @@ describe("Authenticated User Issue Access", () => {
     user_inputed_answer: "other",
     report_id: "report id",
     origin: "report-level",
+    create_time: "create time",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
@@ -432,6 +435,7 @@ describe("Authenticated User Positive Feedback Access", () => {
     user_inputed_answer: "other",
     report_id: "report id",
     origin: "report-level",
+    create_time: "create time",
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
