@@ -116,6 +116,7 @@ def on_medical_report_upload_impl(
         file_name,
         {
             "user_provided_text": user_provided_report,
+            "create_time": firestore.SERVER_TIMESTAMP,
         },
     )
 
