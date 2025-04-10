@@ -77,6 +77,8 @@ describe("Multi Checkbox Submission to Firestore Test", () => {
             pre_defined_answers: [feedbackLabels[selectedFeedbackLabelIndex]],
             user_inputed_answer: null,
             user_id: uid,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            create_time: expect.anything(),
             ...userFeedbackContext,
           }),
         );
@@ -125,6 +127,8 @@ describe("Multi Checkbox Submission to Firestore Test", () => {
           origin: UserFeedbackOrigin.QuestionAnswerLevel,
           question_index: 4,
           observation_index: 1,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          create_time: expect.anything(),
         });
       });
     }),
@@ -163,6 +167,8 @@ describe("Multi Checkbox Submission to Firestore Test", () => {
         origin: UserFeedbackOrigin.QuestionAnswerLevel,
         question_index: 4,
         observation_index: 1,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        create_time: expect.anything(),
       });
     });
   });

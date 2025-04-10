@@ -8,6 +8,7 @@
 
 import json
 import pathlib
+from unittest.mock import ANY
 import pytest
 
 from function_implementation.on_medical_report_upload import (
@@ -93,9 +94,7 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
         report_uuid,
-        {
-            "user_provided_text": user_provided_report,
-        },
+        {"user_provided_text": user_provided_report, "create_time": ANY},
     )
 
     mocked_get_postprocessed_annotation.assert_not_called()
@@ -159,9 +158,7 @@ def test_gpt_validation_failed(mocker):
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
         report_uuid,
-        {
-            "user_provided_text": user_provided_report,
-        },
+        {"user_provided_text": user_provided_report, "create_time": ANY},
     )
 
     mocked_get_postprocessed_annotation.assert_not_called()
@@ -227,9 +224,7 @@ def test_mocked_flow(mocker):
     mocked_set_report_meta_data_function.assert_called_once_with(
         uid,
         report_uuid,
-        {
-            "user_provided_text": user_provided_report,
-        },
+        {"user_provided_text": user_provided_report, "create_time": ANY},
     )
 
     mocked_get_postprocessed_annotation.assert_called_once_with(user_provided_report)
