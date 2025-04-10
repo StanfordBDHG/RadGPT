@@ -36,10 +36,7 @@ export const Legend = () => (
     </CardHeader>
     <ul className="flex flex-wrap items-center gap-x-5 gap-y-1 px-5">
       <LegendItem color="bg-green-300" content="Medical Observation" />
-      <LegendItem
-        color="bg-yellow-300"
-        content="Anatomic Location of Medical Observation"
-      />
+      <LegendItem color="bg-yellow-300" content="Anatomic Location" />
     </ul>
   </Card>
 );
