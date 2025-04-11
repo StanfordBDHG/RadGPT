@@ -13,14 +13,14 @@ on:
     branches:
       - main
     paths:
-        - radgraph_function/**
+      - radgraph_function/**
   workflow_dispatch:
     inputs:
       environment:
         description: |
           The GitHub deployment environment.
         required: true
-        default: 'development'
+        default: "development"
         type: choice
         options:
           - development
@@ -36,7 +36,7 @@ on:
         default: development
 
 concurrency:
-  group: deployment
+  group: deployment-radgrapg
   cancel-in-progress: false
 
 jobs:
@@ -91,7 +91,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
+          python-version: "3.10"
       - name: Setup Python Virutal Environment
         working-directory: radgraph_function
         run: |
@@ -106,11 +106,11 @@ jobs:
       - name: Deploy to Google Cloud Run
         working-directory: radgraph_function
         run: |
-            echo -n "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}" | base64 -d > "$RUNNER_TEMP/google-application-credentials.json"
-            gcloud auth login --cred-file=$RUNNER_TEMP/google-application-credentials.json
-            gcloud config set project radgpt-development-setup
-            sh deploy.sh
+          echo -n "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}" | base64 -d > "$RUNNER_TEMP/google-application-credentials.json"
+          gcloud auth login --cred-file=$RUNNER_TEMP/google-application-credentials.json
+          gcloud config set project ${{ vars.GOOGLE_CLOUD_PROJECT_ID }}
+          sh deploy.sh
       - name: Clean up Google application credentials
         if: always()
         run: |
-            rm -rf $RUNNER_TEMP/google-application-credentials.json || true
+          rm -rf $RUNNER_TEMP/google-application-credentials.json || true
