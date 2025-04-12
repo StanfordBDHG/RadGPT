@@ -19,7 +19,8 @@ service cloud.firestore {
              && previousData["concept_question_1"] == data["concept_question_1"]
              && previousData["concept_answer_1"] == data["concept_answer_1"]
              && previousData["concept_question_2"] == data["concept_question_2"]
-             && previousData["concept_answer_2"] == data["concept_answer_2"];
+             && previousData["concept_answer_2"] == data["concept_answer_2"]
+             && previousData["create_time"] == data["create_time"];
     } 
 
     function containsOnlyAllowedCachedFields(data) {
@@ -29,6 +30,7 @@ service cloud.firestore {
           "concept_answer_1",
           "concept_question_2",
           "concept_answer_2",
+          "create_time",
           "feedback"
         ]) && data.keys().hasAll([
           "main_explanation",
@@ -36,6 +38,7 @@ service cloud.firestore {
           "concept_answer_1",
           "concept_question_2",
           "concept_answer_2",
+          "create_time",
           "feedback"
         ]);
     }
@@ -43,7 +46,8 @@ service cloud.firestore {
     function notChangingAnnotationFields(previousData, data) {
       return previousData["processed_annotations"] == data["processed_annotations"]
               && previousData["text_mapping"] == data["text_mapping"]
-              && previousData["user_provided_text"] == data["user_provided_text"];
+              && previousData["user_provided_text"] == data["user_provided_text"]
+              && previousData["create_time"] == data["create_time"];
     } 
 
     function containsOnlyAllowedAnnotationFields(data) {
@@ -51,12 +55,14 @@ service cloud.firestore {
           "processed_annotations", 
           "text_mapping", 
           "user_feedback", 
-          "user_provided_text"
+          "user_provided_text",
+          "create_time"
         ]) && data.keys().hasAll([
           "processed_annotations",
           "text_mapping",
           "user_feedback", 
-          "user_provided_text"
+          "user_provided_text",
+          "create_time"
         ]);
     }
 
@@ -89,13 +95,16 @@ service cloud.firestore {
           "report_id",
           "question_index",
           "observation_index", 
-          "origin"
+          "origin",
+          "create_time"
         ]) && data.keys().hasAll([
           "pre_defined_answers",
           "report_id",
           "user_id",
-          "origin"
-        ]);
+          "origin",
+          "create_time"
+        ])
+          && request.resource.data.create_time == request.time;
     }
 
     match /users_reported_issues/{documentHash} {

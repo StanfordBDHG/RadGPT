@@ -19,6 +19,7 @@ import {
   doc,
   getDoc,
   getDocs,
+  serverTimestamp,
   setDoc,
   updateDoc,
 } from "firebase/firestore";
@@ -57,7 +58,7 @@ describe("Authenticated Processed Annotations Access", () => {
     await db.withSecurityRulesDisabled(async (context) => {
       await setDoc(
         doc(context.firestore(), "users/user1/annotations/testAnnotations"),
-        fileContent
+        { ...fileContent, create_time: serverTimestamp() }
       );
     });
 
@@ -81,10 +82,14 @@ describe("Authenticated Processed Annotations Access", () => {
   });
   test("Test Blocked New File Creation", async () => {
     await assertFails(
-      setDoc(doc(user1, "users/user1/annotations/newFile"), {})
+      setDoc(doc(user1, "users/user1/annotations/newFile"), {
+        create_time: serverTimestamp(),
+      })
     );
     await assertFails(
-      setDoc(doc(user2, "users/user1/annotations/newFile"), {})
+      setDoc(doc(user2, "users/user1/annotations/newFile"), {
+        create_time: serverTimestamp(),
+      })
     );
   });
   test("Test Blocked File Deletion", async () => {
@@ -170,7 +175,10 @@ describe("Authenticated Cached Answer Access", () => {
     await db.withSecurityRulesDisabled(async (context) => {
       await setDoc(
         doc(context.firestore(), "users/user1/annotations/cached_answer_1"),
-        fileContent
+        {
+          ...fileContent,
+          create_time: serverTimestamp(),
+        }
       );
     });
 
@@ -282,10 +290,10 @@ describe("Unauthenticated User Issue Access", () => {
     const issueContent = { test: "test" };
 
     db.withSecurityRulesDisabled(async (context) => {
-      await setDoc(
-        doc(context.firestore(), "user_reported_issue/newDoc"),
-        issueContent
-      );
+      await setDoc(doc(context.firestore(), "user_reported_issue/newDoc"), {
+        ...issueContent,
+        create_time: serverTimestamp(),
+      });
     });
     return async () => {
       await db.withSecurityRulesDisabled(async (context) => {
@@ -303,7 +311,9 @@ describe("Unauthenticated User Issue Access", () => {
   });
   test("Blocking New File Write Access", async () => {
     await assertFails(
-      setDoc(doc(unauthenticatedUser, "users_reported_issues/test"), {})
+      setDoc(doc(unauthenticatedUser, "users_reported_issues/test"), {
+        create_time: serverTimestamp(),
+      })
     );
   });
   test("Blocking New File Update Access", async () => {
@@ -323,13 +333,17 @@ describe("Authenticated User Issue Access", () => {
     report_id: "report id",
     origin: "report-level",
   };
+  const addIssueContent = {
+    ...issueContent,
+    create_time: serverTimestamp(),
+  };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
     user2 = db.authenticatedContext("user2").firestore();
     await db.withSecurityRulesDisabled(async (context) => {
       await setDoc(
         doc(context.firestore(), "users_reported_issues/test"),
-        issueContent
+        addIssueContent
       );
     });
     return async () => {
@@ -342,7 +356,7 @@ describe("Authenticated User Issue Access", () => {
   test("Test Allowed User1 Create Access", async () => {
     await assertSucceeds(
       addDoc(collection(user1, "users_reported_issues"), {
-        ...issueContent,
+        ...addIssueContent,
         user_id: "user1",
       })
     );
@@ -350,7 +364,7 @@ describe("Authenticated User Issue Access", () => {
   test("Test Block User2 Create Access with Other UID", async () => {
     await assertFails(
       addDoc(collection(user2, "users_reported_issues"), {
-        ...issueContent,
+        ...addIssueContent,
         user_id: "user1",
       })
     );
@@ -413,7 +427,9 @@ describe("Unauthenticated User Positive Feedback Access", () => {
   });
   test("Blocking New File Write Access", async () => {
     await assertFails(
-      setDoc(doc(unauthenticatedUser, "users_positive_feedback/test"), {})
+      setDoc(doc(unauthenticatedUser, "users_positive_feedback/test"), {
+        create_time: serverTimestamp(),
+      })
     );
   });
   test("Blocking New File Update Access", async () => {
@@ -432,6 +448,10 @@ describe("Authenticated User Positive Feedback Access", () => {
     user_inputed_answer: "other",
     report_id: "report id",
     origin: "report-level",
+  };
+  const addIssueContent = {
+    ...issueContent,
+    create_time: serverTimestamp(),
   };
   beforeEach(async () => {
     user1 = db.authenticatedContext("user1").firestore();
@@ -454,7 +474,7 @@ describe("Authenticated User Positive Feedback Access", () => {
   test("Test Allowed User1 Create Access", async () => {
     await assertSucceeds(
       addDoc(collection(user1, "users_positive_feedback"), {
-        ...issueContent,
+        ...addIssueContent,
         user_id: "user1",
       })
     );
@@ -462,8 +482,19 @@ describe("Authenticated User Positive Feedback Access", () => {
   test("Test Block User2 Create Access with Other UID", async () => {
     await assertFails(
       addDoc(collection(user2, "users_positive_feedback"), {
+        ...addIssueContent,
+        user_id: "user1",
+      })
+    );
+  });
+  test("Test Block Incorrect Create Time", async () => {
+    const pastDate = new Date();
+    pastDate.setHours(pastDate.getHours() - 1);
+    await assertFails(
+      addDoc(collection(user1, "users_positive_feedback"), {
         ...issueContent,
         user_id: "user1",
+        create_time: pastDate,
       })
     );
   });

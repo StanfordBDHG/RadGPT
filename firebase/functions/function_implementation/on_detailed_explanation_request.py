@@ -56,7 +56,9 @@ def __store_detailed_response(
     observation_ref = annotations_folder_ref.document(
         f"cached_answer_{observation_index}"
     )
-    observation_ref.set(detailed_response)
+    observation_ref.set(
+        {"create_time": firestore.SERVER_TIMESTAMP, **detailed_response}
+    )
 
 
 def on_detailed_explanation_request_impl(req: https_fn.Request) -> https_fn.Response:
