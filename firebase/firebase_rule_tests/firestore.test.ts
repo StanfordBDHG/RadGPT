@@ -369,6 +369,17 @@ describe("Authenticated User Issue Access", () => {
       })
     );
   });
+  test("Test Block Incorrect Create Time", async () => {
+    const pastDate = new Date();
+    pastDate.setHours(pastDate.getHours() - 1);
+    await assertFails(
+      addDoc(collection(user1, "user_reported_issues"), {
+        ...issueContent,
+        user_id: "user1",
+        create_time: pastDate,
+      })
+    );
+  });
   test("Test Block Read Access", async () => {
     await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
     await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
