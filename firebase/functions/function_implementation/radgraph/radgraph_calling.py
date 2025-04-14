@@ -13,7 +13,8 @@ from google.auth.transport.requests import Request
 
 EMULATED_FUNCTION_URL = "http://localhost:5002"
 RADGRAPH_FUNCTION_URL = (
-    "https://us-central1-gcp-mcqa-eval.cloudfunctions.net/radgraph-http-function"
+    # "https://us-central1-gcp-mcqa-eval.cloudfunctions.net/radgraph-http-function"
+    "https://us-central1-radgpt-development-setup.cloudfunctions.net/radgraph-http-function"
 )
 
 
