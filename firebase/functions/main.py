@@ -11,7 +11,8 @@ from firebase_functions import https_fn, storage_fn
 from function_implementation.on_detailed_explanation_request import (
     on_detailed_explanation_request_impl,
 )
-from function_implementation.on_medical_report_upload import (
+from function_implementation.compute_annotations import (
+    on_annotate_file_retrigger_impl,
     on_medical_report_upload_impl,
 )
 from function_implementation.on_report_meta_data_delete import (
@@ -21,11 +22,19 @@ from function_implementation.on_report_meta_data_delete import (
 initialize_app()
 
 
-@storage_fn.on_object_finalized(secrets=["OPENAI_API_KEY"])
+@storage_fn.on_object_finalized(secrets=["OPENAI_API_KEY"], timeout_sec=90)
 def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
     on_medical_report_upload_impl(event)
+
+
+@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90)
+def on_annotate_file_retrigger(
+    req: https_fn.Request,
+):
+    on_annotate_file_retrigger_impl(req)
+    return https_fn.Response(status=204)
 
 
 @https_fn.on_call(secrets=["OPENAI_API_KEY"])

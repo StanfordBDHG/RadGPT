@@ -8,40 +8,90 @@
 
 import asyncio
 import json
-import pathlib
 from unittest.mock import ANY
 import pytest
+
+from firebase_functions import https_fn
 
 from function_implementation import compute_annotations
 from function_implementation.compute_annotations import (
     ErrorCode,
-    on_medical_report_upload_impl,
+    on_annotate_file_retrigger_impl,
 )
+
+
+def test_invalid_auth_object(mocker):
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = None
+    with pytest.raises(https_fn.HttpsError):
+        on_annotate_file_retrigger_impl(mock_request)
+
+
+def test_invalid_file_name(mocker):
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = "<uid>"
+    mock_request.data = {}
+    with pytest.raises(https_fn.HttpsError):
+        on_annotate_file_retrigger_impl(mock_request)
+
+
+def test_report_meta_data_document_not_existent(mocker):
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = "<uid>"
+    mock_request.data = {"file_name": "<file_name>"}
+
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = False
+
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
+
+    with pytest.raises(https_fn.HttpsError):
+        on_annotate_file_retrigger_impl(mock_request)
+
+    mocked_report_meta_data_ref_get_function.assert_called_once()
 
 
 @pytest.mark.parametrize(
-    "uid,report_uuid",
-    [
-        (uid, report_uuid)
-        for uid in ["<uid>", "", None]
-        for report_uuid in ["<report_uuid>", None]
-        if not (uid == "<uid>" and report_uuid == "<report_uuid>")
-    ],
+    "error_code",
+    [ErrorCode.UPLOAD_LIMIT_REACHED.value, ErrorCode.VALIDATION_FAILED.value],
 )
-def test_invalid_path(mocker, uid, report_uuid):
-    bucket = "<bucket>"
-    mock_event = mocker.MagicMock()
-    uid_segement = f"{uid}/" if uid is not None else ""
-    report_uuid_segment = report_uuid if report_uuid is not None else ""
-    mock_event.data.name = f"users/{uid_segement}reports/{report_uuid_segment}"
-    mock_event.data.bucket = bucket
+def test_report_meta_data_document_not_containing_error_code(mocker, error_code):
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = "<uid>"
+    mock_request.data = {"file_name": "<file_name>"}
 
-    mocked_function = mocker.patch(
-        "function_implementation.compute_annotations.__get_report_from_cloud_storage",
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = True
+    mocked_report_meta_data_to_dict_function = mocker.MagicMock(
+        return_value={"error_code": error_code}
     )
-    mocked_function.assert_not_called()
+    mock_report_meta_data_ref_get.to_dict = mocked_report_meta_data_to_dict_function
 
-    on_medical_report_upload_impl(mock_event)
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
+
+    with pytest.raises(https_fn.HttpsError):
+        on_annotate_file_retrigger_impl(mock_request)
+
+    mocked_report_meta_data_ref_get_function.assert_called_once()
+    mocked_report_meta_data_to_dict_function.assert_called_once()
 
 
 @pytest.mark.parametrize(
@@ -49,14 +99,33 @@ def test_invalid_path(mocker, uid, report_uuid):
     [True, False],
 )
 def test_upload_limiter_failed(mocker, is_report_gpt_valid):
-    bucket = "<bucket>"
+    bucket_name = "<bucket>"
     uid = "<uid>"
     report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
-    mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
-    mock_event.data.bucket = bucket
     mock_report_meta_data_ref = mocker.MagicMock()
+
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = uid
+    mock_request.data = {"file_name": report_uuid}
+
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = True
+    mocked_report_meta_data_to_dict_function = mocker.MagicMock(
+        return_value={"error_code": ErrorCode.TIMEOUT.value}
+    )
+    mock_report_meta_data_ref_get.to_dict = mocked_report_meta_data_to_dict_function
+
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
         "function_implementation.compute_annotations.__get_report_from_cloud_storage",
@@ -73,6 +142,13 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
         "function_implementation.compute_annotations.__get_report_meta_data_ref",
         return_value=mock_report_meta_data_ref,
     )
+
+    mock_bucket = mocker.MagicMock()
+    mock_bucket.name = bucket_name
+
+    mock_storage = mocker.MagicMock()
+    mock_storage.bucket.return_value = mock_bucket
+    mocker.patch("function_implementation.compute_annotations.storage", mock_storage)
 
     processed_annotation = "<processed_annotation>"
     text_mapping = "<text_mapping>"
@@ -91,10 +167,10 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
         return_value=False,
     )
 
-    on_medical_report_upload_impl(mock_event)
+    on_annotate_file_retrigger_impl(mock_request)
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
-        bucket, pathlib.PurePath(mock_event.data.name)
+        bucket_name, ANY
     )
 
     mocked_set_report_meta_data_function.assert_called_once_with(
@@ -113,14 +189,33 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 
 
 def test_gpt_validation_failed(mocker):
-    bucket = "<bucket>"
+    bucket_name = "<bucket>"
     uid = "<uid>"
     report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
-    mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
-    mock_event.data.bucket = bucket
     mock_report_meta_data_ref = mocker.MagicMock()
+
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = uid
+    mock_request.data = {"file_name": report_uuid}
+
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = True
+    mocked_report_meta_data_to_dict_function = mocker.MagicMock(
+        return_value={"error_code": ErrorCode.TIMEOUT.value}
+    )
+    mock_report_meta_data_ref_get.to_dict = mocked_report_meta_data_to_dict_function
+
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
         "function_implementation.compute_annotations.__get_report_from_cloud_storage",
@@ -137,6 +232,13 @@ def test_gpt_validation_failed(mocker):
         "function_implementation.compute_annotations.__get_report_meta_data_ref",
         return_value=mock_report_meta_data_ref,
     )
+
+    mock_bucket = mocker.MagicMock()
+    mock_bucket.name = bucket_name
+
+    mock_storage = mocker.MagicMock()
+    mock_storage.bucket.return_value = mock_bucket
+    mocker.patch("function_implementation.compute_annotations.storage", mock_storage)
 
     processed_annotation = "<processed_annotation>"
     text_mapping = "<text_mapping>"
@@ -155,10 +257,10 @@ def test_gpt_validation_failed(mocker):
         return_value=True,
     )
 
-    on_medical_report_upload_impl(mock_event)
+    on_annotate_file_retrigger_impl(mock_request)
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
-        bucket, pathlib.PurePath(mock_event.data.name)
+        bucket_name, ANY
     )
 
     mocked_set_report_meta_data_function.assert_called_once_with(
@@ -179,19 +281,39 @@ def test_gpt_validation_failed(mocker):
 
 
 def test_mocked_flow(mocker):
-    bucket = "<bucket>"
+    bucket_name = "<bucket>"
     uid = "<uid>"
     report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
-    mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
-    mock_event.data.bucket = bucket
     mock_report_meta_data_ref = mocker.MagicMock()
+
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = uid
+    mock_request.data = {"file_name": report_uuid}
+
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = True
+    mocked_report_meta_data_to_dict_function = mocker.MagicMock(
+        return_value={"error_code": ErrorCode.TIMEOUT.value}
+    )
+    mock_report_meta_data_ref_get.to_dict = mocked_report_meta_data_to_dict_function
+
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
         "function_implementation.compute_annotations.__get_report_from_cloud_storage",
         return_value=user_provided_report,
     )
+
     mocked_set_report_meta_data_function = mocker.MagicMock(return_value=None)
     mock_report_meta_data_ref.set = mocked_set_report_meta_data_function
 
@@ -202,6 +324,13 @@ def test_mocked_flow(mocker):
         "function_implementation.compute_annotations.__get_report_meta_data_ref",
         return_value=mock_report_meta_data_ref,
     )
+
+    mock_bucket = mocker.MagicMock()
+    mock_bucket.name = bucket_name
+
+    mock_storage = mocker.MagicMock()
+    mock_storage.bucket.return_value = mock_bucket
+    mocker.patch("function_implementation.compute_annotations.storage", mock_storage)
 
     processed_annotation = "<processed_annotation>"
     text_mapping = "<text_mapping>"
@@ -220,10 +349,10 @@ def test_mocked_flow(mocker):
         return_value=True,
     )
 
-    on_medical_report_upload_impl(mock_event)
+    on_annotate_file_retrigger_impl(mock_request)
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
-        bucket, pathlib.PurePath(mock_event.data.name)
+        bucket_name, ANY
     )
 
     mocked_set_report_meta_data_function.assert_called_once_with(
@@ -247,14 +376,33 @@ def test_mocked_flow(mocker):
 
 
 def test_timeout(mocker):
-    bucket = "<bucket>"
+    bucket_name = "<bucket>"
     uid = "<uid>"
     report_uuid = "<report_uuid>"
     user_provided_report = "<user_provided_report>"
-    mock_event = mocker.MagicMock()
-    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
-    mock_event.data.bucket = bucket
     mock_report_meta_data_ref = mocker.MagicMock()
+
+    mock_request = mocker.MagicMock()
+    mock_request.auth.uid = uid
+    mock_request.data = {"file_name": report_uuid}
+
+    mock_report_meta_data_ref = mocker.MagicMock()
+    mock_report_meta_data_ref_get = mocker.MagicMock()
+    mock_report_meta_data_ref_get.exists = True
+    mocked_report_meta_data_to_dict_function = mocker.MagicMock(
+        return_value={"error_code": ErrorCode.TIMEOUT.value}
+    )
+    mock_report_meta_data_ref_get.to_dict = mocked_report_meta_data_to_dict_function
+
+    mocked_report_meta_data_ref_get_function = mocker.MagicMock(
+        return_value=mock_report_meta_data_ref_get
+    )
+    mock_report_meta_data_ref.get = mocked_report_meta_data_ref_get_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
         "function_implementation.compute_annotations.__get_report_from_cloud_storage",
@@ -272,6 +420,13 @@ def test_timeout(mocker):
         return_value=mock_report_meta_data_ref,
     )
 
+    mock_bucket = mocker.MagicMock()
+    mock_bucket.name = bucket_name
+
+    mock_storage = mocker.MagicMock()
+    mock_storage.bucket.return_value = mock_bucket
+    mocker.patch("function_implementation.compute_annotations.storage", mock_storage)
+
     mocker.patch.object(
         compute_annotations,
         "COMPUTE_ANNOTATIONS_TIMEOUT_SEC",
@@ -286,10 +441,10 @@ def test_timeout(mocker):
         side_effect=delay,
     )
 
-    on_medical_report_upload_impl(mock_event)
+    on_annotate_file_retrigger_impl(mock_request)
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
-        bucket, pathlib.PurePath(mock_event.data.name)
+        bucket_name, ANY
     )
 
     mocked_set_report_meta_data_function.assert_called_once_with(
