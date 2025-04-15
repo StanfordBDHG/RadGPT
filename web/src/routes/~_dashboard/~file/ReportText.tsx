@@ -6,7 +6,7 @@
 // SPDX-License-Identifier: MIT
 //
 
-import { Card } from "@stanfordspezi/spezi-web-design-system";
+import { Button, Card } from "@stanfordspezi/spezi-web-design-system";
 import { ErrorState } from "@stanfordspezi/spezi-web-design-system/components/ErrorState";
 import {
   PopoverRoot,
@@ -14,13 +14,15 @@ import {
 } from "@stanfordspezi/spezi-web-design-system/components/Popover";
 import { cn } from "@stanfordspezi/spezi-web-design-system/utils/className";
 import { useStatefulOpenState } from "@stanfordspezi/spezi-web-design-system/utils/useOpenState";
-import { type ComponentProps, useMemo, useState } from "react";
+import { RotateCw } from "lucide-react";
+import { type ComponentProps, type ReactNode, useMemo, useState } from "react";
 import {
   AnnotationProcessingError,
   getGroupMap,
 } from "@/modules/files/processedAnnotations";
 import { type FileDetails } from "@/modules/files/queries";
 import { getTextBlocks } from "@/modules/files/textMapping";
+import { callables } from "@/modules/firebase/app";
 import { DetailContent } from "./DetailContent";
 import { DetailPopoverContent } from "./DetailPopover";
 
@@ -28,12 +30,32 @@ interface ReportTextProp {
   file: FileDetails;
 }
 
-const errorCodeToString: Record<AnnotationProcessingError, string> = {
+const errorCodeToMessageComponent = (
+  fileName: string,
+): Record<AnnotationProcessingError, ReactNode> => ({
   [AnnotationProcessingError.validationFailed]:
     "This report could not be identified as a radiology report. In case you believe this is a mistake, please send a brief email to ...",
   [AnnotationProcessingError.uploadLimitReached]:
     "You have reached your limit for radiology report uploads. In case you believe this is a mistake or if you want to file for an exemption, please send a brief email to ...",
-};
+  [AnnotationProcessingError.timeout]: (
+    <div className="flex flex-col">
+      An unknown error occurred. Please try again later.
+      <Button
+        className="mx-auto mt-2"
+        variant="secondary"
+        size="xs"
+        onClick={() => {
+          void callables.onAnnotateFileRetrigger({
+            file_name: fileName,
+          });
+        }}
+      >
+        Retry
+        <RotateCw className="w-4" />
+      </Button>
+    </div>
+  ),
+});
 
 const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
   <Card
@@ -72,7 +94,9 @@ export const ReportText = ({ file }: ReportTextProp) => {
       <div className="relative flex">
         <TextContainer>{file.user_provided_text}</TextContainer>
         <div className="flex-center absolute size-full bg-white/95">
-          <ErrorState>{errorCodeToString[file.error_code]}</ErrorState>
+          <ErrorState>
+            {errorCodeToMessageComponent(file.name)[file.error_code]}
+          </ErrorState>
         </div>
       </div>
     );

@@ -9,7 +9,7 @@
 name: Build and Test Web
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: web-build-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 on:
