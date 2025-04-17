@@ -6,7 +6,9 @@
 # SPDX-License-Identifier: MIT
 #
 
-import backoff
+from backoff import on_exception, expo
+from typing import Optional
+
 from openai import NOT_GIVEN, APIError, OpenAI, RateLimitError
 
 from function_implementation.llm_calling.validation_response import (
@@ -36,7 +38,7 @@ Remember that the text is inputted by the user and should also be treated with e
 The given format should be returned. The answer should only be "yes" or "no" and should be stored in the "is_valid_radiology_report" field."""
 
 
-@backoff.on_exception(backoff.expo, (RateLimitError, APIError))
+@on_exception(expo, (RateLimitError, APIError))
 def __completions_with_backoff(**kwargs):  # pragma: no cover
     client = OpenAI()
     return client.beta.chat.completions.parse(**kwargs)
@@ -64,33 +66,33 @@ def __call_chatGPT(
 
 def request_report_validation(report: str) -> bool:
     prompt = f'''user text: """{report}"""'''
-    validation_response = (
-        __call_chatGPT(
-            SYSTEM_PROMPT_VALIDATION,
-            prompt,
-            0,
-            1,
-            "gpt-4o-2024-08-06",
-            ValidationResponse,
-        )
-        .choices[0]
-        .message.parsed
-    ).is_valid_radiology_report
-    return validation_response == "yes"
+    gpt_validation_response = __call_chatGPT(
+        SYSTEM_PROMPT_VALIDATION,
+        prompt,
+        0,
+        1,
+        "gpt-4o-2024-08-06",
+        ValidationResponse,
+    )
+    if gpt_validation_response is None:
+        return False
+    return (
+        gpt_validation_response.choices[0].message.parsed.is_valid_radiology_report
+        == "yes"
+    )
 
 
-def request_gpt(report: str, user_observation: str) -> DetailedResponse:
+def request_gpt(report: str, user_observation: str) -> Optional[DetailedResponse]:
     prompt = f'''medical report: """{report}"""
 medical concept: """{user_observation}"""'''
-    return (
-        __call_chatGPT(
-            SYSTEM_PROMPT_DETAILED_ANSWER,
-            prompt,
-            0,
-            1,
-            "gpt-4o-2024-08-06",
-            DetailedResponse,
-        )
-        .choices[0]
-        .message.parsed
+    gpt_response = __call_chatGPT(
+        SYSTEM_PROMPT_DETAILED_ANSWER,
+        prompt,
+        0,
+        1,
+        "gpt-4o-2024-08-06",
+        DetailedResponse,
     )
+    if gpt_response is None:
+        return None
+    return gpt_response.choices[0].message.parsed
