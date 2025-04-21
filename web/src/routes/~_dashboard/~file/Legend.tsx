@@ -28,9 +28,9 @@ export const LegendItem = ({ color, content }: LegendItemProps) => (
 
 export const Legend = () => (
   <Card className="mb-8 flex flex-col pb-4">
-    <CardHeader className="!mb-2 flex-col items-stretch sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+    <CardHeader className="mb-2! flex-col items-stretch sm:flex-row sm:items-center sm:justify-between sm:gap-4">
       <CardTitle>Legend</CardTitle>
-      <p className="text-sm text-muted-foreground">
+      <p className="text-muted-foreground text-sm">
         Click on highlighted terms for detailed explanation
       </p>
     </CardHeader>
