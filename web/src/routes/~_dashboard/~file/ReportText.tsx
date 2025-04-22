@@ -37,7 +37,7 @@ const errorCodeToString: Record<AnnotationProcessingError, string> = {
 
 const TextContainer = ({ className, ...props }: ComponentProps<"div">) => (
   <Card
-    className={cn("whitespace-pre-wrap p-5 leading-5 tracking-wide", className)}
+    className={cn("p-5 leading-5 tracking-wide whitespace-pre-wrap", className)}
     {...props}
   />
 );

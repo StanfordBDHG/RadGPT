@@ -50,7 +50,7 @@ export const QuestionAnswer = ({
       {question}
       <ChevronDown
         className={cn(
-          "ml-auto min-w-8 text-muted-foreground transition",
+          "text-muted-foreground ml-auto min-w-8 transition",
           isSelected && "rotate-180",
         )}
       />
@@ -60,7 +60,7 @@ export const QuestionAnswer = ({
         "grid transition-all",
         isSelected ? "grid-rows-[1fr]" : "grid-rows-[0fr]",
       )}
-      hidden={!isSelected}
+      aria-hidden={!isSelected}
     >
       <div className="overflow-hidden">
         <span className="text-gray-600">{answer}</span>

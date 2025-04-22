@@ -57,7 +57,7 @@ export const FileList = () => {
                 {file.customName}
               </Link>
               <button
-                className="ml-auto h-full px-2 text-muted-foreground transition hover:text-destructive"
+                className="text-muted-foreground hover:text-destructive ml-auto h-full px-2 transition"
                 onClick={() => deleteFileMutation.mutate(file)}
                 aria-label="Delete"
               >

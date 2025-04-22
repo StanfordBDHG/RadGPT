@@ -22,7 +22,7 @@ interface DetailPopoverContentProps {
 export const DetailPopoverContent = ({
   children,
 }: DetailPopoverContentProps) => (
-  <PopoverContent className="flex max-h-[--radix-popper-available-height] !w-screen flex-col gap-4 overflow-auto !p-6 lg:!w-[820px]">
+  <PopoverContent className="flex max-h-(--radix-popper-available-height) w-screen! flex-col gap-4 overflow-auto p-6! lg:w-[820px]!">
     <PopoverArrow className="fill-gray-200" width={12} height={8} />
     <PopoverCloseX />
     <PopoverHeader>
