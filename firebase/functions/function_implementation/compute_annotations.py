@@ -9,6 +9,7 @@
 import asyncio
 import datetime
 from enum import Enum
+import functools
 import json
 import pathlib
 import re
@@ -77,6 +78,9 @@ def __is_upload_limiter_valid(uid: int, file_name: str) -> bool:
         limit = snapshot.get("limit") if snapshot.exists else 5
         document_list = snapshot.get("reports") if snapshot.exists else []
 
+        if file_name in map(lambda x: x["file_name"], document_list):
+            return True
+
         if len(document_list) >= limit:
             return False
 
@@ -91,7 +95,7 @@ def __is_upload_limiter_valid(uid: int, file_name: str) -> bool:
     return update_user_uploaded_documents(transaction)
 
 
-async def __compute_annotations(
+def __compute_annotations(
     user_provided_report: str,
     uid: str,
     file_name: str,
@@ -118,7 +122,7 @@ async def __compute_annotations(
     )
 
 
-async def __compute_annotatoins_timeout(
+async def __compute_annotations_timeout(
     bucket: str,
     file_path: str,
     uid: str,
@@ -126,30 +130,34 @@ async def __compute_annotatoins_timeout(
     timeout: int,
     report_meta_data_ref: DocumentReference,
 ):
-    user_provided_report = __get_report_from_cloud_storage(bucket, file_path)
+    try:
+        user_provided_report = __get_report_from_cloud_storage(bucket, file_path)
 
-    report_meta_data_ref.set(
-        {
-            "user_provided_text": user_provided_report,
-            "create_time": firestore.SERVER_TIMESTAMP,
-        }
-    )
-
-    execute_task = asyncio.create_task(
-        __compute_annotations(
-            user_provided_report, uid, file_name, report_meta_data_ref
+        report_meta_data_ref.set(
+            {
+                "user_provided_text": user_provided_report,
+                "create_time": firestore.SERVER_TIMESTAMP,
+            }
         )
-    )
-    handle_timeout_task = asyncio.create_task(asyncio.sleep(timeout))
-    task_set = {execute_task, handle_timeout_task}
 
-    done, pending = await asyncio.wait(task_set, return_when=asyncio.FIRST_COMPLETED)
-
-    for p in pending:
-        p.cancel()
-
-    if handle_timeout_task in done:
+        loop = asyncio.get_running_loop()
+        await asyncio.wait_for(
+            loop.run_in_executor(
+                None,
+                functools.partial(
+                    __compute_annotations,
+                    user_provided_report,
+                    uid,
+                    file_name,
+                    report_meta_data_ref,
+                ),
+            ),
+            timeout=timeout,
+        )
+    except Exception as e:
         report_meta_data_ref.update({"error_code": ErrorCode.TIMEOUT.value})
+        if not isinstance(e, asyncio.TimeoutError):
+            raise
 
 
 def on_medical_report_upload_impl(
@@ -167,7 +175,7 @@ def on_medical_report_upload_impl(
     file_path = pathlib.PurePath(event.data.name)
 
     asyncio.run(
-        __compute_annotatoins_timeout(
+        __compute_annotations_timeout(
             event.data.bucket,
             file_path,
             uid,
@@ -212,7 +220,7 @@ def on_annotate_file_retrigger_impl(req: https_fn.Request) -> https_fn.Response:
     file_path = f"users/{uid}/reports/{file_name}"
 
     asyncio.run(
-        __compute_annotatoins_timeout(
+        __compute_annotations_timeout(
             storage.bucket().name,
             file_path,
             uid,

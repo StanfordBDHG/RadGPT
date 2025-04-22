@@ -27,6 +27,7 @@ def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
     on_medical_report_upload_impl(event)
+    return
 
 
 @https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90)
@@ -37,7 +38,7 @@ def on_annotate_file_retrigger(
     return https_fn.Response(status=204)
 
 
-@https_fn.on_call(secrets=["OPENAI_API_KEY"])
+@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90)
 def on_detailed_explanation_request(
     req: https_fn.Request,
 ) -> https_fn.Response:
@@ -49,3 +50,4 @@ def on_report_meta_data_delete(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ) -> None:
     on_report_meta_data_delete_impl(event)
+    return
