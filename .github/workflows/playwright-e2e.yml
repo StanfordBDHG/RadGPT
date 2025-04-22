@@ -7,10 +7,16 @@
 #
 
 name: Playwright Tests
+
+concurrency:
+  group: playwright-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
   workflow_dispatch:
   workflow_call:
+
 jobs:
   e2e-test:
     timeout-minutes: 60

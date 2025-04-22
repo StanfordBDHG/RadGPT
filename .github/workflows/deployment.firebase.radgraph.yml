@@ -36,7 +36,7 @@ on:
         default: development
 
 concurrency:
-  group: deployment-radgrapg
+  group: deployment-radgraph-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:

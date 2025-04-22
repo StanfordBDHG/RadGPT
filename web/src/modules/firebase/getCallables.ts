@@ -13,6 +13,10 @@ export interface OnDetailedExplanationRequestInput {
   observation_index: number;
 }
 
+export interface OnAnnotateFileRetriggerInput {
+  file_name: string;
+}
+
 interface OnDetailedExplanationRequestOutput {
   main_explanation: string;
   concept_question_1: string | null;
@@ -26,4 +30,8 @@ export const getCallables = (functions: Functions) => ({
     OnDetailedExplanationRequestInput,
     OnDetailedExplanationRequestOutput
   >(functions, "on_detailed_explanation_request"),
+  onAnnotateFileRetrigger: httpsCallable<OnAnnotateFileRetriggerInput>(
+    functions,
+    "on_annotate_file_retrigger",
+  ),
 });
