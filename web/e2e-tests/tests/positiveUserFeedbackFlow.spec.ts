@@ -57,9 +57,7 @@ test("Test User Reporting Positive Feedback", async ({ page }) => {
     .getByText("The explanation is clear and engaging")
     .click();
   await positiveFeedbackDialog.getByText("This page is easy to use").click();
-  await expect(
-    positiveFeedbackDialog.getByText("The feedback has been"),
-  ).not.toBeVisible();
+  await expect(page.getByText("The feedback has been")).not.toBeVisible();
   await positiveFeedbackDialog.getByRole("button", { name: "Submit" }).click();
   await expect(positiveFeedbackDialog).not.toBeVisible();
   await expect(
@@ -67,9 +65,7 @@ test("Test User Reporting Positive Feedback", async ({ page }) => {
   ).toHaveAccessibleName("Liked answer");
   await expect(page.getByText("The feedback has been")).toBeVisible();
   await conceptPopover.getByTestId("question").nth(0).click();
-  await expect(
-    positiveFeedbackDialog.getByText("The feedback has been"),
-  ).not.toBeVisible();
+  await expect(page.getByText("The feedback has been")).not.toBeVisible();
   await expect(positiveFeedbackDialog).not.toBeVisible();
   await expect(
     conceptPopover.getByTestId("question-like").first(),

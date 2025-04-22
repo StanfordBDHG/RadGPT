@@ -54,9 +54,7 @@ test("Test User Reporting Negative Feedback", async ({ page }) => {
   await reportIssueDialog
     .getByText("I am having trouble using this page")
     .click();
-  await expect(
-    reportIssueDialog.getByText("The issue report has been"),
-  ).not.toBeVisible();
+  await expect(page.getByText("The issue report has been")).not.toBeVisible();
   await reportIssueDialog.getByRole("button", { name: "Report" }).click();
   await expect(reportIssueDialog).not.toBeVisible();
   await expect(
@@ -64,9 +62,7 @@ test("Test User Reporting Negative Feedback", async ({ page }) => {
   ).toHaveAccessibleName("Disliked answer");
   await expect(page.getByText("The issue report has been")).toBeVisible();
   await conceptPopover.getByTestId("question").nth(0).click();
-  await expect(
-    reportIssueDialog.getByText("The issue report has been"),
-  ).not.toBeVisible();
+  await expect(page.getByText("The issue report has been")).not.toBeVisible();
   await expect(reportIssueDialog).not.toBeVisible();
   await expect(
     conceptPopover.getByTestId("question-dislike").first(),
