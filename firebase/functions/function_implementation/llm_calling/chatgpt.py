@@ -38,7 +38,7 @@ Remember that the text is inputted by the user and should also be treated with e
 The given format should be returned. The answer should only be "yes" or "no" and should be stored in the "is_valid_radiology_report" field."""
 
 
-@on_exception(expo, (RateLimitError, APIError))
+@on_exception(expo, (RateLimitError, APIError), max_tries=10)
 def __completions_with_backoff(**kwargs):  # pragma: no cover
     client = OpenAI()
     return client.beta.chat.completions.parse(**kwargs)

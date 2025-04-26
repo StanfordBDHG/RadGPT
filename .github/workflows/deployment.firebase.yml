@@ -113,7 +113,7 @@ jobs:
           echo -n "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_BASE64 }}" | base64 -d > "$RUNNER_TEMP/google-application-credentials.json"
           export GOOGLE_APPLICATION_CREDENTIALS="$RUNNER_TEMP/google-application-credentials.json"
           echo "Stored the Google application credentials at $GOOGLE_APPLICATION_CREDENTIALS"
-          firebase deploy --project ${{ needs.vars.outputs.FIREBASE_PROJECT_ID }} --only firestore,storage,functions:on_report_meta_data_delete,functions:on_medical_report_upload,functions:on_detailed_explanation_request
+          firebase deploy --project ${{ needs.vars.outputs.FIREBASE_PROJECT_ID }} --only firestore,storage,functions:on_report_meta_data_delete,functions:on_medical_report_upload,functions:on_detailed_explanation_request,functions:on_annotate_file_retrigger
       - name: Clean up Google application credentials
         if: always()
         run: |

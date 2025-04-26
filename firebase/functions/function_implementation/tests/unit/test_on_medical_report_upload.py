@@ -6,9 +6,9 @@
 # SPDX-License-Identifier: MIT
 #
 
-import asyncio
 import json
 import pathlib
+import time
 from unittest.mock import ANY
 import pytest
 
@@ -246,6 +246,65 @@ def test_mocked_flow(mocker):
     )
 
 
+def test_runtime_error(mocker):
+    bucket = "<bucket>"
+    uid = "<uid>"
+    report_uuid = "<report_uuid>"
+    user_provided_report = "<user_provided_report>"
+    mock_event = mocker.MagicMock()
+    mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
+    mock_event.data.bucket = bucket
+    mock_report_meta_data_ref = mocker.MagicMock()
+
+    mocked_get_report_from_cloud_storage_function = mocker.patch(
+        "function_implementation.compute_annotations.__get_report_from_cloud_storage",
+        return_value=user_provided_report,
+    )
+
+    mocked_set_report_meta_data_function = mocker.MagicMock(return_value=None)
+    mock_report_meta_data_ref.set = mocked_set_report_meta_data_function
+
+    mocked_update_report_meta_data_function = mocker.MagicMock(return_value=None)
+    mock_report_meta_data_ref.update = mocked_update_report_meta_data_function
+
+    mocker.patch(
+        "function_implementation.compute_annotations.__get_report_meta_data_ref",
+        return_value=mock_report_meta_data_ref,
+    )
+
+    mocker.patch.object(
+        compute_annotations,
+        "COMPUTE_ANNOTATIONS_TIMEOUT_SEC",
+        0,
+    )
+
+    def raise_runtime_error(_user_provided_report, _uid, _file_name):
+        raise RuntimeError
+
+    mocked_compute_annotations = mocker.patch(
+        "function_implementation.compute_annotations.__compute_annotations",
+        side_effect=raise_runtime_error,
+    )
+
+    on_medical_report_upload_impl(mock_event)
+
+    mocked_get_report_from_cloud_storage_function.assert_called_once_with(
+        bucket, pathlib.PurePath(mock_event.data.name)
+    )
+
+    mocked_set_report_meta_data_function.assert_called_once_with(
+        {"user_provided_text": user_provided_report, "create_time": ANY},
+    )
+
+    mocked_update_report_meta_data_function.assert_called_once_with(
+        {"error_code": ErrorCode.TIMEOUT.value}
+    )
+
+    mocked_compute_annotations.assert_called_once_with(
+        user_provided_report, uid, report_uuid, mock_report_meta_data_ref
+    )
+
+
 def test_timeout(mocker):
     bucket = "<bucket>"
     uid = "<uid>"
@@ -278,8 +337,8 @@ def test_timeout(mocker):
         0,
     )
 
-    async def delay(_user_provided_report, _uid, _file_name):
-        await asyncio.sleep(1)
+    def delay(_user_provided_report, _uid, _file_name):
+        time.sleep(0.1)
 
     mocked_compute_annotations = mocker.patch(
         "function_implementation.compute_annotations.__compute_annotations",
