@@ -286,18 +286,20 @@ describe("Unauthenticated User Issue Access", () => {
   let existingDocRef;
   beforeAll(async () => {
     unauthenticatedUser = db.unauthenticatedContext().firestore();
-    existingDocRef = doc(unauthenticatedUser, "user_reported_issue/newDoc");
+    existingDocRef = doc(unauthenticatedUser, "users_reported_issues/newDoc");
     const issueContent = { test: "test" };
 
     db.withSecurityRulesDisabled(async (context) => {
-      await setDoc(doc(context.firestore(), "user_reported_issue/newDoc"), {
+      await setDoc(doc(context.firestore(), "users_reported_issues/newDoc"), {
         ...issueContent,
         create_time: serverTimestamp(),
       });
     });
     return async () => {
       await db.withSecurityRulesDisabled(async (context) => {
-        await deleteDoc(doc(context.firestore(), "user_reported_issue/newDoc"));
+        await deleteDoc(
+          doc(context.firestore(), "users_reported_issues/newDoc")
+        );
       });
     };
   });
@@ -306,7 +308,7 @@ describe("Unauthenticated User Issue Access", () => {
   });
   test("Blocking New File List Access", async () => {
     await assertFails(
-      getDocs(collection(unauthenticatedUser, "user_reported_issues"))
+      getDocs(collection(unauthenticatedUser, "users_reported_issues"))
     );
   });
   test("Blocking New File Write Access", async () => {
@@ -373,7 +375,7 @@ describe("Authenticated User Issue Access", () => {
     const pastDate = new Date();
     pastDate.setHours(pastDate.getHours() - 1);
     await assertFails(
-      addDoc(collection(user1, "user_reported_issues"), {
+      addDoc(collection(user1, "users_reported_issues"), {
         ...issueContent,
         user_id: "user1",
         create_time: pastDate,
@@ -381,8 +383,8 @@ describe("Authenticated User Issue Access", () => {
     );
   });
   test("Test Block Read Access", async () => {
-    await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
-    await assertFails(getDoc(doc(user1, "user_reported_issues/test")));
+    await assertFails(getDoc(doc(user1, "users_reported_issues/test")));
+    await assertFails(getDoc(doc(user2, "users_reported_issues/test")));
   });
   test("Test Block List Access", async () => {
     await assertFails(getDocs(collection(user1, "users_reported_issues")));
@@ -390,21 +392,21 @@ describe("Authenticated User Issue Access", () => {
   });
   test("Test Block Update Access", async () => {
     await assertFails(
-      updateDoc(doc(user1, "user_reported_issues/test"), {
+      updateDoc(doc(user1, "users_reported_issues/test"), {
         ...issueContent,
         user_id: "user1",
       })
     );
     await assertFails(
-      updateDoc(doc(user1, "user_reported_issues/test"), {
+      updateDoc(doc(user1, "users_reported_issues/test"), {
         ...issueContent,
         user_id: "user2",
       })
     );
   });
   test("Test Block Delete Access", async () => {
-    await assertFails(deleteDoc(doc(user1, "user_reported_issues/test")));
-    await assertFails(deleteDoc(doc(user1, "user_reported_issues/test")));
+    await assertFails(deleteDoc(doc(user1, "users_reported_issues/test")));
+    await assertFails(deleteDoc(doc(user1, "users_reported_issues/test")));
   });
 });
 
@@ -413,18 +415,20 @@ describe("Unauthenticated User Positive Feedback Access", () => {
   let existingDocRef;
   beforeAll(async () => {
     unauthenticatedUser = db.unauthenticatedContext().firestore();
-    existingDocRef = doc(unauthenticatedUser, "user_reported_issue/newDoc");
+    existingDocRef = doc(unauthenticatedUser, "users_positive_feedback/newDoc");
     const issueContent = { test: "test" };
 
     db.withSecurityRulesDisabled(async (context) => {
       await setDoc(
-        doc(context.firestore(), "user_reported_issue/newDoc"),
+        doc(context.firestore(), "users_positive_feedback/newDoc"),
         issueContent
       );
     });
     return async () => {
       await db.withSecurityRulesDisabled(async (context) => {
-        await deleteDoc(doc(context.firestore(), "user_reported_issue/newDoc"));
+        await deleteDoc(
+          doc(context.firestore(), "users_positive_feedback/newDoc")
+        );
       });
     };
   });
@@ -511,7 +515,7 @@ describe("Authenticated User Positive Feedback Access", () => {
   });
   test("Test Block Read Access", async () => {
     await assertFails(getDoc(doc(user1, "users_positive_feedback/test")));
-    await assertFails(getDoc(doc(user1, "users_positive_feedback/test")));
+    await assertFails(getDoc(doc(user2, "users_positive_feedback/test")));
   });
   test("Test Block List Access", async () => {
     await assertFails(getDocs(collection(user1, "users_positive_feedback")));
@@ -533,6 +537,6 @@ describe("Authenticated User Positive Feedback Access", () => {
   });
   test("Test Block Delete Access", async () => {
     await assertFails(deleteDoc(doc(user1, "users_positive_feedback/test")));
-    await assertFails(deleteDoc(doc(user1, "users_positive_feedback/test")));
+    await assertFails(deleteDoc(doc(user2, "users_positive_feedback/test")));
   });
 });
