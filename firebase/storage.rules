@@ -14,11 +14,18 @@ service firebase.storage {
       return request.auth != null && request.auth.uid == userId;
     }
 
+    function isUUID(fileName) {
+      return fileName.matches(
+        '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+      );
+    }
+
     match /users/{userId}/reports/{reportUUID} {
       allow read: if isAuthenticatedUserID(userId);
       allow create: if isAuthenticatedUserID(userId)
                     && request.resource.contentType.matches("text/plain")
-                    && resource == null;
+                    && resource == null
+                    && isUUID(reportUUID);
       allow delete: if isAuthenticatedUserID(userId);
     } 
   }
