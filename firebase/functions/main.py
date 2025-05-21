@@ -22,7 +22,9 @@ from function_implementation.on_report_meta_data_delete import (
 initialize_app()
 
 
-@storage_fn.on_object_finalized(secrets=["OPENAI_API_KEY"], timeout_sec=90)
+@storage_fn.on_object_finalized(
+    secrets=["OPENAI_API_KEY"], timeout_sec=90, max_instances=5
+)
 def on_medical_report_upload(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ):
@@ -30,7 +32,7 @@ def on_medical_report_upload(
     return
 
 
-@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90)
+@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90, max_instances=5)
 def on_annotate_file_retrigger(
     req: https_fn.Request,
 ):
@@ -38,14 +40,14 @@ def on_annotate_file_retrigger(
     return https_fn.Response(status=204)
 
 
-@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90)
+@https_fn.on_call(secrets=["OPENAI_API_KEY"], timeout_sec=90, max_instances=5)
 def on_detailed_explanation_request(
     req: https_fn.Request,
 ) -> https_fn.Response:
     return on_detailed_explanation_request_impl(req)
 
 
-@storage_fn.on_object_deleted()
+@storage_fn.on_object_deleted(max_instances=5)
 def on_report_meta_data_delete(
     event: storage_fn.CloudEvent[storage_fn.StorageObjectData],
 ) -> None:
