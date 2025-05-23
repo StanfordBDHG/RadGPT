@@ -56,6 +56,12 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
     mock_event = mocker.MagicMock()
     mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
+
     mock_report_meta_data_ref = mocker.MagicMock()
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -93,6 +99,9 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 
     on_medical_report_upload_impl(mock_event)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket, pathlib.PurePath(mock_event.data.name)
     )
@@ -120,6 +129,12 @@ def test_gpt_validation_failed(mocker):
     mock_event = mocker.MagicMock()
     mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
+
     mock_report_meta_data_ref = mocker.MagicMock()
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -157,6 +172,9 @@ def test_gpt_validation_failed(mocker):
 
     on_medical_report_upload_impl(mock_event)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket, pathlib.PurePath(mock_event.data.name)
     )
@@ -186,6 +204,12 @@ def test_mocked_flow(mocker):
     mock_event = mocker.MagicMock()
     mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
+
     mock_report_meta_data_ref = mocker.MagicMock()
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -222,6 +246,9 @@ def test_mocked_flow(mocker):
 
     on_medical_report_upload_impl(mock_event)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket, pathlib.PurePath(mock_event.data.name)
     )
@@ -254,6 +281,12 @@ def test_runtime_error(mocker):
     mock_event = mocker.MagicMock()
     mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
+
     mock_report_meta_data_ref = mocker.MagicMock()
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -288,6 +321,9 @@ def test_runtime_error(mocker):
 
     on_medical_report_upload_impl(mock_event)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket, pathlib.PurePath(mock_event.data.name)
     )
@@ -313,6 +349,12 @@ def test_timeout(mocker):
     mock_event = mocker.MagicMock()
     mock_event.data.name = f"users/{uid}/reports/{report_uuid}"
     mock_event.data.bucket = bucket
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
+
     mock_report_meta_data_ref = mocker.MagicMock()
 
     mocked_get_report_from_cloud_storage_function = mocker.patch(
@@ -346,6 +388,9 @@ def test_timeout(mocker):
     )
 
     on_medical_report_upload_impl(mock_event)
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket, pathlib.PurePath(mock_event.data.name)

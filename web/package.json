@@ -15,7 +15,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@stanfordspezi/spezi-web-design-system": "^0.11.0",
+    "@stanfordspezi/spezi-web-design-system": "^0.13.0",
     "@t3-oss/env-core": "^0.12.0",
     "@tanstack/react-query": "^5.74.4",
     "@tanstack/react-router": "^1.116.0",

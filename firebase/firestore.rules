@@ -118,5 +118,13 @@ service cloud.firestore {
                     && isAuthenticatedUserID(request.resource.data["user_id"])
                     && isValidUserFeedbackCreation(request.resource.data);
     }
+
+    match /user_consent/{userId} {
+      allow read: if isAuthenticatedUserID(userId);
+      allow create: if isAuthenticatedUserID(userId)
+                    && request.resource.data.keys().hasOnly(["create_time"])
+                    && "create_time" in request.resource.data
+                    && request.resource.data.create_time == request.time;
+    }
   }
 }

@@ -18,6 +18,10 @@ from firebase_admin import storage, firestore
 from firebase_functions import https_fn, storage_fn
 from google.cloud.firestore_v1.document import DocumentReference
 
+from function_implementation.on_report_meta_data_delete import (
+    remove_data_associated_to_file,
+)
+from function_implementation.consent_check import has_consent
 from function_implementation.llm_calling.chatgpt import request_report_validation
 from function_implementation.radgraph.radgraph_calling import (
     get_processed_annotation_from_radgraph,
@@ -174,6 +178,10 @@ def on_medical_report_upload_impl(
     file_name = match.group("file_name")
     file_path = pathlib.PurePath(event.data.name)
 
+    if not has_consent(uid):
+        remove_data_associated_to_file(uid, file_name)
+        return
+
     asyncio.run(
         __compute_annotations_timeout(
             event.data.bucket,
@@ -199,6 +207,12 @@ def on_annotate_file_retrigger_impl(req: https_fn.Request) -> https_fn.Response:
         raise https_fn.HttpsError(
             code=https_fn.FunctionsErrorCode.INVALID_ARGUMENT,
             message='The function must be called with an object containing "file_name".',
+        )
+
+    if not has_consent(uid):
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message="User consent has to be provided before using the application.",
         )
 
     report_meta_data_ref = __get_report_meta_data_ref(uid, file_name)

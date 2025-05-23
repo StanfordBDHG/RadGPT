@@ -8,6 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
+  acceptLegalDisclaimer,
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
@@ -15,6 +16,7 @@ import {
 
 test("Test Duplicate Medical Report Upload", async ({ page }) => {
   await authenticateWithGoogle(page);
+  await acceptLegalDisclaimer(page);
 
   const duplicateReportContent =
     "Study Type: CT Abdomen and Pelvis\nIndication: Evaluation for kidney stones due to symptoms of flank pain and hematuria.\nFindings:\nThe kidneys appear normal in size, shape, and position. There is no evidence of hydronephrosis, masses, or calcifications within either kidney. The renal parenchyma and collecting systems are within normal limits. No signs of renal calculi or obstruction in either ureter.\nIn the urinary bladder, a small, non-obstructing calculus is visualized measuring approximately [size in mm]. The calculus is located in the lower portion of the bladder and is not causing any noticeable obstruction or irritation of the bladder wall.\nImpression:\nSmall non-obstructing bladder calculus without evidence of associated hydronephrosis or renal calculi. The stone appears benign, and no immediate intervention is necessary.\nNo other abnormalities detected in the kidneys or urinary tract";

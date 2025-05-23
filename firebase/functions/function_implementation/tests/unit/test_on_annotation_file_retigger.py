@@ -37,8 +37,14 @@ def test_invalid_file_name(mocker):
 
 def test_report_meta_data_document_not_existent(mocker):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {"file_name": "<file_name>"}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -57,6 +63,9 @@ def test_report_meta_data_document_not_existent(mocker):
     with pytest.raises(https_fn.HttpsError):
         on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_report_meta_data_ref_get_function.assert_called_once()
 
 
@@ -66,8 +75,14 @@ def test_report_meta_data_document_not_existent(mocker):
 )
 def test_report_meta_data_document_not_containing_error_code(mocker, error_code):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {"file_name": "<file_name>"}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -90,6 +105,9 @@ def test_report_meta_data_document_not_containing_error_code(mocker, error_code)
     with pytest.raises(https_fn.HttpsError):
         on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_report_meta_data_ref_get_function.assert_called_once()
     mocked_report_meta_data_to_dict_function.assert_called_once()
 
@@ -108,6 +126,11 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
     mock_request = mocker.MagicMock()
     mock_request.auth.uid = uid
     mock_request.data = {"file_name": report_uuid}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -169,6 +192,9 @@ def test_upload_limiter_failed(mocker, is_report_gpt_valid):
 
     on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket_name, ANY
     )
@@ -199,6 +225,10 @@ def test_gpt_validation_failed(mocker):
     mock_request.auth.uid = uid
     mock_request.data = {"file_name": report_uuid}
 
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
     mock_report_meta_data_ref_get.exists = True
@@ -259,6 +289,9 @@ def test_gpt_validation_failed(mocker):
 
     on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket_name, ANY
     )
@@ -290,6 +323,11 @@ def test_mocked_flow(mocker):
     mock_request = mocker.MagicMock()
     mock_request.auth.uid = uid
     mock_request.data = {"file_name": report_uuid}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -351,6 +389,9 @@ def test_mocked_flow(mocker):
 
     on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket_name, ANY
     )
@@ -385,6 +426,11 @@ def test_runtime_error(mocker):
     mock_request = mocker.MagicMock()
     mock_request.auth.uid = uid
     mock_request.data = {"file_name": report_uuid}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -438,6 +484,9 @@ def test_runtime_error(mocker):
     with pytest.raises(RuntimeError):
         on_annotate_file_retrigger_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket_name, ANY
     )
@@ -465,6 +514,11 @@ def test_timeout(mocker):
     mock_request = mocker.MagicMock()
     mock_request.auth.uid = uid
     mock_request.data = {"file_name": report_uuid}
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.compute_annotations.has_consent",
+        return_value=True,
+    )
 
     mock_report_meta_data_ref = mocker.MagicMock()
     mock_report_meta_data_ref_get = mocker.MagicMock()
@@ -522,6 +576,9 @@ def test_timeout(mocker):
     )
 
     on_annotate_file_retrigger_impl(mock_request)
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
 
     mocked_get_report_from_cloud_storage_function.assert_called_once_with(
         bucket_name, ANY
