@@ -8,6 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
+  acceptLegalDisclaimer,
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
@@ -16,6 +17,7 @@ import {
 test("Test Upload and GPT Detailed Information Flow", async ({ page }) => {
   test.setTimeout(60_000);
   await authenticateWithGoogle(page);
+  await acceptLegalDisclaimer(page);
 
   void (await addNewReport(page, {
     name: "Medical Report",

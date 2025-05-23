@@ -35,6 +35,7 @@ import { type OnDetailedExplanationRequestInput } from "@/modules/firebase/getCa
 import { collections, type FeedbackPayload } from "@/modules/firebase/refs";
 import { getDocData } from "@/modules/firebase/utils";
 import { processedAnnotationsSchema } from "./processedAnnotations";
+import { useAuthenticatedUser } from "../user";
 
 const metaDataCompare = (metaData1: FullMetadata, metaData2: FullMetadata) => {
   const dateFile1 = new Date(metaData1.timeCreated);
@@ -131,10 +132,12 @@ export const useGetFileDetailsSubscription = ({
       files.find((listFile) => listFile.ref?.name === file?.name)?.customName,
   });
 
+  const userId = getCurrentUser().uid;
+
   useEffect(() => {
     let ignore = false;
     const fileRef = docRefs.fileMetaData({
-      userId: getCurrentUser().uid,
+      userId,
       fileName,
     });
     const unsubscribe = onSnapshot(fileRef, (snapshot) => {
@@ -151,7 +154,31 @@ export const useGetFileDetailsSubscription = ({
       ignore = true;
       unsubscribe();
     };
-  }, [fileName]);
+  }, [fileName, userId]);
 
   return { file, customFileName };
+};
+
+export const useHasUserConsent = () => {
+  const [hasConsent, setHasConsent] = useState<boolean | null>(null);
+  const user = useAuthenticatedUser();
+
+  useEffect(() => {
+    if (user === null) {
+      return;
+    }
+
+    let ignore = false;
+    const hasConsent = docRefs.userConsent({ userId: user.uid });
+    const unsubscribe = onSnapshot(hasConsent, (snapshot) => {
+      const data = snapshot.exists();
+      if (ignore) return;
+      setHasConsent(data);
+    });
+    return () => {
+      ignore = true;
+      unsubscribe();
+    };
+  }, [user?.uid]);
+  return hasConsent;
 };

@@ -8,6 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
+  acceptLegalDisclaimer,
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
@@ -18,6 +19,8 @@ const MAX_UPLOAD_LIMIT = 5;
 
 test("Test Upload Above Upload Limiting", async ({ page }) => {
   await authenticateWithGoogle(page);
+  await acceptLegalDisclaimer(page);
+
   for (let i = 0; i < MAX_UPLOAD_LIMIT; i++) {
     const reportContent =
       `Report ${i}:\n` +

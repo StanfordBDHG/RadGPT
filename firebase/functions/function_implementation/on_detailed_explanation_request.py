@@ -14,6 +14,7 @@ from firebase_functions import https_fn
 from firebase_admin import firestore
 from google.cloud.firestore_v1.document import DocumentSnapshot
 
+from function_implementation.consent_check import has_consent
 from function_implementation.llm_calling.chatgpt import request_gpt
 
 
@@ -70,6 +71,13 @@ def on_detailed_explanation_request_impl(req: https_fn.Request) -> https_fn.Resp
         )
 
     file_name = req.data.get("file_name")
+
+    if not has_consent(uid):
+        raise https_fn.HttpsError(
+            code=https_fn.FunctionsErrorCode.INTERNAL,
+            message="User consent has to be provided before using the application.",
+        )
+
     observation_index = req.data.get("observation_index")
     if file_name is None or observation_index is None:
         raise https_fn.HttpsError(

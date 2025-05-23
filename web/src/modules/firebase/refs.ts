@@ -29,6 +29,7 @@ export const collections = {
   user: (payload: UserPayload) => `users/${payload.userId}`,
   usersReportedIssues: () => "users_reported_issues",
   usersPositiveFeedback: () => "users_positive_feedback",
+  userConsent: (payload: UserPayload) => `user_consent/${payload.userId}`,
   file: (payload: FilePayload) =>
     `${collections.user(payload)}/${payload.fileName}`,
   feedback: (payload: FeedbackPayload) =>
@@ -57,6 +58,8 @@ export const getDocumentsRefs = (db: Firestore) => ({
     >,
   fileMetaData: (payload: FilePayload) =>
     doc(db, collections.fileMetaData(payload)),
+  userConsent: (payload: UserPayload) =>
+    doc(db, collections.userConsent(payload)),
 });
 
 export const getCollectionRefs = (db: Firestore) => ({

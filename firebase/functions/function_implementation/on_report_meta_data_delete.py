@@ -24,6 +24,10 @@ def on_report_meta_data_delete_impl(
     uid = match.group("uid")
     file_name = match.group("file_name")
 
+    remove_data_associated_to_file(uid, file_name)
+
+
+def remove_data_associated_to_file(uid: str, file_name: str) -> None:
     db = firestore.client()
     medical_report_docs_query = db.collection(f"users/{uid}/{file_name}")
     issue_report_query = (
