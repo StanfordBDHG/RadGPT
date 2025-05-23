@@ -25,6 +25,25 @@ export const authenticateWithGoogle = async (page: Page) => {
   await page.waitForURL("/");
 };
 
+export const acceptLegalDisclaimer = async (page: Page) => {
+  const consentPopover = page.getByRole("dialog", { name: "Legal Disclaimer" });
+  await expect(consentPopover).toBeVisible();
+
+  await expect(
+    consentPopover.getByText("I have read and agree to the"),
+  ).toBeVisible();
+
+  await expect(
+    consentPopover.getByRole("button", { name: "Accept" }),
+  ).toBeDisabled();
+  await consentPopover.getByText("I have read and agree to the").click();
+  await expect(
+    consentPopover.getByRole("button", { name: "Accept" }),
+  ).toBeEnabled();
+
+  await consentPopover.getByRole("button", { name: "Accept" }).click();
+};
+
 export const expectNoReports = async (page: Page) => {
   await expect(page.getByText(/No reports found./).first()).toBeVisible();
 };

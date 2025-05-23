@@ -88,12 +88,20 @@ No other abnormalities detected in the kidneys or urinary tract."""
         "function_implementation.on_detailed_explanation_request.__store_detailed_response",
     )
 
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
+
     function_return_value = on_detailed_explanation_request_impl(mock_request)
     detailed_response = dataclasses.asdict(mock_detailed_response_answer)
     assert function_return_value == detailed_response
 
     mock_get_report_meta_data_function.assert_called_with(uid, file_name)
     assert mock_get_report_meta_data_function.call_count == 1
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
 
     mock_get_cached_answer_function.assert_called_with(uid, file_name, 0)
     assert mock_get_cached_answer_function.call_count == 1

@@ -7,10 +7,17 @@
 //
 
 import { test, expect } from "@playwright/test";
-import { addNewReport, authenticateWithGoogle, GPT_TIMEOUT } from "../utils";
+import {
+  acceptLegalDisclaimer,
+  addNewReport,
+  authenticateWithGoogle,
+  GPT_TIMEOUT,
+} from "../utils";
 
 test("Test Invalid Radiology Report Upload", async ({ page }) => {
   await authenticateWithGoogle(page);
+  await acceptLegalDisclaimer(page);
+
   await addNewReport(page, {
     name: "Not a Radiology Report",
     content:
