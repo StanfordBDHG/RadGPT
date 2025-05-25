@@ -43,19 +43,35 @@ def test_invalid_auth_object(mocker):
 )
 def test_invalid_request_data(mocker, request_data):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = request_data
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
+
     with pytest.raises(https_fn.HttpsError):
         on_detailed_explanation_request_impl(mock_request)
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
 
 
 def test_return_cached_answer(mocker):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": "<file_name>",
         "observation_index": "<observation_index>",
     }
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
 
     cached_answer = {"main_explanation": "test main explanation"}
     mock_cached_answer_document_snapshot = mocker.MagicMock()
@@ -68,14 +84,23 @@ def test_return_cached_answer(mocker):
 
     assert cached_answer == on_detailed_explanation_request_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
 
 def test_invalid_report_meta_data_file(mocker):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": "<file_name>",
         "observation_index": "<observation_index>",
     }
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
     mock_cached_answer_document_snapshot.exists = False
@@ -93,6 +118,9 @@ def test_invalid_report_meta_data_file(mocker):
 
     with pytest.raises(https_fn.HttpsError):
         on_detailed_explanation_request_impl(mock_request)
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
 
 
 @pytest.mark.parametrize(
@@ -115,11 +143,17 @@ def test_invalid_report_meta_data_file(mocker):
 )
 def test_invalid_report_meta_data_content(mocker, report_meta_data):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": "<file_name>",
         "observation_index": "<observation_index>",
     }
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
     mock_cached_answer_document_snapshot.exists = False
@@ -139,6 +173,9 @@ def test_invalid_report_meta_data_content(mocker, report_meta_data):
     with pytest.raises(https_fn.HttpsError):
         on_detailed_explanation_request_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
 
 @pytest.mark.parametrize(
     "observation_index",
@@ -146,11 +183,17 @@ def test_invalid_report_meta_data_content(mocker, report_meta_data):
 )
 def test_invalid_observation_index(mocker, observation_index):
     mock_request = mocker.MagicMock()
-    mock_request.auth.uid = "<uid>"
+    uid = "<uid>"
+    mock_request.auth.uid = uid
     mock_request.data = {
         "file_name": "<file_name>",
         "observation_index": observation_index,
     }
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
     mock_cached_answer_document_snapshot.exists = False
@@ -175,6 +218,9 @@ def test_invalid_observation_index(mocker, observation_index):
     with pytest.raises(https_fn.HttpsError):
         on_detailed_explanation_request_impl(mock_request)
 
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
 
 @pytest.mark.parametrize(
     "observation_index",
@@ -189,6 +235,11 @@ def test_full_uncached_flow(mocker, observation_index):
         "file_name": file_name,
         "observation_index": observation_index,
     }
+
+    mock_has_consent = mocker.patch(
+        "function_implementation.on_detailed_explanation_request.has_consent",
+        return_value=True,
+    )
 
     mock_cached_answer_document_snapshot = mocker.MagicMock()
     mock_cached_answer_document_snapshot.exists = False
@@ -239,6 +290,10 @@ def test_full_uncached_flow(mocker, observation_index):
     )
 
     function_return_value = on_detailed_explanation_request_impl(mock_request)
+
+    mock_has_consent.assert_called_with(uid)
+    assert mock_has_consent.call_count == 1
+
     detailed_response = dataclasses.asdict(gpt_answer)
     assert function_return_value == detailed_response
 

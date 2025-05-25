@@ -8,6 +8,7 @@
 
 import { test, expect } from "@playwright/test";
 import {
+  acceptLegalDisclaimer,
   addNewReport,
   authenticateWithGoogle,
   checkForTextAnnotationCompletion,
@@ -16,6 +17,7 @@ import {
 
 test("Test Upload and Deletion Flow", async ({ page }) => {
   await authenticateWithGoogle(page);
+  await acceptLegalDisclaimer(page);
   await expectNoReports(page);
 
   void (await addNewReport(page, {
