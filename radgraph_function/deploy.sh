@@ -16,4 +16,6 @@ gcloud functions deploy radgraph-http-function \
     --concurrency 80 \
     --max-instances 5 \
     --min-instances 0 \
-    --no-allow-unauthenticated
+    --no-allow-unauthenticated \
+    --set-env-vars \
+        HF_HUB_OFFLINE=1
