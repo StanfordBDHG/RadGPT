@@ -18,40 +18,66 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
-// Import Routes
+import { Route as rootRouteImport } from './routes/~__root'
+import { Route as DashboardRouteImport } from './routes/~_dashboard'
+import { Route as SigninIndexRouteImport } from './routes/~signin/~index'
+import { Route as DashboardIndexRouteImport } from './routes/~_dashboard/~index'
+import { Route as DashboardFileFileNameRouteImport } from './routes/~_dashboard/~file/~$fileName'
 
-import { Route as rootRoute } from './routes/~__root'
-import { Route as DashboardImport } from './routes/~_dashboard'
-import { Route as SigninIndexImport } from './routes/~signin/~index'
-import { Route as DashboardIndexImport } from './routes/~_dashboard/~index'
-import { Route as DashboardFileFileNameImport } from './routes/~_dashboard/~file/~$fileName'
-
-// Create/Update Routes
-
-const DashboardRoute = DashboardImport.update({
+const DashboardRoute = DashboardRouteImport.update({
   id: '/_dashboard',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const SigninIndexRoute = SigninIndexImport.update({
+const SigninIndexRoute = SigninIndexRouteImport.update({
   id: '/signin/',
   path: '/signin/',
-  getParentRoute: () => rootRoute,
+  getParentRoute: () => rootRouteImport,
 } as any)
-
-const DashboardIndexRoute = DashboardIndexImport.update({
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardRoute,
 } as any)
-
-const DashboardFileFileNameRoute = DashboardFileFileNameImport.update({
+const DashboardFileFileNameRoute = DashboardFileFileNameRouteImport.update({
   id: '/file/$fileName',
   path: '/file/$fileName',
   getParentRoute: () => DashboardRoute,
 } as any)
 
-// Populate the FileRoutesByPath interface
+export interface FileRoutesByFullPath {
+  '/': typeof DashboardIndexRoute
+  '/signin': typeof SigninIndexRoute
+  '/file/$fileName': typeof DashboardFileFileNameRoute
+}
+export interface FileRoutesByTo {
+  '/': typeof DashboardIndexRoute
+  '/signin': typeof SigninIndexRoute
+  '/file/$fileName': typeof DashboardFileFileNameRoute
+}
+export interface FileRoutesById {
+  __root__: typeof rootRouteImport
+  '/_dashboard': typeof DashboardRouteWithChildren
+  '/_dashboard/': typeof DashboardIndexRoute
+  '/signin/': typeof SigninIndexRoute
+  '/_dashboard/file/$fileName': typeof DashboardFileFileNameRoute
+}
+export interface FileRouteTypes {
+  fileRoutesByFullPath: FileRoutesByFullPath
+  fullPaths: '/' | '/signin' | '/file/$fileName'
+  fileRoutesByTo: FileRoutesByTo
+  to: '/' | '/signin' | '/file/$fileName'
+  id:
+    | '__root__'
+    | '/_dashboard'
+    | '/_dashboard/'
+    | '/signin/'
+    | '/_dashboard/file/$fileName'
+  fileRoutesById: FileRoutesById
+}
+export interface RootRouteChildren {
+  DashboardRoute: typeof DashboardRouteWithChildren
+  SigninIndexRoute: typeof SigninIndexRoute
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -59,34 +85,32 @@ declare module '@tanstack/react-router' {
       id: '/_dashboard'
       path: ''
       fullPath: ''
-      preLoaderRoute: typeof DashboardImport
-      parentRoute: typeof rootRoute
-    }
-    '/_dashboard/': {
-      id: '/_dashboard/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof DashboardIndexImport
-      parentRoute: typeof DashboardImport
+      preLoaderRoute: typeof DashboardRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/signin/': {
       id: '/signin/'
       path: '/signin'
       fullPath: '/signin'
-      preLoaderRoute: typeof SigninIndexImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof SigninIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/': {
+      id: '/_dashboard/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRoute
     }
     '/_dashboard/file/$fileName': {
       id: '/_dashboard/file/$fileName'
       path: '/file/$fileName'
       fullPath: '/file/$fileName'
-      preLoaderRoute: typeof DashboardFileFileNameImport
-      parentRoute: typeof DashboardImport
+      preLoaderRoute: typeof DashboardFileFileNameRouteImport
+      parentRoute: typeof DashboardRoute
     }
   }
 }
-
-// Create and export the route tree
 
 interface DashboardRouteChildren {
   DashboardIndexRoute: typeof DashboardIndexRoute
@@ -102,83 +126,10 @@ const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
   DashboardRouteChildren,
 )
 
-export interface FileRoutesByFullPath {
-  '': typeof DashboardRouteWithChildren
-  '/': typeof DashboardIndexRoute
-  '/signin': typeof SigninIndexRoute
-  '/file/$fileName': typeof DashboardFileFileNameRoute
-}
-
-export interface FileRoutesByTo {
-  '/': typeof DashboardIndexRoute
-  '/signin': typeof SigninIndexRoute
-  '/file/$fileName': typeof DashboardFileFileNameRoute
-}
-
-export interface FileRoutesById {
-  __root__: typeof rootRoute
-  '/_dashboard': typeof DashboardRouteWithChildren
-  '/_dashboard/': typeof DashboardIndexRoute
-  '/signin/': typeof SigninIndexRoute
-  '/_dashboard/file/$fileName': typeof DashboardFileFileNameRoute
-}
-
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '' | '/' | '/signin' | '/file/$fileName'
-  fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/signin' | '/file/$fileName'
-  id:
-    | '__root__'
-    | '/_dashboard'
-    | '/_dashboard/'
-    | '/signin/'
-    | '/_dashboard/file/$fileName'
-  fileRoutesById: FileRoutesById
-}
-
-export interface RootRouteChildren {
-  DashboardRoute: typeof DashboardRouteWithChildren
-  SigninIndexRoute: typeof SigninIndexRoute
-}
-
 const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   SigninIndexRoute: SigninIndexRoute,
 }
-
-export const routeTree = rootRoute
+export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-/* ROUTE_MANIFEST_START
-{
-  "routes": {
-    "__root__": {
-      "filePath": "~__root.tsx",
-      "children": [
-        "/_dashboard",
-        "/signin/"
-      ]
-    },
-    "/_dashboard": {
-      "filePath": "~_dashboard.tsx",
-      "children": [
-        "/_dashboard/",
-        "/_dashboard/file/$fileName"
-      ]
-    },
-    "/_dashboard/": {
-      "filePath": "~_dashboard/~index.tsx",
-      "parent": "/_dashboard"
-    },
-    "/signin/": {
-      "filePath": "~signin/~index.tsx"
-    },
-    "/_dashboard/file/$fileName": {
-      "filePath": "~_dashboard/~file/~$fileName.tsx",
-      "parent": "/_dashboard"
-    }
-  }
-}
-ROUTE_MANIFEST_END */
