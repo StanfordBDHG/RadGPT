@@ -93,29 +93,58 @@ export const DashboardLayout = ({
         <ConsentDialogContent>
           <div className="space-y-2">
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sed
-              tortor nisl. Vestibulum a lectus quis libero condimentum maximus
-              ac sed sem. Cras vel ligula ac lorem commodo luctus. Phasellus at
-              convallis odio. Duis rhoncus felis vitae nisl pulvinar, quis
-              sagittis velit condimentum. Nullam lectus nulla, faucibus vitae
-              gravida a, venenatis non est. Nullam gravida, quam rhoncus dapibus
-              gravida, erat felis hendrerit arcu, posuere mattis sapien lectus
-              sit amet lectus. Nam faucibus velit ut ornare venenatis. Nunc
-              sagittis eleifend gravida. Cras in dignissim leo. Suspendisse
-              mauris orci, mattis quis eros finibus, cursus rhoncus velit.
+              RADGPT IS EXPERIMENTAL AND PROVIDED “AS IS” AND STANFORD
+              UNIVERSITY AND ITS COLLABORATORS, EXCEPT TO THE EXTENT PROHIBTED
+              BY LAW, DO NOT MAKE A WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+              INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+              FITNESS FOR A PARTICULAR PURPOSE AND/OR NON-INFRINGEMENT.
             </p>
             <p>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam sed
-              tortor nisl. Vestibulum a lectus quis libero condimentum maximus
-              ac sed sem. Cras vel ligula ac lorem commodo luctus. Phasellus at
-              convallis odio. Duis rhoncus felis vitae nisl pulvinar, quis
-              sagittis velit condimentum. Nullam lectus nulla, faucibus vitae
-              gravida a, venenatis non est. Nullam gravida, quam rhoncus dapibus
-              gravida, erat felis hendrerit arcu, posuere mattis sapien lectus
-              sit amet lectus. Nam faucibus velit ut ornare venenatis. Nunc
-              sagittis eleifend gravida. Cras in dignissim leo. Suspendisse
-              mauris orci, mattis quis eros finibus, cursus rhoncus velit.
+              BY USING RADGPT, YOU AGREE THAT USE OF RADGPT AND ANY OUTPUTS
+              RECEIVED FROM RADGPT ARE AT YOUR SOLE RISK. THE OUTPUTS PROVIDED
+              BY RADGPT MAY NOT BE ACCURATE OR COMPLETE. RADGPT DOES NOT, AND
+              SHOULD NOT BE USED TO, PROVIDE HEALTH CARE ADVICE. RADGPT OUTPUTS
+              ARE PROVIDED FOR INFORMATIONAL PURPOSES AND IS NOT A SUBSTITUTE
+              FOR PROFESSIONAL ADVICE. RADGPT DOES NOT PROVIDE MEDICAL TREATMENT
+              AND OUTPUTS DO NOT CONSTITUED MEDICAL TREATMENT OR DIAGNOSIS. YOU
+              SHOULD CONSULT WITH YOUR PHYSICIAN BEFORE MAKING ANY CHANGES TO
+              YOUR HEALTH CARE.
             </p>
+            <p>
+              STANFORD MAY STORE AND USE DATA YOU INPUT INTO, OR RECEIVE FROM,
+              RADGPT TO IMPROVE THE PERFORMANCE OF RADGPT, FOR RESEARCH
+              PURPOSES, OR FOR ANY OTHER PURPOSE PERMITTED BY LAW.
+            </p>
+            <p>
+              LIMITATION OF LIABILITY. STANFORD, ITS COLLABORATORS, AUTHORS, AND
+              COPYRIGHT HOLDERS WILL HAVE NO LIABILITY FOR ANY INDIRECT,
+              INCIDENTAL, SPECIAL, CONSEQUENTIAL, OR EXEMPLARY DAMAGES,
+              INCLUDING DAMAGES FOR LOSS OF PROFITS, GOODWILL, USE, OR DATA OR
+              OTHER LOSSES ARISING FROM YOUR USE OF RADGPT, EVEN IF THE
+              UNIVERSITY HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+              THE UNIVERSITY’S AGGREGATE LIABILITY UNDER THESE TERMS WILL NOT
+              EXCEED ONE HUNDRED DOLLARS ($100). THE LIMITATIONS IN THIS SECTION
+              APPLY ONLY TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+              STANFORD COLLABORATORS, AUTHORS, AND COPYRIGHT HOLDERS ARE
+              INTENDED THIRD PARTY BENEFICIARIES OF THIS SECTION.
+            </p>
+            <p>
+              INDEMNITY. TO THE EXTENT PERMITTED BY LAW, YOU AGREE TO INDEMNIFY
+              AND HOLD STANFORD UNIVERSITY AND ITS COLLABORATORS HARMLESS FROM
+              ANY CLAIMS, LOSSES OR DAMAGES, INCLUDING LEGAL FEES, ARISING OUT
+              OF, OR RESULTING FROM, YOUR USE OF RADGPT OR YOUR VIOLATION OR
+              ROLE IN VIOLATION OF THESE TERMS. YOU AGREE TO FULLY COOPERATE IN
+              STANFORD’S DEFENSE AGAINST ANY SUCH CLAIMS. THESE TERMS SHALL BE
+              GOVERNED BY AND INTERPRETED IN ACCORDANCE WITH THE LAWS OF
+              CALIFORNIA AND ALL CLAIMS ARISING OUT OF OR RELATING TO THESE
+              TERMS SHALL BE BROUGHT EXCLUSIVELY IN THE FEDERAL OR STATE COURTS
+              OF SANTA CLARA COUNTY, CALIFORNIA.
+            </p>
+            <p>
+              WE MAY DISCONTINUE RADGPT OR YOUR USE THEREOF AT ANY TIME WITHOUT
+              NOTICE, AND WE MAY MAKE CHANGES TO THESE TERMS FROM TIME TO TIME.
+            </p>
+            <p>YOU MAY USE RADGPT FOR LEGAL PURPOSES ONLY.</p>
           </div>
         </ConsentDialogContent>
         <ConsentDialogCheckbox label="I have read and agree to the privacy policy" />
